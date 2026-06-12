@@ -2,11 +2,13 @@
 
 A mobile-first subscription **onboarding funnel**, built as an engineering artifact.
 
+**▶ Live demo: [sorrel.akinoztorun.dev](https://sorrel.akinoztorun.dev/)**
+
 > **Status: 🚧 work in progress.** Landed: the monorepo + AI-governance workflow, the
 > GraphQL contract with a mock Apollo API, the typed analytics contract, and the **wizard
 > shell** — all seven steps routed and instrumented, with local resume, an exit-intent
-> recovery modal, and the delivery-date picker wired into step 4. In active build: the
-> per-step input forms, the Apollo write-path, and deployment. See [Roadmap](#roadmap).
+> recovery modal, and the delivery-date picker wired into step 4 — **deployed on Vercel**. In
+> active build: the per-step input forms and the Apollo write-path. See [Roadmap](#roadmap).
 
 > _Sorrel is a fictional brand created for this demo. No real company, product, or
 > brand assets are referenced anywhere in this repository._
@@ -65,8 +67,9 @@ measured**. The instrument is the typed analytics contract, not opinion.
 - **Exit-intent recovery modal** (desktop) → intercept the abandonment gesture with a reason
   to stay → measured by recovery rate (`exit_intent_recovered ÷ exit_intent_shown`).
 
-_(Live link, mobile walkthrough, Lighthouse score, and the seeded funnel-curve screenshot
-land at the Tier-1 exit — see [Roadmap](#roadmap).)_
+_(Live: [sorrel.akinoztorun.dev](https://sorrel.akinoztorun.dev/). Mobile walkthrough,
+Lighthouse score, and the seeded funnel-curve screenshot land at the Tier-1 exit — see
+[Roadmap](#roadmap).)_
 
 ---
 
@@ -158,5 +161,6 @@ Tiers ship in order; nothing ships below the Tier-1 line.
 picker (`packages/ui`), the GraphQL contract + mock Apollo API (`schema.graphql`,
 `services/api`), the typed analytics contract (`packages/analytics`), and the wizard shell
 (`apps/web`) — routed, instrumented (PostHog behind an env flag), with local resume and an
-exit-intent recovery modal. **In active build:** per-step input forms, the Apollo write-path
-(optimistic mutations), CMS content, i18n, CI, and deployment.
+exit-intent recovery modal, **deployed on Vercel** ([sorrel.akinoztorun.dev](https://sorrel.akinoztorun.dev/)).
+**In active build:** per-step input forms, the Apollo write-path (optimistic mutations), CMS
+content, i18n, CI, and the mobile Lighthouse 95+ budget.
