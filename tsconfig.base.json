@@ -1,0 +1,37 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "lib": ["ES2022", "DOM"],
+    "strict": true,
+
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+
+    "noImplicitAny": true,
+    "noImplicitThis": true,
+    "noImplicitOverride": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "useUnknownInCatchVariables": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+
+    "allowJs": false,
+    "paths": {
+      "@sorrel/analytics/*": ["./packages/analytics/src/*"],
+      "@sorrel/domain/*": ["./packages/domain/src/*"],
+      "@sorrel/shared/*": ["./packages/shared/src/*"],
+      "@sorrel/ui/*": ["./packages/ui/src/*"],
+      "@sorrel/api/*": ["./services/api/src/*"],
+      "@sorrel/frontend/*": ["./apps/web/*"]
+    },
+
+    "types": ["node", "jest"]
+  },
+  "exclude": ["node_modules", "dist", "build"]
+}

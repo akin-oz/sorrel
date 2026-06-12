@@ -65,6 +65,14 @@
             "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/verify-on-stop.sh\""
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/docs-update-check.sh\""
+          }
+        ]
       }
     ],
     "PreCompact": [

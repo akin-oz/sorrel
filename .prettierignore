@@ -1,0 +1,16 @@
+# Package manager & dependencies
+node_modules
+.yarn
+.pnpm-store
+
+# Build directories
+dist
+build
+.next
+out
+
+# Test coverage
+coverage
+
+# System files
+.DS_Store
