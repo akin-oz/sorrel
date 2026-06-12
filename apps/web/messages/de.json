@@ -51,6 +51,7 @@
     "confirm": "Bestätigen",
     "change": "Ändern",
     "earliestDelivery": "Frühester Liefertag",
+    "deliveryDate": "Liefertag",
     "freeDelivery": "Kostenlose Lieferung",
     "blockedWeekday": "Keine Lieferung {weekday}s",
     "beforeEarliest": "Frühester Liefertag ist der {date}"

@@ -1,5 +1,5 @@
-export { DeliveryDatePicker } from "./DeliveryDatePicker";
-export type { DeliveryDatePickerProps } from "./DeliveryDatePicker";
+export { DeliveryDatePicker, DEFAULT_DELIVERY_LABELS } from "./DeliveryDatePicker";
+export type { DeliveryDatePickerProps, DeliveryLabels } from "./DeliveryDatePicker";
 export { BrandLogo } from "./BrandLogo";
 export type { BrandLogoProps } from "./BrandLogo";
 export {

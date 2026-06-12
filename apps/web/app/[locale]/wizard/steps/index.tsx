@@ -4,10 +4,10 @@ import { type ComponentType, type ReactNode } from "react";
 
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 import { FUNNEL_STEPS, type FunnelStep } from "@sorrel/shared";
-import { DeliveryDatePicker, sorrelTheme } from "@sorrel/ui";
+import { DeliveryDatePicker, type DeliveryLabels, sorrelTheme } from "@sorrel/ui";
 
 import { useFunnel } from "../FunnelProvider";
 
@@ -56,11 +56,27 @@ function RecipesStep() {
 
 function DeliveryStep() {
   const { state, dispatch } = useFunnel();
+  const appLocale = useLocale();
+  const tp = useTranslations("Picker");
+  const locale = appLocale === "de" ? "de-DE" : "en-GB";
+  const labels: Partial<DeliveryLabels> = {
+    dialogTitle: tp("dialogTitle"),
+    cancel: tp("cancel"),
+    confirm: tp("confirm"),
+    change: tp("change"),
+    earliestDelivery: tp("earliestDelivery"),
+    deliveryDate: tp("deliveryDate"),
+    freeDelivery: tp("freeDelivery"),
+    blockedWeekday: (weekday) => tp("blockedWeekday", { weekday }),
+    beforeEarliest: (date) => tp("beforeEarliest", { date }),
+  };
   return (
     <StepShell step="DELIVERY">
       <Box sx={{ display: "flex", justifyContent: "center" }}>
         <DeliveryDatePicker
           theme={sorrelTheme}
+          locale={locale}
+          labels={labels}
           value={state.deliveryDate ?? undefined}
           onConfirm={(iso) => dispatch({ type: "SET_DELIVERY_DATE", date: iso })}
         />

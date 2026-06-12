@@ -101,17 +101,17 @@ describe("formatLongDate", () => {
 describe("blockedInfo reasons", () => {
   const earliest = "2026-06-15";
 
-  it("flags days before the earliest with a reason", () => {
+  it("flags days before the earliest with a structured reason", () => {
     expect(blockedInfo("2026-06-08", earliest)).toEqual({
       blocked: true,
-      reason: "Earliest delivery is Monday 15 June",
+      reason: { code: "BEFORE_EARLIEST", earliest: "2026-06-15" },
     });
   });
 
-  it("flags blocked weekdays with the weekday reason", () => {
+  it("flags blocked weekdays with the weekday reason (Fri = Monday-index 4)", () => {
     expect(blockedInfo("2026-06-19", earliest)).toEqual({
       blocked: true,
-      reason: "No deliveries on Fridays",
+      reason: { code: "BLOCKED_WEEKDAY", weekdayIndex: 4 },
     });
   });
 
@@ -149,10 +149,10 @@ describe("buildMonthView", () => {
 
     expect(byDay(12)?.blocked).toBe(true); // Fri, also before earliest
     expect(byDay(19)?.blocked).toBe(true); // Fri
-    expect(byDay(19)?.blockedReason).toBe("No deliveries on Fridays");
+    expect(byDay(19)?.blockedReason).toEqual({ code: "BLOCKED_WEEKDAY", weekdayIndex: 4 });
 
     expect(byDay(8)?.blocked).toBe(true); // before earliest
-    expect(byDay(8)?.blockedReason).toBe("Earliest delivery is Monday 15 June");
+    expect(byDay(8)?.blockedReason).toEqual({ code: "BEFORE_EARLIEST", earliest: "2026-06-15" });
 
     expect(byDay(17)?.blocked).toBe(false); // Wed, after earliest
   });

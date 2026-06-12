@@ -11,13 +11,12 @@ import {
 } from "react";
 
 import {
+  type BlockedReason,
   type DateCell,
   type GridKey,
   type IsoDate,
-  MONDAY_FIRST_WEEKDAYS,
   buildMonthView,
   earliestDeliverableDate,
-  formatLongDate,
   moveFocus,
   parseIso,
   toIso,
@@ -25,6 +24,51 @@ import {
 
 import { useInjectDeliveryStyles } from "./theme/styles";
 import { type DeliveryTheme, FONT_MONO, FONT_SANS, FONT_SERIF, sorrelTheme } from "./theme/tokens";
+
+/** Display strings + reason templates. The host (e.g. next-intl) supplies localised values. */
+export interface DeliveryLabels {
+  dialogTitle: string;
+  cancel: string;
+  confirm: string;
+  change: string;
+  earliestDelivery: string;
+  deliveryDate: string;
+  freeDelivery: string;
+  blockedWeekday: (weekday: string) => string;
+  beforeEarliest: (date: string) => string;
+}
+
+export const DEFAULT_DELIVERY_LABELS: DeliveryLabels = {
+  dialogTitle: "Choose a delivery day",
+  cancel: "Cancel",
+  confirm: "Confirm",
+  change: "Change",
+  earliestDelivery: "Earliest delivery",
+  deliveryDate: "Delivery date",
+  freeDelivery: "Free delivery",
+  blockedWeekday: (weekday) => `No deliveries on ${weekday}s`,
+  beforeEarliest: (date) => `Earliest delivery is ${date}`,
+};
+
+// 2024-01-01 is a Monday — reference point for naming a Monday-first weekday index.
+const MONDAY_REF_MS = Date.UTC(2024, 0, 1);
+const DAY_MS = 86_400_000;
+
+function weekdayName(mondayIndex: number, locale: string, weekday: "long" | "narrow"): string {
+  return new Intl.DateTimeFormat(locale, { weekday, timeZone: "UTC" }).format(
+    new Date(MONDAY_REF_MS + mondayIndex * DAY_MS),
+  );
+}
+
+function formatDate(iso: IsoDate, locale: string, opts: Intl.DateTimeFormatOptions): string {
+  return new Intl.DateTimeFormat(locale, { ...opts, timeZone: "UTC" }).format(parseIso(iso));
+}
+
+function blockedReasonText(reason: BlockedReason, locale: string, labels: DeliveryLabels): string {
+  return reason.code === "BLOCKED_WEEKDAY"
+    ? labels.blockedWeekday(weekdayName(reason.weekdayIndex, locale, "long"))
+    : labels.beforeEarliest(formatDate(reason.earliest, locale, { day: "numeric", month: "long" }));
+}
 
 export interface DeliveryDatePickerProps {
   /** "Today" as an ISO date; defaults to the current date. */
@@ -37,6 +81,10 @@ export interface DeliveryDatePickerProps {
   leadDays?: number;
   /** Brand token skin. Defaults to Sorrel. */
   theme?: DeliveryTheme;
+  /** BCP-47 locale for date formatting (e.g. "en-GB", "de-DE"). Defaults to en-GB. */
+  locale?: string;
+  /** Localised display strings; merged over English defaults. */
+  labels?: Partial<DeliveryLabels>;
   /** Called with the ISO date when the user confirms a new day. */
   onConfirm?: (iso: IsoDate) => void;
   /** Called when the modal opens (true) or closes (false). */
@@ -70,10 +118,14 @@ export function DeliveryDatePicker({
   defaultValue,
   leadDays,
   theme = sorrelTheme,
+  locale = "en-GB",
+  labels,
   onConfirm,
   onOpenChange,
 }: DeliveryDatePickerProps) {
   useInjectDeliveryStyles();
+
+  const resolvedLabels: DeliveryLabels = { ...DEFAULT_DELIVERY_LABELS, ...labels };
 
   const today = todayProp ?? toIso(new Date());
   const earliest = earliestDeliverableDate(today, leadDays);
@@ -187,6 +239,8 @@ export function DeliveryDatePicker({
     <div style={{ ...rootVars, fontFamily: FONT_SANS, color: theme.ink }}>
       <ClosedCard
         theme={theme}
+        locale={locale}
+        labels={resolvedLabels}
         committed={committed}
         isEarliest={committed === earliest}
         changeRef={changeRef}
@@ -196,11 +250,14 @@ export function DeliveryDatePicker({
       {state !== "closed" && (
         <Modal
           theme={theme}
+          locale={locale}
+          labels={resolvedLabels}
           state={state}
           dialogRef={dialogRef}
           labelId={labelId}
           monthId={monthId}
-          monthLabel={monthView.monthLabel}
+          year={viewYear}
+          month={viewMonth}
           weeks={toWeeks(monthView.leadingBlanks, monthView.cells)}
           activeIso={activeIso}
           cellRefs={cellRefs}
@@ -233,13 +290,23 @@ function toWeeks(leadingBlanks: number, cells: DateCell[]): (DateCell | null)[][
 
 interface ClosedCardProps {
   theme: DeliveryTheme;
+  locale: string;
+  labels: DeliveryLabels;
   committed: IsoDate;
   isEarliest: boolean;
   changeRef: RefObject<HTMLButtonElement | null>;
   onChange: () => void;
 }
 
-function ClosedCard({ theme, committed, isEarliest, changeRef, onChange }: ClosedCardProps) {
+function ClosedCard({
+  theme,
+  locale,
+  labels,
+  committed,
+  isEarliest,
+  changeRef,
+  onChange,
+}: ClosedCardProps) {
   const dayNumber = parseIso(committed).getUTCDate();
   return (
     <div
@@ -303,12 +370,13 @@ function ClosedCard({ theme, committed, isEarliest, changeRef, onChange }: Close
             fontSize: 10,
             letterSpacing: "0.12em",
             color: theme.mono,
+            textTransform: "uppercase",
           }}
         >
-          {isEarliest ? "EARLIEST DELIVERY" : "DELIVERY DATE"}
+          {isEarliest ? labels.earliestDelivery : labels.deliveryDate}
         </div>
         <div style={{ fontFamily: FONT_SERIF, fontSize: 18, fontWeight: 600, color: theme.ink }}>
-          {formatLongDate(committed)}
+          {formatDate(committed, locale, { weekday: "long", day: "numeric", month: "long" })}
         </div>
         <div style={{ display: "flex" }}>
           <span
@@ -323,7 +391,7 @@ function ClosedCard({ theme, committed, isEarliest, changeRef, onChange }: Close
               textTransform: "uppercase",
             }}
           >
-            Free delivery
+            {labels.freeDelivery}
           </span>
         </div>
       </div>
@@ -348,7 +416,7 @@ function ClosedCard({ theme, committed, isEarliest, changeRef, onChange }: Close
           fontFamily: FONT_SANS,
         }}
       >
-        Change
+        {labels.change}
       </button>
     </div>
   );
@@ -360,11 +428,14 @@ function Dot({ color }: { color: string }) {
 
 interface ModalProps {
   theme: DeliveryTheme;
+  locale: string;
+  labels: DeliveryLabels;
   state: DialogState;
   dialogRef: RefObject<HTMLDivElement | null>;
   labelId: string;
   monthId: string;
-  monthLabel: string;
+  year: number;
+  month: number;
   weeks: (DateCell | null)[][];
   activeIso: IsoDate;
   cellRefs: RefObject<Map<IsoDate, HTMLButtonElement>>;
@@ -378,8 +449,26 @@ interface ModalProps {
 }
 
 function Modal(props: ModalProps) {
-  const { theme, state, dialogRef, labelId, monthId, monthLabel, weeks, activeIso, cellRefs } =
-    props;
+  const {
+    theme,
+    locale,
+    labels,
+    state,
+    dialogRef,
+    labelId,
+    monthId,
+    year,
+    month,
+    weeks,
+    activeIso,
+    cellRefs,
+  } = props;
+  const monthLabel = new Intl.DateTimeFormat(locale, {
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC",
+  }).format(new Date(Date.UTC(year, month - 1, 1)));
+  const weekdayHeaders = Array.from({ length: 7 }, (_, i) => weekdayName(i, locale, "narrow"));
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 1000 }}>
       <div
@@ -419,7 +508,7 @@ function Modal(props: ModalProps) {
             id={labelId}
             style={{ fontFamily: FONT_SERIF, fontSize: 20, fontWeight: 600, color: theme.ink }}
           >
-            Choose a delivery day
+            {labels.dialogTitle}
           </div>
           <div
             id={monthId}
@@ -441,7 +530,7 @@ function Modal(props: ModalProps) {
           style={{ display: "flex", flexDirection: "column", gap: 6 }}
         >
           <div role="row" style={{ display: "grid", gridTemplateColumns: "repeat(7,1fr)", gap: 6 }}>
-            {MONDAY_FIRST_WEEKDAYS.map((label, i) => (
+            {weekdayHeaders.map((label, i) => (
               <div
                 key={i}
                 role="columnheader"
@@ -473,6 +562,8 @@ function Modal(props: ModalProps) {
                   <DayCell
                     key={cell.iso}
                     theme={theme}
+                    locale={locale}
+                    labels={labels}
                     cell={cell}
                     isActive={cell.iso === activeIso}
                     cellRefs={cellRefs}
@@ -504,7 +595,7 @@ function Modal(props: ModalProps) {
               fontFamily: FONT_SANS,
             }}
           >
-            Cancel
+            {labels.cancel}
           </button>
           <button
             type="button"
@@ -525,7 +616,7 @@ function Modal(props: ModalProps) {
               fontFamily: FONT_SANS,
             }}
           >
-            Confirm
+            {labels.confirm}
           </button>
         </div>
       </div>
@@ -535,13 +626,18 @@ function Modal(props: ModalProps) {
 
 interface DayCellProps {
   theme: DeliveryTheme;
+  locale: string;
+  labels: DeliveryLabels;
   cell: DateCell;
   isActive: boolean;
   cellRefs: RefObject<Map<IsoDate, HTMLButtonElement>>;
   onSelect: (iso: IsoDate) => void;
 }
 
-function DayCell({ theme, cell, isActive, cellRefs, onSelect }: DayCellProps) {
+function DayCell({ theme, locale, labels, cell, isActive, cellRefs, onSelect }: DayCellProps) {
+  const reasonText = cell.blockedReason
+    ? blockedReasonText(cell.blockedReason, locale, labels)
+    : null;
   const base: CSSProperties = {
     minHeight: 44,
     display: "flex",
@@ -584,9 +680,7 @@ function DayCell({ theme, cell, isActive, cellRefs, onSelect }: DayCellProps) {
         else cellRefs.current.delete(cell.iso);
       }}
       tabIndex={isActive ? 0 : -1}
-      aria-label={
-        cell.blocked && cell.blockedReason ? `${cell.day} — ${cell.blockedReason}` : undefined
-      }
+      aria-label={cell.blocked && reasonText ? `${cell.day} — ${reasonText}` : undefined}
       aria-selected={cell.isSelected}
       aria-disabled={cell.blocked || undefined}
       onClick={() => onSelect(cell.iso)}

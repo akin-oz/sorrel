@@ -100,18 +100,26 @@ export function earliestDeliverableDate(
   return candidate;
 }
 
+/**
+ * Why a day is blocked, as a locale-agnostic code the UI formats. The pure domain
+ * stays free of display strings so the picker can localise the aria text.
+ */
+export type BlockedReason =
+  | { code: "BEFORE_EARLIEST"; earliest: IsoDate }
+  | { code: "BLOCKED_WEEKDAY"; weekdayIndex: number };
+
 export interface BlockedInfo {
   blocked: boolean;
-  /** Human-readable reason for an aria-disabled cell, or null when deliverable. */
-  reason: string | null;
+  /** Structured reason for an aria-disabled cell, or null when deliverable. */
+  reason: BlockedReason | null;
 }
 
 export function blockedInfo(iso: IsoDate, earliest: IsoDate): BlockedInfo {
   if (iso < earliest) {
-    return { blocked: true, reason: `Earliest delivery is ${formatLongDate(earliest)}` };
+    return { blocked: true, reason: { code: "BEFORE_EARLIEST", earliest } };
   }
   if (!isDeliverableWeekday(iso)) {
-    return { blocked: true, reason: `No deliveries on ${WEEKDAY_LONG[mondayIndex(iso)]}s` };
+    return { blocked: true, reason: { code: "BLOCKED_WEEKDAY", weekdayIndex: mondayIndex(iso) } };
   }
   return { blocked: false, reason: null };
 }
@@ -123,7 +131,7 @@ export interface DateCell {
   weekdayIndex: number;
   deliverable: boolean;
   blocked: boolean;
-  blockedReason: string | null;
+  blockedReason: BlockedReason | null;
   isSelected: boolean;
   isEarliest: boolean;
 }

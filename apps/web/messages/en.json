@@ -51,6 +51,7 @@
     "confirm": "Confirm",
     "change": "Change",
     "earliestDelivery": "Earliest delivery",
+    "deliveryDate": "Delivery date",
     "freeDelivery": "Free delivery",
     "blockedWeekday": "No deliveries on {weekday}s",
     "beforeEarliest": "Earliest delivery is {date}"
