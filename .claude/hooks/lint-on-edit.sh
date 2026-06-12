@@ -18,8 +18,22 @@ PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$(pwd)}"
 cd "$PROJECT_DIR"
 [ -d node_modules ] || exit 0   # toolchain not installed yet — skip quietly
 
+# Lint from the nearest workspace that owns an ESLint config. In this monorepo
+# apps/web self-lints via eslint-config-next; the root flat config covers the
+# rest. Running the root config over apps/web pulls in an eslint-plugin-react
+# that is incompatible with ESLint 10 — so route each file to its own config.
+ESLINT_DIR="$PROJECT_DIR"
+dir="$(dirname "$FILE_PATH")"
+while [ "$dir" != "$PROJECT_DIR" ] && [ "$dir" != "/" ]; do
+  if ls "$dir"/eslint.config.* >/dev/null 2>&1; then
+    ESLINT_DIR="$dir"
+    break
+  fi
+  dir="$(dirname "$dir")"
+done
+
 FAIL=0
-if ! npx --no-install eslint --max-warnings 0 "$FILE_PATH" 2>&1; then
+if ! ( cd "$ESLINT_DIR" && npx --no-install eslint --max-warnings 0 "$FILE_PATH" ) 2>&1; then
   echo "" >&2
   echo "ESLint failed on $FILE_PATH (zero-warning policy). Fix before continuing." >&2
   FAIL=1
