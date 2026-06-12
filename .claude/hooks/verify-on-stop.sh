@@ -17,6 +17,17 @@ if [ ! -d node_modules ]; then
   exit 0
 fi
 
+# The repo pins Node (engines requires >=20.19); activate it via nvm so yarn can
+# run even when the hook runner's shell defaults to an older Node.
+if [ -s "$HOME/.nvm/nvm.sh" ]; then
+  export NVM_DIR="$HOME/.nvm"
+  set +u
+  # shellcheck disable=SC1091
+  . "$NVM_DIR/nvm.sh"
+  nvm use >/dev/null 2>&1 || true
+  set -u
+fi
+
 # Only verify when source actually changed vs HEAD.
 CHANGED=$(git diff --name-only HEAD 2>/dev/null | grep -E '\.(ts|tsx|js|jsx|graphql)$' || true)
 [ -z "$CHANGED" ] && exit 0
