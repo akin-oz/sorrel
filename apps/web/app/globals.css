@@ -5,6 +5,14 @@ body {
   min-height: 100%;
 }
 
+/* Focus-visible as a system token (spec 012): 2px accent ring, 2px offset —
+   sorrelTheme.accent, not the browser default. Components that paint their own
+   ring (e.g. the delivery picker's .sdp-cell) override this locally. */
+:focus-visible {
+  outline: 2px solid #a14d27;
+  outline-offset: 2px;
+}
+
 /* Respect prefers-reduced-motion everywhere, including MUI transitions. */
 @media (prefers-reduced-motion: reduce) {
   *,
