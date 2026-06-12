@@ -28,10 +28,25 @@ const mono = IBM_Plex_Mono({
   variable: "--font-mono",
 });
 
-export const metadata: Metadata = {
-  title: "Sorrel — fresh food, tailored to your cat",
-  description: "Build a tailored fresh-food plan for your cats in a few quick steps.",
-};
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://sorrel.akinoztorun.dev";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  return {
+    metadataBase: new URL(SITE_URL),
+    title: "Sorrel — fresh food, tailored to your cat",
+    description: "Build a tailored fresh-food plan for your cats in a few quick steps.",
+    alternates: {
+      // en is unprefixed (localePrefix: "as-needed"); de is /de.
+      canonical: locale === routing.defaultLocale ? "/" : `/${locale}`,
+      languages: { en: "/", de: "/de", "x-default": "/" },
+    },
+  };
+}
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
