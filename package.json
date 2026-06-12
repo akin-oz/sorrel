@@ -2,6 +2,9 @@
   "name": "sorrel-monorepo",
   "private": true,
   "version": "1.0.0",
+  "engines": {
+    "node": "^20.19.0 || ^22.13.0 || >=24"
+  },
   "workspaces": [
     "apps/*",
     "services/*",
