@@ -45,6 +45,17 @@
       "description": "Review everything, then start your subscription."
     }
   },
+  "Recipes": {
+    "all": "All",
+    "add": "Add",
+    "added": "Added",
+    "selected": "{count, plural, =0 {No recipes selected} =1 {1 recipe selected} other {# recipes selected}}",
+    "tags": {
+      "GRAIN_FREE": "Grain-free",
+      "CHICKEN_FREE": "Chicken-free",
+      "SENSITIVE": "Sensitive"
+    }
+  },
   "Picker": {
     "dialogTitle": "Choose a delivery day",
     "cancel": "Cancel",

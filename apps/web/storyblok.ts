@@ -5,6 +5,7 @@ import { FeatureGrid } from "./app/_cms/FeatureGrid";
 import { FeatureItem } from "./app/_cms/FeatureItem";
 import { Hero } from "./app/_cms/Hero";
 import { Page } from "./app/_cms/Page";
+import { RecipeCard } from "./app/_cms/RecipeCard";
 
 /**
  * Server-side Storyblok init (spec 011). The component map binds each blok to an
@@ -21,5 +22,6 @@ export const getStoryblokApi = storyblokInit({
     feature_grid: FeatureGrid,
     feature_item: FeatureItem,
     cta_section: CtaSection,
+    recipe: RecipeCard,
   },
 });

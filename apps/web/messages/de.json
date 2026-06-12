@@ -45,6 +45,17 @@
       "description": "Prüfe alles und starte dann dein Abo."
     }
   },
+  "Recipes": {
+    "all": "Alle",
+    "add": "Hinzufügen",
+    "added": "Hinzugefügt",
+    "selected": "{count, plural, =0 {Keine Rezepte ausgewählt} =1 {1 Rezept ausgewählt} other {# Rezepte ausgewählt}}",
+    "tags": {
+      "GRAIN_FREE": "Getreidefrei",
+      "CHICKEN_FREE": "Hühnerfrei",
+      "SENSITIVE": "Sensibel"
+    }
+  },
   "Picker": {
     "dialogTitle": "Liefertag wählen",
     "cancel": "Abbrechen",

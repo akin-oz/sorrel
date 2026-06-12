@@ -9,6 +9,7 @@ import { FeatureGrid } from "./FeatureGrid";
 import { FeatureItem } from "./FeatureItem";
 import { Hero } from "./Hero";
 import { Page } from "./Page";
+import { RecipeCard } from "./RecipeCard";
 
 // Client-side registration so the Visual Editor Bridge can resolve + highlight bloks.
 storyblokInit({
@@ -20,6 +21,7 @@ storyblokInit({
     feature_grid: FeatureGrid,
     feature_item: FeatureItem,
     cta_section: CtaSection,
+    recipe: RecipeCard,
   },
 });
 

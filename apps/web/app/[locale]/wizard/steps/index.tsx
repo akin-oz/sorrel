@@ -9,7 +9,9 @@ import { useLocale, useTranslations } from "next-intl";
 import { FUNNEL_STEPS, type FunnelStep } from "@sorrel/shared";
 import { DeliveryDatePicker, type DeliveryLabels, sorrelTheme } from "@sorrel/ui";
 
+import type { RecipeBlok } from "../../../../types/storyblok.gen";
 import { useFunnel } from "../FunnelProvider";
+import { RecipesPicker } from "../RecipesPicker";
 
 /**
  * Presentational frame shared by every step — the "Step N of 7" overline, a serif
@@ -50,8 +52,13 @@ function ProfileStep() {
   return <StepShell step="PROFILE" />;
 }
 
-function RecipesStep() {
-  return <StepShell step="RECIPES" />;
+/** RECIPES is data-driven — rendered by the step page with Storyblok recipes. */
+export function RecipesStep({ recipes }: { recipes: RecipeBlok[] }) {
+  return (
+    <StepShell step="RECIPES">
+      <RecipesPicker recipes={recipes} />
+    </StepShell>
+  );
 }
 
 function DeliveryStep() {
@@ -97,10 +104,15 @@ function SummaryStep() {
   return <StepShell step="SUMMARY" />;
 }
 
+/** Registry fallback — RECIPES is normally rendered data-driven by the step page. */
+function RecipesPlaceholder() {
+  return <StepShell step="RECIPES" />;
+}
+
 const STEP_SCREENS: Record<FunnelStep, ComponentType> = {
   CATS: CatsStep,
   PROFILE: ProfileStep,
-  RECIPES: RecipesStep,
+  RECIPES: RecipesPlaceholder,
   DELIVERY: DeliveryStep,
   PLAN: PlanStep,
   EMAIL: EmailStep,

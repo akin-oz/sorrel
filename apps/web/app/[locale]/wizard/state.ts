@@ -41,6 +41,7 @@ export type FunnelAction =
   | { type: "ADVANCE"; step: FunnelStep }
   | { type: "SET_DELIVERY_DATE"; date: string }
   | { type: "SET_FREQUENCY"; frequency: string }
+  | { type: "TOGGLE_RECIPE"; slug: string }
   | { type: "RESET" };
 
 /** Index of a step in funnel order. */
@@ -63,6 +64,13 @@ export function funnelReducer(state: FunnelState, action: FunnelAction): FunnelS
       return { ...state, deliveryDate: action.date };
     case "SET_FREQUENCY":
       return { ...state, frequency: action.frequency };
+    case "TOGGLE_RECIPE":
+      return {
+        ...state,
+        recipeSlugs: state.recipeSlugs.includes(action.slug)
+          ? state.recipeSlugs.filter((slug) => slug !== action.slug)
+          : [...state.recipeSlugs, action.slug],
+      };
     case "RESET":
       return initialFunnelState;
   }

@@ -10,6 +10,7 @@ const config: Config = {
   testMatch: [
     "<rootDir>/app/**/*.test.ts",
     "<rootDir>/app/**/*.test.tsx",
+    "<rootDir>/lib/**/*.test.ts",
     "<rootDir>/src/**/*.test.ts",
     "<rootDir>/src/**/*.test.tsx",
   ],

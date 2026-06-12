@@ -35,6 +35,16 @@ describe("funnelReducer", () => {
     expect(next.frequency).toBe("EVERY_2_WEEKS");
   });
 
+  it("TOGGLE_RECIPE adds then removes a slug", () => {
+    const added = funnelReducer(initialFunnelState, {
+      type: "TOGGLE_RECIPE",
+      slug: "pasture-turkey",
+    });
+    expect(added.recipeSlugs).toEqual(["pasture-turkey"]);
+    const removed = funnelReducer(added, { type: "TOGGLE_RECIPE", slug: "pasture-turkey" });
+    expect(removed.recipeSlugs).toEqual([]);
+  });
+
   it("HYDRATE replaces the whole state (resume)", () => {
     const saved: FunnelState = {
       cats: [{ name: "Biscuit" }],
