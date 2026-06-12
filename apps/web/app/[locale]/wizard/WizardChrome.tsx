@@ -79,9 +79,18 @@ export function WizardChrome({ children }: { children: ReactNode }) {
                 <IconButton
                   onClick={handleBack}
                   aria-label={t("back")}
-                  sx={{ width: 44, height: 44, color: "text.primary", fontSize: 20 }}
+                  sx={{ width: 44, height: 44, color: "text.primary" }}
                 >
-                  ←
+                  {/* Material Design "arrow_back" — inlined to avoid the @mui/icons-material dep. */}
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" />
+                  </svg>
                 </IconButton>
               ) : null}
             </Box>
