@@ -1,0 +1,63 @@
+{
+  "Landing": {
+    "headline": "Frisches Futter, auf deine Katze abgestimmt.",
+    "subcopy": "Beantworte ein paar Fragen, und wir stellen einen Plan zusammen, der zu deinen Katzen passt — Rezepte, Portionen und ein erster Liefertag, der dir passt.",
+    "cta": "Plan erstellen"
+  },
+  "Wizard": {
+    "back": "Zurück",
+    "continue": "Weiter",
+    "confirm": "Plan bestätigen",
+    "stepProgress": "Schritt {current} von {total}",
+    "resume": "Fortsetzen",
+    "resumeBanner": "Willkommen zurück — wir haben gespeichert, wo du aufgehört hast."
+  },
+  "ExitIntent": {
+    "title": "Schon dabei zu gehen?",
+    "body": "Wir haben deinen Fortschritt gespeichert — mach einfach weiter, wann immer du bereit bist.",
+    "keepGoing": "Weitermachen",
+    "leave": "Vorerst verlassen"
+  },
+  "Steps": {
+    "CATS": {
+      "title": "Wie viele Katzen füttern wir?",
+      "description": "Jeder Napf bekommt seinen eigenen Portionsplan."
+    },
+    "PROFILE": { "title": "Erzähl uns von deiner Katze" },
+    "RECIPES": {
+      "title": "Rezepte, die deine Katze lieben wird",
+      "description": "Gefiltert nach dem Geschmack und den Bedürfnissen deiner Katze."
+    },
+    "DELIVERY": {
+      "title": "Wann soll die erste Box ankommen?",
+      "description": "Wir haben den frühesten Tag gewählt — du kannst ihn jederzeit ändern."
+    },
+    "PLAN": {
+      "title": "Der Plan deiner Katze",
+      "description": "Portionen, Boxgröße und Preis — prüfe alles, bevor du dich festlegst."
+    },
+    "EMAIL": {
+      "title": "Wohin sollen wir den Plan schicken?",
+      "description": "Wir bewahren auch deinen Fortschritt sicher auf."
+    },
+    "SUMMARY": {
+      "title": "Deine erste Box",
+      "description": "Prüfe alles und starte dann dein Abo."
+    }
+  },
+  "Picker": {
+    "dialogTitle": "Liefertag wählen",
+    "cancel": "Abbrechen",
+    "confirm": "Bestätigen",
+    "change": "Ändern",
+    "earliestDelivery": "Frühester Liefertag",
+    "freeDelivery": "Kostenlose Lieferung",
+    "blockedWeekday": "Keine Lieferung {weekday}s",
+    "beforeEarliest": "Frühester Liefertag ist der {date}"
+  },
+  "LocaleSwitcher": {
+    "label": "Sprache",
+    "en": "EN",
+    "de": "DE"
+  }
+}

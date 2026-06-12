@@ -6,12 +6,14 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
-import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 import { FUNNEL_STEPS } from "@sorrel/shared";
 
+import { useRouter } from "../../../i18n/navigation";
 import { ExitIntentModal } from "./ExitIntentModal";
 import { useFunnel } from "./FunnelProvider";
+import { LocaleSwitcher } from "./LocaleSwitcher";
 import { isFirstStep, isLastStep, nextStep, prevStep, segmentForStep } from "./state";
 import { useExitIntent } from "./useExitIntent";
 
@@ -20,6 +22,7 @@ const INACTIVE_SEGMENT = "#E3D8C8";
 export function WizardChrome({ children }: { children: ReactNode }) {
   const { currentStep, track } = useFunnel();
   const router = useRouter();
+  const t = useTranslations("Wizard");
 
   const stepNumber = currentStep ? FUNNEL_STEPS.indexOf(currentStep) + 1 : 0;
   const total = FUNNEL_STEPS.length;
@@ -75,7 +78,7 @@ export function WizardChrome({ children }: { children: ReactNode }) {
               {showBack ? (
                 <IconButton
                   onClick={handleBack}
-                  aria-label="Back"
+                  aria-label={t("back")}
                   sx={{ width: 44, height: 44, color: "text.primary", fontSize: 20 }}
                 >
                   ←
@@ -85,7 +88,7 @@ export function WizardChrome({ children }: { children: ReactNode }) {
             <Typography variant="h3" component="span" sx={{ fontSize: "1.25rem", fontWeight: 700 }}>
               Sorrel
             </Typography>
-            <Box sx={{ width: 44 }} />
+            <LocaleSwitcher />
           </Box>
 
           {currentStep ? (
@@ -132,7 +135,7 @@ export function WizardChrome({ children }: { children: ReactNode }) {
               onClick={handleNext}
               sx={{ mt: "auto" }}
             >
-              {isLastStep(currentStep) ? "Confirm plan" : "Continue"}
+              {isLastStep(currentStep) ? t("confirm") : t("continue")}
             </Button>
           ) : null}
         </Box>
@@ -147,6 +150,7 @@ export function WizardChrome({ children }: { children: ReactNode }) {
 function ResumeBanner() {
   const { currentStep, state } = useFunnel();
   const router = useRouter();
+  const t = useTranslations("Wizard");
   if (currentStep !== "CATS" || state.furthestStep === "CATS") return null;
   return (
     <Box
@@ -163,7 +167,7 @@ function ResumeBanner() {
       }}
     >
       <Typography sx={{ fontSize: 13, lineHeight: 1.45, color: "#5E4434" }}>
-        Welcome back — we saved where you left off.
+        {t("resumeBanner")}
       </Typography>
       <Button
         variant="text"
@@ -176,7 +180,7 @@ function ResumeBanner() {
           whiteSpace: "nowrap",
         }}
       >
-        Resume
+        {t("resume")}
       </Button>
     </Box>
   );

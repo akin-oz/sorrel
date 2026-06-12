@@ -1,0 +1,63 @@
+{
+  "Landing": {
+    "headline": "Fresh food, tailored to your cat.",
+    "subcopy": "Answer a few questions and we'll build a plan around your cats' needs — recipes, portions, and a first delivery day that suits you.",
+    "cta": "Build your plan"
+  },
+  "Wizard": {
+    "back": "Back",
+    "continue": "Continue",
+    "confirm": "Confirm plan",
+    "stepProgress": "Step {current} of {total}",
+    "resume": "Resume",
+    "resumeBanner": "Welcome back — we saved where you left off."
+  },
+  "ExitIntent": {
+    "title": "Leaving so soon?",
+    "body": "We've saved your progress — pick up right where you left off whenever you're ready.",
+    "keepGoing": "Keep going",
+    "leave": "Leave for now"
+  },
+  "Steps": {
+    "CATS": {
+      "title": "How many cats are we feeding?",
+      "description": "Every bowl gets its own portion plan."
+    },
+    "PROFILE": { "title": "Tell us about your cat" },
+    "RECIPES": {
+      "title": "Recipes your cat will love",
+      "description": "Filtered to your cat's tastes and needs."
+    },
+    "DELIVERY": {
+      "title": "When should the first box arrive?",
+      "description": "We picked the earliest day — change it anytime."
+    },
+    "PLAN": {
+      "title": "Your cat's plan",
+      "description": "Portions, box size, and price — review before you commit."
+    },
+    "EMAIL": {
+      "title": "Where should we send the plan?",
+      "description": "We'll keep your progress safe, too."
+    },
+    "SUMMARY": {
+      "title": "Your first box",
+      "description": "Review everything, then start your subscription."
+    }
+  },
+  "Picker": {
+    "dialogTitle": "Choose a delivery day",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "change": "Change",
+    "earliestDelivery": "Earliest delivery",
+    "freeDelivery": "Free delivery",
+    "blockedWeekday": "No deliveries on {weekday}s",
+    "beforeEarliest": "Earliest delivery is {date}"
+  },
+  "LocaleSwitcher": {
+    "label": "Language",
+    "en": "EN",
+    "de": "DE"
+  }
+}

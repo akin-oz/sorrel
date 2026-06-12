@@ -11,11 +11,10 @@ import {
   useRef,
 } from "react";
 
-import { usePathname } from "next/navigation";
-
 import type { Track } from "@sorrel/analytics";
 import { type FunnelStep } from "@sorrel/shared";
 
+import { usePathname } from "../../../i18n/navigation";
 import { createAppTracker } from "./analytics";
 import {
   type FunnelAction,

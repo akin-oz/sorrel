@@ -72,8 +72,8 @@ it now to front-load the App Router setup and the stack signal.
   an accidental tab close — no backend needed.
 - **Server draft sync** (`saveFunnelDraft` mutation, cross-device resume) is **out of scope**
   here — it needs the Apollo Client + `apps/web` operation-type codegen, which is its own
-  spec (011). Local resume is complete on its own; server sync is an enhancement layered on
-  top, not a prerequisite.
+  follow-up spec (the Apollo write-path). Local resume is complete on its own; server sync is
+  an enhancement layered on top, not a prerequisite.
 
 ## Conversion instrumentation (the point of the shell)
 
@@ -151,7 +151,8 @@ analytics contract; changes neither. No `schema.graphql` or `packages/domain` ed
 
 # Out of scope
 
-- Apollo Client, `apps/web` operation-type codegen, `saveFunnelDraft` server sync — **spec 011**.
+- Apollo Client, `apps/web` operation-type codegen, `saveFunnelDraft` server sync — its own
+  follow-up spec (the Apollo write-path).
 - Real per-step form fields, validation, and `field_error` emission — per-step specs.
 - The seed script / drop-off curve generator — its own spec.
 - The MUI icon set (`@mui/icons-material`) and data-heavy MUI components (DataGrid, etc.) —

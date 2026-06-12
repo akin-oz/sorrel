@@ -4,6 +4,7 @@ import { type ComponentType, type ReactNode } from "react";
 
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
+import { useTranslations } from "next-intl";
 
 import { FUNNEL_STEPS, type FunnelStep } from "@sorrel/shared";
 import { DeliveryDatePicker, sorrelTheme } from "@sorrel/ui";
@@ -11,35 +12,28 @@ import { DeliveryDatePicker, sorrelTheme } from "@sorrel/ui";
 import { useFunnel } from "../FunnelProvider";
 
 /**
- * Presentational frame shared by every step — the "STEP N OF 7" overline, a serif
- * title, optional subcopy, and an optional body. Copy follows the design's warm
- * tone; per-cat personalisation ("Tell us about Miso") lands when the forms
- * capture the name (later specs), so it is deferred, not lost.
+ * Presentational frame shared by every step — the "Step N of 7" overline, a serif
+ * title, optional subcopy (from the next-intl `Steps` catalog), and an optional
+ * body. The localised copy follows the design's warm tone.
  */
-function StepShell({
-  step,
-  title,
-  description,
-  children,
-}: {
-  step: FunnelStep;
-  title: string;
-  description?: string;
-  children?: ReactNode;
-}) {
+function StepShell({ step, children }: { step: FunnelStep; children?: ReactNode }) {
+  const tSteps = useTranslations("Steps");
+  const tWizard = useTranslations("Wizard");
   const stepNumber = FUNNEL_STEPS.indexOf(step) + 1;
+  const hasDescription = tSteps.has(`${step}.description`);
+
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}>
       <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
         <Typography variant="overline" sx={{ color: "#A8967F", lineHeight: 1.4 }}>
-          Step {stepNumber} of {FUNNEL_STEPS.length}
+          {tWizard("stepProgress", { current: stepNumber, total: FUNNEL_STEPS.length })}
         </Typography>
         <Typography variant="h3" sx={{ fontSize: "1.625rem", lineHeight: 1.2 }}>
-          {title}
+          {tSteps(`${step}.title`)}
         </Typography>
-        {description ? (
+        {hasDescription ? (
           <Typography variant="body1" color="text.secondary">
-            {description}
+            {tSteps(`${step}.description`)}
           </Typography>
         ) : null}
       </Box>
@@ -49,37 +43,21 @@ function StepShell({
 }
 
 function CatsStep() {
-  return (
-    <StepShell
-      step="CATS"
-      title="How many cats are we feeding?"
-      description="Every bowl gets its own portion plan."
-    />
-  );
+  return <StepShell step="CATS" />;
 }
 
 function ProfileStep() {
-  return <StepShell step="PROFILE" title="Tell us about your cat" />;
+  return <StepShell step="PROFILE" />;
 }
 
 function RecipesStep() {
-  return (
-    <StepShell
-      step="RECIPES"
-      title="Recipes your cat will love"
-      description="Filtered to your cat's tastes and needs."
-    />
-  );
+  return <StepShell step="RECIPES" />;
 }
 
 function DeliveryStep() {
   const { state, dispatch } = useFunnel();
   return (
-    <StepShell
-      step="DELIVERY"
-      title="When should the first box arrive?"
-      description="We picked the earliest day — change it anytime."
-    >
+    <StepShell step="DELIVERY">
       <Box sx={{ display: "flex", justifyContent: "center" }}>
         <DeliveryDatePicker
           theme={sorrelTheme}
@@ -92,33 +70,15 @@ function DeliveryStep() {
 }
 
 function PlanStep() {
-  return (
-    <StepShell
-      step="PLAN"
-      title="Your cat's plan"
-      description="Portions, box size, and price — review before you commit."
-    />
-  );
+  return <StepShell step="PLAN" />;
 }
 
 function EmailStep() {
-  return (
-    <StepShell
-      step="EMAIL"
-      title="Where should we send the plan?"
-      description="We'll keep your progress safe, too."
-    />
-  );
+  return <StepShell step="EMAIL" />;
 }
 
 function SummaryStep() {
-  return (
-    <StepShell
-      step="SUMMARY"
-      title="Your first box"
-      description="Review everything, then start your subscription."
-    />
-  );
+  return <StepShell step="SUMMARY" />;
 }
 
 const STEP_SCREENS: Record<FunnelStep, ComponentType> = {

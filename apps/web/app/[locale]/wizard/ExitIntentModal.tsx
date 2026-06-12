@@ -6,6 +6,7 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
+import { useTranslations } from "next-intl";
 
 interface ExitIntentModalProps {
   open: boolean;
@@ -22,6 +23,7 @@ interface ExitIntentModalProps {
  * brand-safe and invents nothing — keyed to the local-resume already built.
  */
 export function ExitIntentModal({ open, onRecover, onLeave }: ExitIntentModalProps) {
+  const t = useTranslations("ExitIntent");
   return (
     <Dialog
       open={open}
@@ -37,17 +39,14 @@ export function ExitIntentModal({ open, onRecover, onLeave }: ExitIntentModalPro
         id="exit-intent-title"
         sx={{ fontFamily: "var(--font-serif)", fontWeight: 700, fontSize: "1.5rem" }}
       >
-        Leaving so soon?
+        {t("title")}
       </DialogTitle>
       <DialogContent>
-        <DialogContentText sx={{ color: "text.secondary" }}>
-          We&apos;ve saved your progress — pick up right where you left off whenever you&apos;re
-          ready.
-        </DialogContentText>
+        <DialogContentText sx={{ color: "text.secondary" }}>{t("body")}</DialogContentText>
       </DialogContent>
       <DialogActions sx={{ flexDirection: "column", gap: 1, px: 3, pb: 3 }}>
         <Button onClick={onRecover} variant="contained" size="large" fullWidth>
-          Keep going
+          {t("keepGoing")}
         </Button>
         <Button
           onClick={onLeave}
@@ -56,7 +55,7 @@ export function ExitIntentModal({ open, onRecover, onLeave }: ExitIntentModalPro
           fullWidth
           sx={{ ml: "0 !important" }}
         >
-          Leave for now
+          {t("leave")}
         </Button>
       </DialogActions>
     </Dialog>
