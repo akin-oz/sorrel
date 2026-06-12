@@ -21,7 +21,17 @@ function renderBlok(blok: PageBodyBlok) {
 
 export function Page({ blok }: { blok: PageBlok }) {
   return (
-    <Box component="main" {...storyblokEditable(blok)} sx={{ minHeight: "100dvh" }}>
+    <Box
+      component="main"
+      {...storyblokEditable(blok)}
+      sx={{
+        width: "100%",
+        maxWidth: "56rem",
+        mx: "auto",
+        px: { xs: 2, sm: 3 },
+        py: { xs: 2, sm: 4 },
+      }}
+    >
       {blok.body?.map(renderBlok)}
     </Box>
   );
