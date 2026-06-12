@@ -35,9 +35,12 @@ export interface DeliveryTheme {
   radiusPill: number;
 }
 
-export const FONT_SERIF = "'Source Serif 4', Georgia, serif";
-export const FONT_SANS = "'Public Sans', system-ui, sans-serif";
-export const FONT_MONO = "'IBM Plex Mono', ui-monospace, monospace";
+// The host app loads the faces (e.g. via next/font) and exposes them as these
+// CSS variables; the literal names + generic families are the standalone
+// fallback (Storybook, tests, or any consumer that doesn't set the variables).
+export const FONT_SERIF = "var(--font-serif, 'Source Serif 4'), Georgia, serif";
+export const FONT_SANS = "var(--font-sans, 'Public Sans'), system-ui, sans-serif";
+export const FONT_MONO = "var(--font-mono, 'IBM Plex Mono'), ui-monospace, monospace";
 
 export const sorrelTheme: DeliveryTheme = {
   name: "Sorrel",

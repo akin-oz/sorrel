@@ -6,6 +6,9 @@ export {
   sorrelTheme,
   brambleTheme,
   deliveryThemes,
+  FONT_SERIF,
+  FONT_SANS,
+  FONT_MONO,
   type DeliveryTheme,
   type DeliveryThemeName,
 } from "./theme/tokens";

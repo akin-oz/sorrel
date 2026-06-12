@@ -7,10 +7,19 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "test": "jest"
   },
   "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "@mui/material": "^9.1.1",
+    "@mui/material-nextjs": "^9.1.1",
+    "@sorrel/analytics": "*",
+    "@sorrel/shared": "*",
+    "@sorrel/ui": "*",
     "next": "16.2.9",
+    "posthog-js": "^1.386.6",
     "react": "19.2.4",
     "react-dom": "19.2.4"
   },
