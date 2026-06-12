@@ -1,0 +1,16 @@
+{
+  "name": "@sorrel/api",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "node --loader ts-node/esm src/index.ts",
+    "build": "tsc",
+    "type-check": "tsc --noEmit",
+    "test": "jest"
+  },
+  "dependencies": {
+    "@apollo/server": "^5.5.1",
+    "@sorrel/domain": "*",
+    "graphql": "^16.14.2"
+  }
+}

@@ -16,12 +16,14 @@
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,html,yml,yaml}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md,html,yml,yaml}\"",
     "type-check": "yarn workspaces run type-check && tsc --noEmit -p tsconfig.json",
-    "codegen:check": "node scripts/codegen-check.mjs"
+    "codegen": "graphql-codegen --config codegen.ts",
+    "codegen:check": "node scripts/codegen-check.mjs && graphql-codegen --config codegen.ts --check"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@graphql-codegen/cli": "^7.1.2",
     "@graphql-codegen/typescript": "^6.0.2",
+    "@graphql-codegen/typescript-resolvers": "^6.0.2",
     "@next/eslint-plugin-next": "^16.2.9",
     "@trivago/prettier-plugin-sort-imports": "^6.0.2",
     "@types/jest": "^30.0.0",
