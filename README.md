@@ -7,8 +7,11 @@ A mobile-first subscription **onboarding funnel**, built as an engineering artif
 > **Status: 🚧 work in progress.** Landed: the monorepo + AI-governance workflow, the
 > GraphQL contract with a mock Apollo API, the typed analytics contract, and the **wizard
 > shell** — all seven steps routed and instrumented, with local resume, an exit-intent
-> recovery modal, and the delivery-date picker wired into step 4 — **deployed on Vercel**. In
-> active build: the per-step input forms and the Apollo write-path. See [Roadmap](#roadmap).
+> recovery modal, and the delivery-date picker wired into step 4. Now **bilingual (en/de,
+> next-intl)** end to end, and the landing + recipes are **CMS-driven via Storyblok** (visual
+> editing, draft preview, on-publish revalidation), with a typed offline fallback. **Deployed
+> on Vercel.** In active build: the per-step input forms and the Apollo write-path. See
+> [Roadmap](#roadmap).
 
 > _Sorrel is a fictional brand created for this demo. No real company, product, or
 > brand assets are referenced anywhere in this repository._
@@ -159,8 +162,10 @@ Tiers ship in order; nothing ships below the Tier-1 line.
 
 **Landed:** the monorepo + AI-governance layer (`.claude/` + `specs/`), the delivery-date
 picker (`packages/ui`), the GraphQL contract + mock Apollo API (`schema.graphql`,
-`services/api`), the typed analytics contract (`packages/analytics`), and the wizard shell
+`services/api`), the typed analytics contract (`packages/analytics`), the wizard shell
 (`apps/web`) — routed, instrumented (PostHog behind an env flag), with local resume and an
-exit-intent recovery modal, **deployed on Vercel** ([sorrel.akinoztorun.dev](https://sorrel.akinoztorun.dev/)).
-**In active build:** per-step input forms, the Apollo write-path (optimistic mutations), CMS
-content, i18n, CI, and the mobile Lighthouse 95+ budget.
+exit-intent recovery modal — **bilingual en/de (next-intl, hreflang)**, and a **Storyblok**
+CMS for the landing + recipes (visual editing, draft preview, on-publish revalidation, typed
+bloks, offline fallback). **Deployed on Vercel** ([sorrel.akinoztorun.dev](https://sorrel.akinoztorun.dev/)).
+**In active build:** per-step input forms, the Apollo write-path (optimistic mutations), CI,
+and the mobile Lighthouse 95+ budget.
