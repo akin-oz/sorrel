@@ -2,9 +2,11 @@
 
 A mobile-first subscription **onboarding funnel**, built as an engineering artifact.
 
-> **Status: 🚧 work in progress.** The monorepo scaffold and the AI-governance
-> workflow (below) are landed and live in the git history. The funnel itself is in
-> active build — see [Roadmap](#roadmap) for what exists today versus what is planned.
+> **Status: 🚧 work in progress.** Landed: the monorepo + AI-governance workflow, the
+> GraphQL contract with a mock Apollo API, the typed analytics contract, and the **wizard
+> shell** — all seven steps routed and instrumented, with local resume, an exit-intent
+> recovery modal, and the delivery-date picker wired into step 4. In active build: the
+> per-step input forms, the Apollo write-path, and deployment. See [Roadmap](#roadmap).
 
 > _Sorrel is a fictional brand created for this demo. No real company, product, or
 > brand assets are referenced anywhere in this repository._
@@ -18,7 +20,7 @@ lock it with budgets.**
 
 This repo applies the same method that took a real onboarding funnel from **39% → 65%
 completion** (employer unnamed) to a subscription flow's shape. The product is a fresh
-cat-food signup wizard; the interesting part is the *method* — every step is a clean,
+cat-food signup wizard; the interesting part is the _method_ — every step is a clean,
 measured analytics unit, every UX decision has an expected effect and a way to verify it,
 and quality is enforced by hooks and budgets rather than by hope.
 
@@ -30,8 +32,8 @@ A URL-segmented wizard (`/wizard/[step]`) — deep-linkable, correct back-button
 behaviour, each step its own analytics unit.
 
 1. **Quantity of cats** — how many cats to feed.
-2. **Cat profile** — name, age, neutered, weight, fussiness, allergies. *The conversion
-   lever:* free-text (variant A) vs. searchable autocomplete with smart defaults
+2. **Cat profile** — name, age, neutered, weight, fussiness, allergies. _The conversion
+   lever:_ free-text (variant A) vs. searchable autocomplete with smart defaults
    (variant B), behind a flag. This is the 39→65 fix, made demoable.
 3. **Recipe selection** — cards with dietary filters.
 4. **Delivery date** — the [date-picker centerpiece](#the-delivery-date-picker).
@@ -40,9 +42,12 @@ behaviour, each step its own analytics unit.
 7. **Checkout summary** — order review.
 
 Cross-cutting: typed funnel events (`funnel_step_viewed`, `step_completed`,
-`field_error`, `funnel_abandoned`), abandonment recovery (local draft + a
-`saveFunnelDraft` mutation to resume mid-funnel), and a seed script that generates a
-realistic drop-off curve.
+`field_error`, `funnel_abandoned`, `exit_intent_shown` / `exit_intent_recovered`),
+abandonment recovery (local draft + a `saveFunnelDraft` mutation to resume mid-funnel),
+and a seed script that generates a realistic drop-off curve.
+
+_Today the shell routes and instruments all seven steps with the picker wired into step 4;
+the input forms themselves land step by step (each its own approved spec)._
 
 ---
 
@@ -57,6 +62,8 @@ measured**. The instrument is the typed analytics contract, not opinion.
   step that drops the most → measured by `step_completed` split by `variant`.
 - **Local draft + `saveFunnelDraft`** → recover abandoned sessions → measured by resume
   rate after `funnel_abandoned`.
+- **Exit-intent recovery modal** (desktop) → intercept the abandonment gesture with a reason
+  to stay → measured by recovery rate (`exit_intent_recovered ÷ exit_intent_shown`).
 
 _(Live link, mobile walkthrough, Lighthouse score, and the seeded funnel-curve screenshot
 land at the Tier-1 exit — see [Roadmap](#roadmap).)_
@@ -123,9 +130,12 @@ The git log is the demo: spec → approval → implementation → green checks �
 
 ```bash
 yarn install
-yarn workspace @sorrel/frontend dev   # http://localhost:3000
+yarn workspace @sorrel/frontend dev   # the funnel at http://localhost:3000/wizard/cats
+yarn workspace @sorrel/api dev        # GraphQL mock at http://localhost:4000
 
 yarn type-check        # strict TS across the workspaces (0 errors required)
+yarn workspace @sorrel/domain test    # (and @sorrel/api / shared / analytics / frontend)
+yarn codegen:check     # fail the build if schema.graphql is invalid
 yarn format:check      # formatting
 ```
 
@@ -144,5 +154,9 @@ Tiers ship in order; nothing ships below the Tier-1 line.
 - **Tier 3 — closers:** funnel-insights page from seeded events, Storybook, axe checks in
   CI, Stripe test mode.
 
-**Landed today:** monorepo scaffold (`@sorrel/frontend` on Next 16 / React 19) and the
-full AI-governance layer (`.claude/` + `specs/`). Everything else is in active build.
+**Landed:** the monorepo + AI-governance layer (`.claude/` + `specs/`), the delivery-date
+picker (`packages/ui`), the GraphQL contract + mock Apollo API (`schema.graphql`,
+`services/api`), the typed analytics contract (`packages/analytics`), and the wizard shell
+(`apps/web`) — routed, instrumented (PostHog behind an env flag), with local resume and an
+exit-intent recovery modal. **In active build:** per-step input forms, the Apollo write-path
+(optimistic mutations), CMS content, i18n, CI, and deployment.
