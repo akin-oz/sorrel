@@ -30,7 +30,7 @@ None — tooling only.
 
 # Acceptance criteria
 
-- [x] `.nvmrc` pins Node 22
+- [x] `.nvmrc` pins Node 24 (current active LTS)
 - [x] `engines.node` declared on the root `package.json`, matching the dependency floor
 - [x] `yarn install` succeeds on the pinned Node with no `--ignore-engines`
 - [x] No spurious peer-dependency warning on `yarn install`
