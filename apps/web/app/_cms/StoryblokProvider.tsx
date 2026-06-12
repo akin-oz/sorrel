@@ -12,9 +12,10 @@ import { Page } from "./Page";
 import { RecipeCard } from "./RecipeCard";
 
 // Client-side registration so the Visual Editor Bridge can resolve + highlight bloks.
+const clientToken = process.env.NEXT_PUBLIC_STORYBLOK_PUBLIC_TOKEN;
 storyblokInit({
-  accessToken: process.env.NEXT_PUBLIC_STORYBLOK_PUBLIC_TOKEN,
-  use: [apiPlugin],
+  accessToken: clientToken,
+  use: clientToken ? [apiPlugin] : [],
   components: {
     page: Page,
     hero: Hero,

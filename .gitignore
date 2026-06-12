@@ -40,3 +40,7 @@ logs/
 .sass-cache/
 .eslintcache
 .turbo/
+# Per-workspace lockfiles — only the root yarn.lock is authoritative
+apps/*/yarn.lock
+packages/*/yarn.lock
+services/*/yarn.lock

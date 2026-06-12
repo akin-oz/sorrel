@@ -17,7 +17,8 @@
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md,html,yml,yaml}\"",
     "type-check": "yarn workspaces run type-check && tsc --noEmit -p tsconfig.json",
     "codegen": "graphql-codegen --config codegen.ts",
-    "codegen:check": "node scripts/codegen-check.mjs && graphql-codegen --config codegen.ts --check"
+    "codegen:check": "node scripts/codegen-check.mjs && graphql-codegen --config codegen.ts --check",
+    "storyblok:types": "storyblok-generate-ts source=./storyblok.components.json target=./apps/web/types/storyblok.gen.ts"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

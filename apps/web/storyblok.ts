@@ -12,9 +12,12 @@ import { RecipeCard } from "./app/_cms/RecipeCard";
  * MUI renderer; `getStoryblokApi` is used by server components to fetch stories.
  * No token is required to render a story object (fallback path stays offline).
  */
+const serverToken = process.env.STORYBLOK_PUBLIC_TOKEN || process.env.STORYBLOK_PREVIEW_TOKEN;
+
 export const getStoryblokApi = storyblokInit({
-  accessToken: process.env.STORYBLOK_PUBLIC_TOKEN,
-  use: [apiPlugin],
+  accessToken: serverToken,
+  // Only load the API plugin when a token exists; the fallback path never calls it.
+  use: serverToken ? [apiPlugin] : [],
   apiOptions: { region: process.env.STORYBLOK_REGION === "us" ? "us" : "eu" },
   components: {
     page: Page,
