@@ -8,6 +8,7 @@ import { IBM_Plex_Mono, Public_Sans, Source_Serif_4 } from "next/font/google";
 import { notFound } from "next/navigation";
 
 import { routing } from "../../i18n/routing";
+import { StoryblokProvider } from "../_cms/StoryblokProvider";
 import "../globals.css";
 import theme from "../theme";
 
@@ -52,12 +53,14 @@ export default async function LocaleLayout({
     <html lang={locale} className={`${serif.variable} ${sans.variable} ${mono.variable}`}>
       <body>
         <NextIntlClientProvider locale={locale} messages={messages}>
-          <AppRouterCacheProvider>
-            <ThemeProvider theme={theme}>
-              <CssBaseline />
-              {children}
-            </ThemeProvider>
-          </AppRouterCacheProvider>
+          <StoryblokProvider>
+            <AppRouterCacheProvider>
+              <ThemeProvider theme={theme}>
+                <CssBaseline />
+                {children}
+              </ThemeProvider>
+            </AppRouterCacheProvider>
+          </StoryblokProvider>
         </NextIntlClientProvider>
       </body>
     </html>

@@ -1,56 +1,17 @@
-"use client";
+import { StoryblokStory } from "@storyblok/react/rsc";
+import { setRequestLocale } from "next-intl/server";
+import { draftMode } from "next/headers";
 
-import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
-import Typography from "@mui/material/Typography";
-import { useTranslations } from "next-intl";
+import { getHomeStory } from "../../lib/cms";
+import { homeFallbackContent } from "../../lib/cms-fallback";
+import { Page } from "../_cms/Page";
 
-import { BrandLogo } from "@sorrel/ui";
+export default async function Home({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+  const { isEnabled } = await draftMode();
+  const story = await getHomeStory(locale, isEnabled);
 
-import { Link } from "../../i18n/navigation";
-
-export default function Home() {
-  const t = useTranslations("Landing");
-  return (
-    <Box
-      component="main"
-      sx={{
-        minHeight: "100dvh",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        gap: 2.5,
-        px: 2.5,
-        py: 6,
-        textAlign: "center",
-      }}
-    >
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-        <BrandLogo size={40} color="#A14D27" title="Sorrel" />
-        <Typography
-          variant="h2"
-          component="span"
-          sx={{ fontSize: "1.6rem", color: "primary.main" }}
-        >
-          Sorrel
-        </Typography>
-      </Box>
-      <Typography variant="h1" sx={{ maxWidth: "32rem", fontSize: "clamp(1.9rem, 6vw, 2.6rem)" }}>
-        {t("headline")}
-      </Typography>
-      <Typography variant="body1" color="text.secondary" sx={{ maxWidth: "30rem" }}>
-        {t("subcopy")}
-      </Typography>
-      <Button
-        component={Link}
-        href="/wizard/cats"
-        variant="contained"
-        size="large"
-        sx={{ mt: 1, px: 3.5 }}
-      >
-        {t("cta")}
-      </Button>
-    </Box>
-  );
+  // Live editing on the API path; the typed Page blok directly on the fallback path.
+  return story ? <StoryblokStory story={story} /> : <Page blok={homeFallbackContent(locale)} />;
 }
