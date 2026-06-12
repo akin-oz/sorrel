@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "storyblok": {
+      "type": "http",
+      "url": "https://mcp.labs.storyblok.com/mcp",
+      "headers": {
+        "Authorization": "Bearer ${STORYBLOK_PERSONAL_ACCESS_TOKEN}"
+      }
+    }
+  }
+}
