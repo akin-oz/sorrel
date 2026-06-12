@@ -35,11 +35,20 @@ weekdays are deliverable) belongs in `packages/domain` or a pure util in
 - Real delivery-availability API; blocked weekdays are static rules for the demo.
 
 # Acceptance criteria
-- [ ] `yarn type-check` green (0 errors/warnings)
-- [ ] Unit tests cover date logic across month boundaries (28/29/30/31) and blocked weekdays
-- [ ] Focus trap, ESC, return-focus, `aria-modal`, roving-tabindex grid nav, `aria-disabled`+reason on blocked days, `prefers-reduced-motion` fallback
-- [ ] Storybook story renders the component under both token themes
-- [ ] No real-brand names, logos, copy, or assets
+- [x] `yarn type-check` green (0 errors/warnings)
+- [x] Unit tests cover date logic across month boundaries (28/29/30/31) and blocked weekdays — 25 tests in `packages/domain`
+- [x] Focus trap, ESC, return-focus, `aria-modal`, roving-tabindex grid nav, `aria-disabled`+reason on blocked days, `prefers-reduced-motion` fallback — implemented in `packages/ui`
+- [ ] Storybook story renders the component under both token themes — deferred (Storybook not yet set up; a Tier-3 cut item)
+- [x] No real-brand names, logos, copy, or assets
+
+# Implementation
+Built pixel-faithfully from the Claude Design handoff (`Sorrel Funnel.dc.html`).
+- `packages/domain/src/delivery/calendar.ts` — pure, timezone-safe date logic: Monday-first grid, blocked Tue/Fri/Sat, earliest-deliverable, roving-grid navigation. 25 unit tests across month boundaries.
+- `packages/ui/src/DeliveryDatePicker.tsx` — closed card + modal, three-state exit animation (open → closing → closed, unmount on `animationend`), focus trap / ESC / return-focus / roving tabindex.
+- `packages/ui/src/theme/tokens.ts` — Sorrel + Bramble token skins (one component, two brands).
+- Test toolchain (ts-jest + ts-node) added to run the domain unit tests — user-approved.
+
+Remaining as their own follow-ups: component DOM tests (needs jsdom + testing-library), the Storybook story, and wiring the component into the `/wizard/delivery` step (which needs its own funnel-step spec).
 
 # Analytics
 - `step_completed` with `{ step: "delivery-date" }` on confirm.
