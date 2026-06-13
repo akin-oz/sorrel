@@ -5,6 +5,18 @@
  */
 export type EmailError = "required" | "invalid";
 
+/** EMAIL-step form state for `useActionState`. Lives here, not in the "use server"
+ *  action file — a "use server" module may only export async functions. */
+export interface EmailFormState {
+  status: "idle" | "ok" | "error";
+  /** Echoed back so the input keeps its value across submissions. */
+  email: string;
+  /** Locale-agnostic error code the client maps to a localized message. */
+  error?: EmailError;
+}
+
+export const initialEmailState: EmailFormState = { status: "idle", email: "" };
+
 // Pragmatic single-line check — one @, a dot in the domain, no whitespace.
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 

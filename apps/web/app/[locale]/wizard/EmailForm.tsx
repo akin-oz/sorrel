@@ -9,7 +9,8 @@ import TextField from "@mui/material/TextField";
 import { useTranslations } from "next-intl";
 
 import { useFunnel } from "./FunnelProvider";
-import { type EmailFormState, initialEmailState, submitEmail } from "./email-action";
+import { submitEmail } from "./email-action";
+import { type EmailFormState, initialEmailState } from "./email-validation";
 
 /**
  * EMAIL step (spec 013) — `useActionState` over a server action.

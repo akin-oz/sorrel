@@ -1,9 +1,11 @@
 "use server";
 
-import { type EmailError, validateEmail } from "./email-validation";
+import { type EmailFormState, validateEmail } from "./email-validation";
 
 /**
- * EMAIL-step server action (spec 013).
+ * EMAIL-step server action (spec 013). A "use server" module may only export
+ * async functions, so the form-state type + initial value live in
+ * email-validation.ts; this file exports only the action.
  *
  * Validation runs on the server — the deliberate contrast to the Apollo
  * mutations: a progressively-enhanced `<form action>` that works without JS, and
@@ -11,16 +13,6 @@ import { type EmailError, validateEmail } from "./email-validation";
  * `field_error` analytics emit. (Persistence stays with the Apollo autosave; this
  * action only validates.)
  */
-export interface EmailFormState {
-  status: "idle" | "ok" | "error";
-  /** Echoed back so the input keeps its value across submissions. */
-  email: string;
-  /** Locale-agnostic error code the client maps to a localized message. */
-  error?: EmailError;
-}
-
-export const initialEmailState: EmailFormState = { status: "idle", email: "" };
-
 export async function submitEmail(
   _prev: EmailFormState,
   formData: FormData,
