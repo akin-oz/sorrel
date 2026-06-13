@@ -65,14 +65,15 @@ measured**. The instrument is the typed analytics contract, not opinion.
   `funnel_step_viewed` → `step_completed` drop-off per step.
 - **Autocomplete with smart defaults vs. free text**, behind a flag → less friction at the
   step that drops the most → measured by `step_completed` split by `variant`.
-- **Local draft now; `saveFunnelDraft` server sync to follow** → recover abandoned sessions
+- **Local draft + `saveFunnelDraft` server autosave** → recover abandoned sessions
   → measured by resume rate after `funnel_abandoned`.
 - **Exit-intent recovery modal** (desktop) → intercept the abandonment gesture with a reason
   to stay → measured by recovery rate (`exit_intent_recovered ÷ exit_intent_shown`).
 
-_(Live: [sorrel.akinoztorun.dev](https://sorrel.akinoztorun.dev/). Mobile walkthrough,
-Lighthouse score, and the seeded funnel-curve screenshot land at the Tier-1 exit — see
-[Roadmap](#roadmap).)_
+_(Live: [sorrel.akinoztorun.dev](https://sorrel.akinoztorun.dev/). Measured mobile Lighthouse
+— landing **93 / 95 / 100 / 92** (perf / a11y / best-practices / SEO), budgeted in CI:
+[docs/lighthouse.md](docs/lighthouse.md). Seeded funnel-curve screenshot lands at the Tier-1
+exit — see [Roadmap](#roadmap).)_
 
 ---
 
@@ -153,10 +154,11 @@ Tiers ship in order; nothing ships below the Tier-1 line.
 
 - **Tier 1 — credible core:** wizard steps with typed reducer state, MUI theme, RSC shells
   with client islands, Apollo queries + optimistic mutations, instrumentation firing,
-  mobile-first, deployed, mobile Lighthouse 95+.
+  mobile-first, deployed, mobile Lighthouse budgeted in CI (perf 90–93 · a11y 95 ·
+  best-practices 100).
 - **Tier 2 — coverage:** CMS-driven landing/recipe content, i18n (en/de) with hreflang,
-  CI (typecheck, unit, Lighthouse budget as a PR gate), one Cypress happy path, JSON-LD,
-  sitemap/robots.
+  CI (typecheck, lint, unit matrix, codegen + format gates, a spec-trailer gate, Lighthouse
+  budget — all as PR gates), one Cypress happy path, JSON-LD, sitemap/robots.
 - **Tier 3 — closers:** funnel-insights page from seeded events, Storybook, axe checks in
   CI, Stripe test mode.
 
@@ -166,6 +168,11 @@ picker (`packages/ui`), the GraphQL contract + mock Apollo API (`schema.graphql`
 (`apps/web`) — routed, instrumented (PostHog behind an env flag), with local resume and an
 exit-intent recovery modal — **bilingual en/de (next-intl, hreflang)**, and a **Storyblok**
 CMS for the landing + recipes (visual editing, draft preview, on-publish revalidation, typed
-bloks, offline fallback). **Deployed on Vercel** ([sorrel.akinoztorun.dev](https://sorrel.akinoztorun.dev/)).
-**In active build:** per-step input forms, the Apollo write-path (optimistic mutations), CI,
-and the mobile Lighthouse 95+ budget.
+bloks, offline fallback). The **Apollo write-path** — a co-located GraphQL endpoint, an
+RSC-safe client, the PLAN-step optimistic price preview, `saveFunnelDraft` autosave, and the
+EMAIL server action — is wired, with pricing centralised in `packages/domain` behind an
+anti-drift guard (spec 013). **CI gates** (the full verify matrix, a spec-trailer gate, and
+the Lighthouse mobile budget) and **SEO** (sitemap, robots, Product + FAQ JSON-LD) are in
+place (spec 015). **Deployed on Vercel** ([sorrel.akinoztorun.dev](https://sorrel.akinoztorun.dev/)).
+**In active build:** the remaining CATS/RECIPES input polish, a Cypress happy path,
+Storybook, and Stripe test mode.
