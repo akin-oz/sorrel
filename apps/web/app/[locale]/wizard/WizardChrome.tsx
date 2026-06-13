@@ -92,6 +92,7 @@ export function WizardChrome({ children }: { children: ReactNode }) {
           component="header"
           tone="transparent"
           border={false}
+          radius={0}
           padding={0}
           borderBottom={{ xs: false, md: true }}
           direction="row"
@@ -173,6 +174,7 @@ export function WizardChrome({ children }: { children: ReactNode }) {
           <AppCard
             tone="page"
             border={false}
+            radius={0}
             borderRight
             padding={0}
             direction="column"
@@ -186,6 +188,7 @@ export function WizardChrome({ children }: { children: ReactNode }) {
           <AppCard
             tone="paper"
             border={false}
+            radius={0}
             padding={0}
             direction="column"
             px={{ xs: 2.5, md: 7 }}
