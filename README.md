@@ -48,8 +48,8 @@ behaviour, each step its own analytics unit.
 
 Cross-cutting: typed funnel events (`funnel_step_viewed`, `step_completed`,
 `field_error`, `funnel_abandoned`, `exit_intent_shown` / `exit_intent_recovered`),
-abandonment recovery (local draft + a `saveFunnelDraft` mutation to resume mid-funnel),
-and a seed script that generates a realistic drop-off curve.
+abandonment recovery (local-draft resume today; the `saveFunnelDraft` server sync follows
+with the Apollo write-path), and a planned seed script for a realistic drop-off curve.
 
 _Today the shell routes and instruments all seven steps with the picker wired into step 4;
 the input forms themselves land step by step (each its own approved spec)._
@@ -65,8 +65,8 @@ measured**. The instrument is the typed analytics contract, not opinion.
   `funnel_step_viewed` → `step_completed` drop-off per step.
 - **Autocomplete with smart defaults vs. free text**, behind a flag → less friction at the
   step that drops the most → measured by `step_completed` split by `variant`.
-- **Local draft + `saveFunnelDraft`** → recover abandoned sessions → measured by resume
-  rate after `funnel_abandoned`.
+- **Local draft now; `saveFunnelDraft` server sync to follow** → recover abandoned sessions
+  → measured by resume rate after `funnel_abandoned`.
 - **Exit-intent recovery modal** (desktop) → intercept the abandonment gesture with a reason
   to stay → measured by recovery rate (`exit_intent_recovered ÷ exit_intent_shown`).
 

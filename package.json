@@ -15,6 +15,8 @@
     "build": "yarn workspaces run build",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,html,yml,yaml}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md,html,yml,yaml}\"",
+    "lint": "eslint packages services scripts codegen.ts eslint.config.mjs && yarn workspace @sorrel/frontend lint",
+    "lint:fix": "eslint --fix packages services scripts codegen.ts eslint.config.mjs && yarn workspace @sorrel/frontend lint --fix",
     "type-check": "yarn workspaces run type-check && tsc --noEmit -p tsconfig.json",
     "codegen": "graphql-codegen --config codegen.ts",
     "codegen:check": "node scripts/codegen-check.mjs && graphql-codegen --config codegen.ts --check",
