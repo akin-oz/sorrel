@@ -9,6 +9,7 @@ import {
   useMemo,
   useReducer,
   useRef,
+  useState,
 } from "react";
 
 import type { Track } from "@sorrel/analytics";
@@ -39,6 +40,10 @@ interface FunnelContextValue {
   variant: Variant | null;
   /** Server draft id once the autosave has persisted one (spec 013); null until then. */
   draftId: string | null;
+  /** Funnel completed — the SUMMARY confirm was pressed (spec 017). */
+  confirmed: boolean;
+  /** Mark the funnel confirmed (drives the SUMMARY success state). */
+  confirm: () => void;
 }
 
 const FunnelContext = createContext<FunnelContextValue | null>(null);
@@ -69,6 +74,10 @@ export function FunnelProvider({ children }: { children: ReactNode }) {
 
   // Server-backed autosave (spec 013): persists the draft and hands back its id.
   const draftId = useDraftAutosave(state, currentStep);
+
+  // Funnel completion (spec 017): set by the SUMMARY-step confirm.
+  const [confirmed, setConfirmed] = useState(false);
+  const confirm = useCallback(() => setConfirmed(true), []);
 
   // Resume: hydrate once from localStorage, then persist on every change.
   const hydratedRef = useRef(false);
@@ -112,8 +121,8 @@ export function FunnelProvider({ children }: { children: ReactNode }) {
   }, [currentStep, track]);
 
   const value = useMemo<FunnelContextValue>(
-    () => ({ state, dispatch, track, currentStep, variant, draftId }),
-    [state, track, currentStep, variant, draftId],
+    () => ({ state, dispatch, track, currentStep, variant, draftId, confirmed, confirm }),
+    [state, track, currentStep, variant, draftId, confirmed, confirm],
   );
 
   return <FunnelContext.Provider value={value}>{children}</FunnelContext.Provider>;

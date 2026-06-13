@@ -81,6 +81,17 @@
       "SENSITIVE": "Sensibel"
     }
   },
+  "Summary": {
+    "cats": "Katzen",
+    "recipes": "Rezepte",
+    "delivery": "Erste Lieferung",
+    "frequency": "Rhythmus",
+    "price": "Preis",
+    "priceValue": "{first} erste Box, dann {box}/Box",
+    "email": "E-Mail",
+    "successTitle": "Alles bereit!",
+    "successBody": "Deine erste Box ist unterwegs — die Details haben wir dir per E-Mail geschickt."
+  },
   "Plan": {
     "frequencyLegend": "Lieferrhythmus",
     "everyTwoWeeks": "Alle 2 Wochen",

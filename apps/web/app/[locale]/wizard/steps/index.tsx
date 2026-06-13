@@ -16,6 +16,7 @@ import { useFunnel } from "../FunnelProvider";
 import { PlanForm } from "../PlanForm";
 import { ProfileForm } from "../ProfileForm";
 import { RecipesPicker } from "../RecipesPicker";
+import { SummaryForm } from "../SummaryForm";
 
 /**
  * Presentational frame shared by every step — the "Step N of 7" overline, a serif
@@ -121,7 +122,11 @@ function EmailStep() {
 }
 
 function SummaryStep() {
-  return <StepShell step="SUMMARY" />;
+  return (
+    <StepShell step="SUMMARY">
+      <SummaryForm />
+    </StepShell>
+  );
 }
 
 /** Registry fallback — RECIPES is normally rendered data-driven by the step page. */

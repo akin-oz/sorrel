@@ -81,6 +81,17 @@
       "SENSITIVE": "Sensitive"
     }
   },
+  "Summary": {
+    "cats": "Cats",
+    "recipes": "Recipes",
+    "delivery": "First delivery",
+    "frequency": "Frequency",
+    "price": "Price",
+    "priceValue": "{first} first box, then {box}/box",
+    "email": "Email",
+    "successTitle": "You're all set!",
+    "successBody": "Your first box is on its way — we've sent the details to your inbox."
+  },
   "Plan": {
     "frequencyLegend": "Delivery frequency",
     "everyTwoWeeks": "Every 2 weeks",

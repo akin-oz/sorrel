@@ -20,7 +20,7 @@ import { useExitIntent } from "./useExitIntent";
 const INACTIVE_SEGMENT = "#E3D8C8";
 
 export function WizardChrome({ children }: { children: ReactNode }) {
-  const { currentStep, track, variant } = useFunnel();
+  const { currentStep, track, variant, confirmed, confirm } = useFunnel();
   const router = useRouter();
   const t = useTranslations("Wizard");
 
@@ -30,10 +30,15 @@ export function WizardChrome({ children }: { children: ReactNode }) {
   const handleNext = useCallback(() => {
     if (!currentStep) return;
     track({ name: "step_completed", step: currentStep, variant: variant ?? undefined });
-    if (!isLastStep(currentStep)) {
+    if (isLastStep(currentStep)) {
+      confirm(); // funnel complete — SUMMARY shows the success state (spec 017)
+    } else {
       router.push(`/wizard/${segmentForStep(nextStep(currentStep))}`);
     }
-  }, [currentStep, track, router, variant]);
+  }, [currentStep, track, router, variant, confirm]);
+
+  // On SUMMARY, the confirm button gives way to the success state once pressed.
+  const showCta = currentStep ? !(isLastStep(currentStep) && confirmed) : false;
 
   const handleBack = useCallback(() => {
     if (!currentStep || isFirstStep(currentStep)) return;
@@ -137,7 +142,7 @@ export function WizardChrome({ children }: { children: ReactNode }) {
         >
           <ResumeBanner />
           {children}
-          {currentStep ? (
+          {currentStep && showCta ? (
             <Button
               variant="contained"
               size="large"
