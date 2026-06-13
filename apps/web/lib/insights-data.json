@@ -1,0 +1,38 @@
+{
+  "sessionsPerVariant": 1000,
+  "steps": [
+    "CATS",
+    "PROFILE",
+    "RECIPES",
+    "DELIVERY",
+    "PLAN",
+    "EMAIL",
+    "SUMMARY"
+  ],
+  "variants": {
+    "A": {
+      "viewed": [
+        1000,
+        820,
+        451,
+        365,
+        325,
+        280,
+        255
+      ],
+      "completionRate": 0.255
+    },
+    "B": {
+      "viewed": [
+        1000,
+        820,
+        640,
+        518,
+        461,
+        396,
+        360
+      ],
+      "completionRate": 0.36
+    }
+  }
+}

@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "type-check": "tsc --noEmit",
-    "test": "jest"
+    "test": "jest",
+    "seed": "tsx scripts/seed-funnel.ts"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -32,6 +33,7 @@
     "babel-plugin-react-compiler": "1.0.0",
     "eslint": "^9",
     "eslint-config-next": "16.2.9",
+    "tsx": "^4.22.4",
     "typescript": "^5"
   }
 }
