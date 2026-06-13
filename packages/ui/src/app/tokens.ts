@@ -13,6 +13,12 @@ export const appTokens = {
   radius: {
     /** Bordered surfaces (cards, panels, rails), in px. */
     surface: 16,
+    /** The funnel card / dialog outer radius, in px. */
+    shell: 24,
+  },
+  shadow: {
+    /** The funnel card's lifted shadow. */
+    card: "0 24px 48px -24px rgba(46,37,32,0.3)",
   },
   layout: {
     /** Desktop page / funnel max width, in px. */

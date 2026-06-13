@@ -1,7 +1,8 @@
 "use client";
 
-import { type ReactNode } from "react";
+import { type ElementType, type ReactNode, useId } from "react";
 
+import Alert, { type AlertProps } from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Button, { type ButtonProps } from "@mui/material/Button";
 import Chip, { type ChipProps } from "@mui/material/Chip";
@@ -10,13 +11,16 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
+import IconButton, { type IconButtonProps } from "@mui/material/IconButton";
+import MenuItem from "@mui/material/MenuItem";
 import Skeleton, { type SkeletonProps } from "@mui/material/Skeleton";
 import TextField, { type TextFieldProps } from "@mui/material/TextField";
 import ToggleButton, { type ToggleButtonProps } from "@mui/material/ToggleButton";
 import ToggleButtonGroup, { type ToggleButtonGroupProps } from "@mui/material/ToggleButtonGroup";
 import Typography, { type TypographyProps } from "@mui/material/Typography";
 
-import { type Responsive } from "./layout";
+import { FONT_SERIF, sorrelTheme } from "../theme/tokens";
+import { type LayoutProps, type Responsive, layoutSx } from "./layout";
 import { appTokens } from "./tokens";
 
 /**
@@ -25,6 +29,16 @@ import { appTokens } from "./tokens";
  * intent props, never CSS. A curated set of type props (fontSize/lineHeight/…)
  * is exposed where the design genuinely varies, kept off the freeform `sx` system.
  */
+
+/** Resolve a responsive value (or scalar) by mapping each breakpoint through `fn`. */
+function mapResponsive<T, R>(value: Responsive<T>, fn: (v: T) => R): Responsive<R> {
+  if (value !== null && typeof value === "object") {
+    const out: Record<string, R> = {};
+    for (const [k, v] of Object.entries(value as Record<string, T>)) out[k] = fn(v);
+    return out as Responsive<R>;
+  }
+  return fn(value as T);
+}
 
 // ─── Type ──────────────────────────────────────────────────────────────────
 
@@ -69,6 +83,7 @@ type AppTextProps = TypeTuning & {
   fontWeight?: number;
   component?: TypographyProps["component"];
   id?: string;
+  "aria-live"?: "polite" | "off" | "assertive";
   children: ReactNode;
 };
 
@@ -101,9 +116,15 @@ export function AppButton(props: AppButtonProps) {
   return <Button {...props} />;
 }
 
+export type AppIconButtonProps = Omit<IconButtonProps, "sx">;
+/** Icon-only button (e.g. the wizard back arrow) — 44px target, inherits ink. */
+export function AppIconButton(props: AppIconButtonProps) {
+  return <IconButton sx={{ width: 44, height: 44, color: "text.primary" }} {...props} />;
+}
+
 export type AppChipProps = Omit<ChipProps, "sx">;
 export function AppChip(props: AppChipProps) {
-  return <Chip {...props} />;
+  return <Chip sx={{ fontWeight: 600 }} {...props} />;
 }
 
 export type AppSkeletonProps = Omit<SkeletonProps, "sx">;
@@ -111,26 +132,70 @@ export function AppSkeleton(props: AppSkeletonProps) {
   return <Skeleton {...props} />;
 }
 
-export type AppFieldProps = Omit<TextFieldProps, "sx">;
-/** Text or select field (pass `select` + option children); theme-styled. */
-export function AppField(props: AppFieldProps) {
-  return <TextField {...props} />;
+export type AppAlertProps = Omit<AlertProps, "sx">;
+/** Inline status banner (e.g. EMAIL "saved"). */
+export function AppAlert(props: AppAlertProps) {
+  return <Alert {...props} />;
 }
 
-export type AppToggleGroupProps = Omit<ToggleButtonGroupProps, "sx">;
-/** Equal-width segmented selector (frequency, cat count). */
-export function AppToggleGroup(props: AppToggleGroupProps) {
+export type AppFieldProps = Omit<TextFieldProps, "sx"> & {
+  /** Select options — pass with `select` instead of raw MenuItem children. */
+  options?: { value: string; label: string }[];
+};
+/** Text or select field (PROFILE/EMAIL). Pass `select` + `options` for a dropdown. */
+export function AppField({ options, children, ...props }: AppFieldProps) {
   return (
-    <ToggleButtonGroup
-      exclusive
-      color="primary"
-      sx={{
-        alignSelf: "stretch",
-        "& .MuiToggleButton-root": { flex: 1, py: appTokens.control.togglePaddingY },
-      }}
-      {...props}
-    />
+    <TextField {...props}>
+      {options
+        ? options.map((o) => (
+            <MenuItem key={o.value} value={o.value}>
+              {o.label}
+            </MenuItem>
+          ))
+        : children}
+    </TextField>
   );
+}
+
+export type AppToggleGroupProps = Omit<ToggleButtonGroupProps, "sx"> & {
+  /** `segmented` = equal-width connected bar (frequency); `cards` = a grid of
+   *  standalone selectable cards (cat count). */
+  layout?: "segmented" | "cards";
+  /** For `cards`: responsive `grid-template-columns`. */
+  columns?: Responsive<string>;
+};
+/** Single-select control — segmented bar or a card grid. */
+export function AppToggleGroup({ layout = "segmented", columns, ...props }: AppToggleGroupProps) {
+  const sx =
+    layout === "cards"
+      ? {
+          display: "grid",
+          gridTemplateColumns: columns ?? "repeat(2, 1fr)",
+          gap: { xs: "12px", md: "14px" },
+          // Reset the connected-group treatment so each option is a standalone card.
+          "& .MuiToggleButtonGroup-grouped": {
+            m: 0,
+            minWidth: 0,
+            flexDirection: "column",
+            gap: "2px",
+            height: { xs: 96, md: 104 },
+            borderRadius: `${appTokens.radius.surface}px`,
+            border: "1.5px solid",
+            borderColor: "divider",
+            bgcolor: "background.paper",
+            "&.Mui-selected": {
+              bgcolor: sorrelTheme.accentTint,
+              borderWidth: 2,
+              borderColor: "primary.main",
+              "&:hover": { bgcolor: sorrelTheme.accentTint },
+            },
+          },
+        }
+      : {
+          alignSelf: "stretch",
+          "& .MuiToggleButton-root": { flex: 1, py: appTokens.control.togglePaddingY },
+        };
+  return <ToggleButtonGroup exclusive color="primary" sx={sx} {...props} />;
 }
 
 export type AppToggleOptionProps = Omit<ToggleButtonProps, "sx">;
@@ -140,29 +205,126 @@ export function AppToggleOption(props: AppToggleOptionProps) {
 
 // ─── Surface ──────────────────────────────────────────────────────────────
 
-interface AppCardProps {
-  /** Inner padding on the theme spacing scale. */
-  padding?: number;
-  component?: React.ElementType;
+const TONE_BG = {
+  paper: "background.paper",
+  page: sorrelTheme.page,
+  surface: sorrelTheme.surface,
+  accentTint: sorrelTheme.accentTint,
+  transparent: "transparent",
+} as const;
+
+interface AppCardProps extends LayoutProps {
+  /** Background tone (default `paper`). */
+  tone?: keyof typeof TONE_BG;
+  /** Corner radius — number (theme units) or px/responsive string. Defaults to the surface token. */
+  radius?: Responsive<number | string>;
+  /** Lifted card shadow (responsive). */
+  shadow?: Responsive<boolean>;
+  /** Full 1px border on all sides (default true). Set false for shell/banner surfaces. */
+  border?: boolean;
+  /** 1px border on the right only (the rail divider). */
+  borderRight?: boolean;
+  /** 1px border on the bottom (responsive — the desktop top-bar divider). */
+  borderBottom?: Responsive<boolean>;
+  overflow?: "hidden" | "visible";
+  /** When set, the card becomes a flex container in this direction. */
+  direction?: Responsive<"row" | "column">;
+  /** Convenience padding (theme units) — default 2.5; `px`/`py`/… override per axis. */
+  padding?: Responsive<number | string>;
+  component?: ElementType;
   id?: string;
+  role?: string;
+  "aria-live"?: "polite" | "off" | "assertive";
   children: ReactNode;
 }
 
-/** Bordered, rounded surface — recipe cards, the plan/summary panels, FAQ rows. */
-export function AppCard({ padding = 2.5, component, id, children }: AppCardProps) {
+/** Bordered/tonal surface — recipe cards, the plan/summary panels, the funnel shell,
+ *  the rail and form panes. Layout props (`gap`, `px`, `minHeight`, …) apply too. */
+export function AppCard({
+  tone = "paper",
+  radius,
+  shadow,
+  border = true,
+  borderRight,
+  borderBottom,
+  overflow,
+  direction,
+  padding = 2.5,
+  component = "div",
+  id,
+  role,
+  children,
+  ...layout
+}: AppCardProps) {
+  const base: Record<string, unknown> = {
+    p: padding,
+    bgcolor: TONE_BG[tone],
+    borderRadius: radius ?? `${appTokens.radius.surface}px`,
+  };
+  if (border) {
+    base.border = "1px solid";
+    base.borderColor = "divider";
+  }
+  if (borderRight) {
+    base.borderRight = "1px solid";
+    base.borderRightColor = "divider";
+  }
+  if (borderBottom !== undefined) {
+    base.borderBottom = mapResponsive(borderBottom, (b) => (b ? "1px solid" : "none"));
+    base.borderBottomColor = "divider";
+  }
+  if (shadow !== undefined) {
+    base.boxShadow = mapResponsive(shadow, (b) => (b ? appTokens.shadow.card : "none"));
+  }
+  if (overflow) base.overflow = overflow;
+  if (direction) {
+    base.display = "flex";
+    base.flexDirection = direction;
+  }
+  const ariaLive = (layout as { "aria-live"?: AppCardProps["aria-live"] })["aria-live"];
+  return (
+    <Box component={component} id={id} role={role} aria-live={ariaLive} sx={layoutSx(layout, base)}>
+      {children}
+    </Box>
+  );
+}
+
+// ─── Progress ────────────────────────────────────────────────────────────────
+
+interface AppProgressBarProps {
+  /** Completed/active steps (1-based). */
+  value: number;
+  /** Total steps. */
+  max: number;
+  /** Accessible label (omit + set `decorative` for a purely visual duplicate). */
+  label?: string;
+  decorative?: boolean;
+  width?: Responsive<number | string>;
+}
+
+/** The wizard's segmented step bar. */
+export function AppProgressBar({ value, max, label, decorative, width }: AppProgressBarProps) {
   return (
     <Box
-      component={component ?? "div"}
-      id={id}
-      sx={{
-        p: padding,
-        borderRadius: `${appTokens.radius.surface}px`,
-        border: "1px solid",
-        borderColor: "divider",
-        bgcolor: "background.paper",
-      }}
+      role={decorative ? undefined : "progressbar"}
+      aria-hidden={decorative || undefined}
+      aria-label={decorative ? undefined : label}
+      aria-valuemin={decorative ? undefined : 1}
+      aria-valuemax={decorative ? undefined : max}
+      aria-valuenow={decorative ? undefined : value}
+      sx={{ display: "flex", gap: "5px", width: width ?? "100%" }}
     >
-      {children}
+      {Array.from({ length: max }, (_, i) => (
+        <Box
+          key={i}
+          sx={{
+            flex: 1,
+            height: 4,
+            borderRadius: "2px",
+            bgcolor: i < value ? "primary.main" : sorrelTheme.border,
+          }}
+        />
+      ))}
     </Box>
   );
 }
@@ -174,21 +336,52 @@ interface AppDialogProps {
   onClose: () => void;
   title: string;
   body?: string;
-  /** Footer actions (buttons). */
+  /** Footer actions (buttons), stacked. */
   actions?: ReactNode;
-  "aria-label"?: string;
 }
 
 export function AppDialog({ open, onClose, title, body, actions }: AppDialogProps) {
+  const titleId = useId();
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="xs">
-      <DialogTitle>{title}</DialogTitle>
+    <Dialog
+      open={open}
+      onClose={onClose}
+      aria-labelledby={titleId}
+      slotProps={{
+        paper: {
+          sx: {
+            borderRadius: `${appTokens.radius.surface}px`,
+            p: 1,
+            maxWidth: "26rem",
+            bgcolor: "background.paper",
+          },
+        },
+      }}
+    >
+      <DialogTitle
+        id={titleId}
+        sx={{ fontFamily: FONT_SERIF, fontWeight: 700, fontSize: "1.5rem" }}
+      >
+        {title}
+      </DialogTitle>
       {body ? (
         <DialogContent>
-          <DialogContentText>{body}</DialogContentText>
+          <DialogContentText sx={{ color: "text.secondary" }}>{body}</DialogContentText>
         </DialogContent>
       ) : null}
-      {actions ? <DialogActions>{actions}</DialogActions> : null}
+      {actions ? (
+        <DialogActions
+          sx={{
+            flexDirection: "column",
+            gap: 1,
+            px: 3,
+            pb: 3,
+            "& > :not(:first-of-type)": { ml: 0 },
+          }}
+        >
+          {actions}
+        </DialogActions>
+      ) : null}
     </Dialog>
   );
 }

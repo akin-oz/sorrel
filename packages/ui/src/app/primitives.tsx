@@ -42,10 +42,19 @@ function box(props: BaseProps, base: Record<string, unknown>) {
 export interface AppStackProps extends BaseProps {
   /** Flex direction (defaults to column — the funnel's common case). */
   direction?: Responsive<"row" | "column">;
+  /** Allow items to wrap onto multiple lines. */
+  wrap?: boolean;
+  /** Insert a 1px divider between children (like MUI Stack's `divider`). */
+  divider?: boolean;
 }
 /** Flex container. */
-export function AppStack({ direction = "column", ...props }: AppStackProps) {
-  return box(props, { display: "flex", flexDirection: direction });
+export function AppStack({ direction = "column", wrap, divider, ...props }: AppStackProps) {
+  const base: Record<string, unknown> = { display: "flex", flexDirection: direction };
+  if (wrap) base.flexWrap = "wrap";
+  if (divider) {
+    base["& > :not(:first-of-type)"] = { borderTop: "1px solid", borderColor: "divider" };
+  }
+  return box(props, base);
 }
 
 export type AppBoxProps = BaseProps;
