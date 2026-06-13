@@ -26,7 +26,8 @@ export async function getHomeStory(
     const { data } = await getStoryblokApi().get(
       "cdn/stories/home",
       { version: draft ? "draft" : "published", language: locale, token: readToken(draft) },
-      { next: { tags: ["cms", "story:home"] } },
+      // ISR: serve a cached, static page; on-publish webhooks revalidate by tag.
+      { next: { tags: ["cms", "story:home"], revalidate: 3600 } },
     );
     return data.story as ISbStoryData<PageBlok>;
   } catch (error) {
@@ -49,7 +50,7 @@ export async function getRecipes(locale: string, draft: boolean): Promise<Recipe
         token: readToken(draft),
         content_type: "recipe",
       },
-      { next: { tags: ["cms", "recipes"] } },
+      { next: { tags: ["cms", "recipes"], revalidate: 3600 } },
     );
     return (data.stories as ISbStoryData<RecipeBlok>[]).map((story) => story.content);
   } catch (error) {

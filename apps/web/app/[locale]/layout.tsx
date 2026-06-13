@@ -8,27 +8,35 @@ import { IBM_Plex_Mono, Public_Sans, Source_Serif_4 } from "next/font/google";
 import { notFound } from "next/navigation";
 
 import { routing } from "../../i18n/routing";
+import { SITE_URL } from "../../lib/site";
 import { StoryblokProvider } from "../_cms/StoryblokProvider";
 import "../globals.css";
 import theme from "../theme";
 
+// display:swap + preload the fonts in the first paint (serif headline is the LCP
+// element; sans is body copy) so text renders immediately (spec 015 LCP lever).
 const serif = Source_Serif_4({
   subsets: ["latin"],
   weight: ["400", "600", "700"],
   variable: "--font-serif",
+  display: "swap",
+  preload: true,
 });
 const sans = Public_Sans({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
   variable: "--font-sans",
+  display: "swap",
+  preload: true,
 });
 const mono = IBM_Plex_Mono({
   subsets: ["latin"],
   weight: ["400", "500"],
   variable: "--font-mono",
+  display: "swap",
+  // Not in the first paint — don't spend an LCP preload slot on it.
+  preload: false,
 });
-
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://sorrel.akinoztorun.dev";
 
 export async function generateMetadata({
   params,
