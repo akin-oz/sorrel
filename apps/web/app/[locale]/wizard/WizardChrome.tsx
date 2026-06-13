@@ -10,10 +10,10 @@ import { useTranslations } from "next-intl";
 
 import { FUNNEL_STEPS } from "@sorrel/shared";
 
-import { useRouter } from "../../../i18n/navigation";
+import { Link, useRouter } from "../../../i18n/navigation";
+import { LocaleSwitcher } from "../../_components/LocaleSwitcher";
 import { ExitIntentModal } from "./ExitIntentModal";
 import { useFunnel } from "./FunnelProvider";
-import { LocaleSwitcher } from "./LocaleSwitcher";
 import { isFirstStep, isLastStep, nextStep, prevStep, segmentForStep } from "./state";
 import { useExitIntent } from "./useExitIntent";
 
@@ -99,7 +99,17 @@ export function WizardChrome({ children }: { children: ReactNode }) {
                 </IconButton>
               ) : null}
             </Box>
-            <Typography variant="h3" component="span" sx={{ fontSize: "1.25rem", fontWeight: 700 }}>
+            <Typography
+              component={Link}
+              href="/"
+              variant="h3"
+              sx={{
+                fontSize: "1.25rem",
+                fontWeight: 700,
+                color: "text.primary",
+                textDecoration: "none",
+              }}
+            >
               Sorrel
             </Typography>
             <LocaleSwitcher />

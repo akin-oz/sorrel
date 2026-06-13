@@ -4,8 +4,8 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import { useLocale, useTranslations } from "next-intl";
 
-import { usePathname, useRouter } from "../../../i18n/navigation";
-import { routing } from "../../../i18n/routing";
+import { usePathname, useRouter } from "../../i18n/navigation";
+import { routing } from "../../i18n/routing";
 
 /** EN/DE toggle that swaps the locale while keeping the current path. */
 export function LocaleSwitcher() {

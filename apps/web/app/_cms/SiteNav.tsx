@@ -9,6 +9,7 @@ import { BrandLogo, FONT_SERIF } from "@sorrel/ui";
 
 import { Link } from "../../i18n/navigation";
 import type { SiteNavBlok } from "../../types/storyblok.gen";
+import { LocaleSwitcher } from "../_components/LocaleSwitcher";
 import { Band } from "./Band";
 
 export function SiteNav({ blok }: { blok: SiteNavBlok }) {
@@ -26,11 +27,14 @@ export function SiteNav({ blok }: { blok: SiteNavBlok }) {
       }}
     >
       <Box
+        component={Link}
+        href="/"
         sx={{
           display: "flex",
           alignItems: "center",
           gap: { xs: 1, md: 1.25 },
           color: "primary.main",
+          textDecoration: "none",
           "& svg": { width: { xs: 22, md: 26 }, height: { xs: 22, md: 26 } },
         }}
       >
@@ -46,9 +50,12 @@ export function SiteNav({ blok }: { blok: SiteNavBlok }) {
           Sorrel
         </Typography>
       </Box>
-      <Button component={Link} href={blok.ctaHref || "/wizard/cats"} variant="contained">
-        {blok.ctaLabel}
-      </Button>
+      <Box sx={{ display: "flex", alignItems: "center", gap: { xs: 1, md: 1.5 } }}>
+        <LocaleSwitcher />
+        <Button component={Link} href={blok.ctaHref || "/wizard/cats"} variant="contained">
+          {blok.ctaLabel}
+        </Button>
+      </Box>
     </Band>
   );
 }
