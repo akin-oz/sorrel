@@ -17,6 +17,7 @@ import ToggleButtonGroup, { type ToggleButtonGroupProps } from "@mui/material/To
 import Typography, { type TypographyProps } from "@mui/material/Typography";
 
 import { type Responsive } from "./layout";
+import { appTokens } from "./tokens";
 
 /**
  * Semantic App* components (spec 018). Styling is baked in here (these may use
@@ -123,7 +124,10 @@ export function AppToggleGroup(props: AppToggleGroupProps) {
     <ToggleButtonGroup
       exclusive
       color="primary"
-      sx={{ alignSelf: "stretch", "& .MuiToggleButton-root": { flex: 1, py: 1.25 } }}
+      sx={{
+        alignSelf: "stretch",
+        "& .MuiToggleButton-root": { flex: 1, py: appTokens.control.togglePaddingY },
+      }}
       {...props}
     />
   );
@@ -152,7 +156,7 @@ export function AppCard({ padding = 2.5, component, id, children }: AppCardProps
       id={id}
       sx={{
         p: padding,
-        borderRadius: "16px",
+        borderRadius: `${appTokens.radius.surface}px`,
         border: "1px solid",
         borderColor: "divider",
         bgcolor: "background.paper",

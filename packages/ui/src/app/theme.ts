@@ -1,6 +1,7 @@
 import { createTheme } from "@mui/material/styles";
 
 import { FONT_MONO, FONT_SANS, FONT_SERIF, sorrelTheme } from "../theme/tokens";
+import { appTokens } from "./tokens";
 
 /**
  * The Sorrel MUI theme, derived from the design tokens (spec 010, relocated into
@@ -14,7 +15,7 @@ export const appTheme = createTheme({
     background: { default: sorrelTheme.page, paper: sorrelTheme.paper },
     text: { primary: sorrelTheme.ink, secondary: sorrelTheme.inkMuted },
     divider: sorrelTheme.border,
-    error: { main: "#9E2F23" },
+    error: { main: appTokens.color.danger },
     success: { main: sorrelTheme.pillText },
   },
   shape: { borderRadius: sorrelTheme.radiusControl },
@@ -33,9 +34,9 @@ export const appTheme = createTheme({
           borderRadius: sorrelTheme.radiusCta,
           textTransform: "none",
           fontWeight: 600,
-          minHeight: 44,
+          minHeight: appTokens.control.minHeight,
         },
-        sizeLarge: { minHeight: 52, fontSize: "1rem" },
+        sizeLarge: { minHeight: appTokens.control.minHeightLarge, fontSize: "1rem" },
       },
     },
   },

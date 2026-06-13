@@ -5,6 +5,7 @@ import { type ElementType, type ReactNode } from "react";
 import Box from "@mui/material/Box";
 
 import { type LayoutProps, type Responsive, layoutSx } from "./layout";
+import { appTokens } from "./tokens";
 
 /**
  * Layout primitives (spec 018). They expose a curated, tokenized layout prop set
@@ -58,7 +59,10 @@ export interface AppContainerProps extends BaseProps {
   width?: Responsive<number | string>;
 }
 /** Centered max-width column (page bands, wizard shell). */
-export function AppContainer({ width = 1120, ...props }: AppContainerProps) {
+export function AppContainer({
+  width = appTokens.layout.pageMaxWidth,
+  ...props
+}: AppContainerProps) {
   return box({ ...props, maxWidth: width }, { mx: "auto", width: "100%" });
 }
 

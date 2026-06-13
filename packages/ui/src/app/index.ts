@@ -2,6 +2,7 @@
  *  components so apps/web composes UI without inline `sx` or raw `@mui` imports. */
 export { AppThemeProvider } from "./AppThemeProvider";
 export { appTheme } from "./theme";
+export { appTokens } from "./tokens";
 
 export { AppStack, AppBox, AppContainer, AppGrid } from "./primitives";
 export type { AppStackProps, AppBoxProps, AppContainerProps, AppGridProps } from "./primitives";
