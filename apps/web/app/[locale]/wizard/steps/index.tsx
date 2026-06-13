@@ -2,12 +2,17 @@
 
 import { type ComponentType, type ReactNode } from "react";
 
-import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
 import { useLocale, useTranslations } from "next-intl";
 
 import { FUNNEL_STEPS, type FunnelStep } from "@sorrel/shared";
-import { DeliveryDatePicker, type DeliveryLabels, sorrelTheme } from "@sorrel/ui";
+import {
+  AppHeading,
+  AppStack,
+  AppText,
+  DeliveryDatePicker,
+  type DeliveryLabels,
+  sorrelTheme,
+} from "@sorrel/ui";
 
 import type { RecipeBlok } from "../../../../types/storyblok.gen";
 import { CatsForm } from "../CatsForm";
@@ -30,24 +35,22 @@ function StepShell({ step, children }: { step: FunnelStep; children?: ReactNode 
   const hasDescription = tSteps.has(`${step}.description`);
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}>
+    <AppStack gap={2.5}>
       {/* On desktop the heading lives in the left rail (WizardRail); here it shows
           on mobile only, where there is no rail. */}
-      <Box sx={{ display: { xs: "flex", md: "none" }, flexDirection: "column", gap: 1 }}>
-        <Typography variant="overline" sx={{ color: sorrelTheme.mono, lineHeight: 1.4 }}>
+      <AppStack display={{ xs: "flex", md: "none" }} gap={1}>
+        <AppText variant="overline" color={sorrelTheme.mono} lineHeight={1.4}>
           {tWizard("stepProgress", { current: stepNumber, total: FUNNEL_STEPS.length })}
-        </Typography>
-        <Typography variant="h3" sx={{ fontSize: "1.625rem", lineHeight: 1.2 }}>
+        </AppText>
+        <AppHeading level={3} fontSize="1.625rem" lineHeight={1.2}>
           {tSteps(`${step}.title`)}
-        </Typography>
+        </AppHeading>
         {hasDescription ? (
-          <Typography variant="body1" color="text.secondary">
-            {tSteps(`${step}.description`)}
-          </Typography>
+          <AppText color="text.secondary">{tSteps(`${step}.description`)}</AppText>
         ) : null}
-      </Box>
+      </AppStack>
       {children}
-    </Box>
+    </AppStack>
   );
 }
 
@@ -94,7 +97,7 @@ function DeliveryStep() {
   };
   return (
     <StepShell step="DELIVERY">
-      <Box sx={{ display: "flex", justifyContent: "center" }}>
+      <AppStack direction="row" justifyContent="center">
         <DeliveryDatePicker
           theme={sorrelTheme}
           locale={locale}
@@ -102,7 +105,7 @@ function DeliveryStep() {
           value={state.deliveryDate ?? undefined}
           onConfirm={(iso) => dispatch({ type: "SET_DELIVERY_DATE", date: iso })}
         />
-      </Box>
+      </AppStack>
     </StepShell>
   );
 }

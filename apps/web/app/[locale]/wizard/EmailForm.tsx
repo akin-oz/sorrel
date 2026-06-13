@@ -2,11 +2,9 @@
 
 import { useActionState, useEffect } from "react";
 
-import Alert from "@mui/material/Alert";
-import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
-import TextField from "@mui/material/TextField";
 import { useTranslations } from "next-intl";
+
+import { AppAlert, AppButton, AppField, AppStack } from "@sorrel/ui";
 
 import { useFunnel } from "./FunnelProvider";
 import { submitEmail } from "./email-action";
@@ -38,30 +36,27 @@ export function EmailForm() {
   }, [result, track, dispatch]);
 
   return (
-    <Box
-      component="form"
-      action={formAction}
-      noValidate
-      sx={{ display: "flex", flexDirection: "column", gap: 2 }}
-    >
-      <TextField
-        name="email"
-        type="email"
-        label={t("label")}
-        placeholder={t("placeholder")}
-        defaultValue={result.email}
-        error={result.status === "error"}
-        helperText={result.error ? t(`error.${result.error}`) : t("hint")}
-        fullWidth
-      />
-      <Button type="submit" variant="contained" size="large" disabled={pending}>
-        {t("submit")}
-      </Button>
-      {result.status === "ok" ? (
-        <Alert severity="success" aria-live="polite">
-          {t("saved")}
-        </Alert>
-      ) : null}
-    </Box>
+    <form action={formAction} noValidate>
+      <AppStack gap={2}>
+        <AppField
+          name="email"
+          type="email"
+          label={t("label")}
+          placeholder={t("placeholder")}
+          defaultValue={result.email}
+          error={result.status === "error"}
+          helperText={result.error ? t(`error.${result.error}`) : t("hint")}
+          fullWidth
+        />
+        <AppButton type="submit" variant="contained" size="large" disabled={pending}>
+          {t("submit")}
+        </AppButton>
+        {result.status === "ok" ? (
+          <AppAlert severity="success" aria-live="polite">
+            {t("saved")}
+          </AppAlert>
+        ) : null}
+      </AppStack>
+    </form>
   );
 }

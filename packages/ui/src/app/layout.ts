@@ -10,15 +10,18 @@ export type Responsive<T> = T | Partial<Record<"xs" | "sm" | "md" | "lg" | "xl",
  * apps/web call sites, not here).
  */
 export interface LayoutProps {
+  /** Responsive display — the tokenized way to show/hide across breakpoints
+   *  (e.g. `{ xs: "none", md: "flex" }`) without reaching for `sx`. */
+  display?: Responsive<"none" | "block" | "flex" | "grid" | "inline-flex">;
   p?: Responsive<number>;
   px?: Responsive<number>;
   py?: Responsive<number>;
   pt?: Responsive<number>;
   pb?: Responsive<number>;
-  m?: Responsive<number>;
-  mt?: Responsive<number>;
-  mb?: Responsive<number>;
-  mx?: Responsive<number>;
+  m?: Responsive<number | "auto">;
+  mt?: Responsive<number | "auto">;
+  mb?: Responsive<number | "auto">;
+  mx?: Responsive<number | "auto">;
   gap?: Responsive<number>;
   width?: Responsive<number | string>;
   maxWidth?: Responsive<number | string>;
@@ -31,6 +34,7 @@ export interface LayoutProps {
 }
 
 const LAYOUT_KEYS: readonly (keyof LayoutProps)[] = [
+  "display",
   "p",
   "px",
   "py",

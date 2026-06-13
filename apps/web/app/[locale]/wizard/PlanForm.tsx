@@ -3,14 +3,18 @@
 import { useEffect, useOptimistic, useTransition } from "react";
 
 import { useMutation, useQuery } from "@apollo/client/react";
-import Box from "@mui/material/Box";
-import Chip from "@mui/material/Chip";
-import Skeleton from "@mui/material/Skeleton";
-import Stack from "@mui/material/Stack";
-import ToggleButton from "@mui/material/ToggleButton";
-import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
-import Typography from "@mui/material/Typography";
 import { useTranslations } from "next-intl";
+
+import {
+  AppCard,
+  AppChip,
+  AppSkeleton,
+  AppStack,
+  AppText,
+  AppToggleGroup,
+  AppToggleOption,
+  sorrelTheme,
+} from "@sorrel/ui";
 
 import type { BoxFrequency } from "../../../lib/gql/graphql";
 import { FunnelDraftByIdDocument, UpdateFunnelPlanDocument } from "../../../lib/graphql/funnel";
@@ -65,59 +69,44 @@ export function PlanForm() {
   }
 
   return (
-    <Stack spacing={3}>
-      <ToggleButtonGroup
-        exclusive
-        color="primary"
+    <AppStack gap={3}>
+      <AppToggleGroup
         value={optimisticFrequency}
         onChange={choose}
         aria-label={t("frequencyLegend")}
-        sx={{ alignSelf: "stretch", "& .MuiToggleButton-root": { flex: 1, py: 1.25 } }}
       >
         {FREQUENCIES.map((frequency) => (
-          <ToggleButton key={frequency} value={frequency}>
+          <AppToggleOption key={frequency} value={frequency}>
             {t(frequency === "EVERY_2_WEEKS" ? "everyTwoWeeks" : "everyFourWeeks")}
-          </ToggleButton>
+          </AppToggleOption>
         ))}
-      </ToggleButtonGroup>
+      </AppToggleGroup>
 
-      <Box
-        sx={{
-          border: "1px solid",
-          borderColor: "divider",
-          borderRadius: 2,
-          p: 2.5,
-          display: "flex",
-          flexDirection: "column",
-          gap: 1.5,
-        }}
-      >
-        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <Typography variant="overline" sx={{ color: "#A8967F" }}>
+      <AppCard direction="column" gap={1.5}>
+        <AppStack direction="row" alignItems="center" justifyContent="space-between">
+          <AppText variant="overline" color={sorrelTheme.mono}>
             {t("summary")}
-          </Typography>
-          {updating ? (
-            <Chip label={t("updating")} size="small" aria-live="polite" sx={{ fontWeight: 600 }} />
-          ) : null}
-        </Box>
+          </AppText>
+          {updating ? <AppChip label={t("updating")} size="small" aria-live="polite" /> : null}
+        </AppStack>
 
         {plan ? (
           <>
             <PriceRow label={t("perBox")} value={plan.pricing.perBox.formatted} />
             <PriceRow label={t("firstBox")} value={plan.pricing.firstBox.formatted} highlight />
-            <Typography variant="body2" color="text.secondary">
+            <AppText variant="body2" color="text.secondary">
               {t("portionPerDay", { grams: plan.portionGramsPerDay })} ·{" "}
               {t("mealsPerBox", { meals: plan.mealsPerBox })}
-            </Typography>
+            </AppText>
           </>
         ) : (
-          <Stack spacing={1}>
-            <Skeleton variant="text" height={28} />
-            <Skeleton variant="text" height={28} width="70%" />
-          </Stack>
+          <AppStack gap={1}>
+            <AppSkeleton variant="text" height={28} />
+            <AppSkeleton variant="text" height={28} width="70%" />
+          </AppStack>
         )}
-      </Box>
-    </Stack>
+      </AppCard>
+    </AppStack>
   );
 }
 
@@ -131,16 +120,18 @@ function PriceRow({
   highlight?: boolean;
 }) {
   return (
-    <Box sx={{ display: "flex", alignItems: "baseline", justifyContent: "space-between" }}>
-      <Typography variant="body1" sx={{ fontWeight: highlight ? 600 : 400 }}>
+    <AppStack direction="row" alignItems="baseline" justifyContent="space-between">
+      <AppText variant="body1" fontWeight={highlight ? 600 : 400}>
         {label}
-      </Typography>
-      <Typography
-        variant="h6"
-        sx={{ fontWeight: 700, color: highlight ? "primary.main" : "text.primary" }}
+      </AppText>
+      <AppText
+        variant="body1"
+        fontSize="1.25rem"
+        fontWeight={700}
+        color={highlight ? "primary.main" : "text.primary"}
       >
         {value}
-      </Typography>
-    </Box>
+      </AppText>
+    </AppStack>
   );
 }

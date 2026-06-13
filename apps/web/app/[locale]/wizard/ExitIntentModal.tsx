@@ -1,12 +1,8 @@
 "use client";
 
-import Button from "@mui/material/Button";
-import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
-import DialogContentText from "@mui/material/DialogContentText";
-import DialogTitle from "@mui/material/DialogTitle";
 import { useTranslations } from "next-intl";
+
+import { AppButton, AppDialog } from "@sorrel/ui";
 
 interface ExitIntentModalProps {
   open: boolean;
@@ -17,47 +13,29 @@ interface ExitIntentModalProps {
 }
 
 /**
- * Exit-intent recovery modal (spec 010) as a MUI `Dialog`: focus trap,
- * Escape/backdrop close, and transitions come from the component. The global
- * prefers-reduced-motion rule (globals.css) collapses the transition. Copy is
- * brand-safe and invents nothing — keyed to the local-resume already built.
+ * Exit-intent recovery modal (spec 010) via AppDialog: focus trap, Escape/backdrop
+ * close, and transitions come from the dialog. The global prefers-reduced-motion
+ * rule (globals.css) collapses the transition. Copy is brand-safe and invents
+ * nothing — keyed to the local-resume already built.
  */
 export function ExitIntentModal({ open, onRecover, onLeave }: ExitIntentModalProps) {
   const t = useTranslations("ExitIntent");
   return (
-    <Dialog
+    <AppDialog
       open={open}
       onClose={onLeave}
-      aria-labelledby="exit-intent-title"
-      slotProps={{
-        paper: {
-          sx: { borderRadius: "16px", p: 1, maxWidth: "26rem", bgcolor: "background.paper" },
-        },
-      }}
-    >
-      <DialogTitle
-        id="exit-intent-title"
-        sx={{ fontFamily: "var(--font-serif)", fontWeight: 700, fontSize: "1.5rem" }}
-      >
-        {t("title")}
-      </DialogTitle>
-      <DialogContent>
-        <DialogContentText sx={{ color: "text.secondary" }}>{t("body")}</DialogContentText>
-      </DialogContent>
-      <DialogActions sx={{ flexDirection: "column", gap: 1, px: 3, pb: 3 }}>
-        <Button onClick={onRecover} variant="contained" size="large" fullWidth>
-          {t("keepGoing")}
-        </Button>
-        <Button
-          onClick={onLeave}
-          variant="outlined"
-          size="large"
-          fullWidth
-          sx={{ ml: "0 !important" }}
-        >
-          {t("leave")}
-        </Button>
-      </DialogActions>
-    </Dialog>
+      title={t("title")}
+      body={t("body")}
+      actions={
+        <>
+          <AppButton onClick={onRecover} variant="contained" size="large" fullWidth>
+            {t("keepGoing")}
+          </AppButton>
+          <AppButton onClick={onLeave} variant="outlined" size="large" fullWidth>
+            {t("leave")}
+          </AppButton>
+        </>
+      }
+    />
   );
 }

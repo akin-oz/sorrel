@@ -1,9 +1,9 @@
 "use client";
 
 import { useQuery } from "@apollo/client/react";
-import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
 import { useLocale, useTranslations } from "next-intl";
+
+import { AppCard, AppHeading, AppStack, AppText } from "@sorrel/ui";
 
 import { FunnelDraftByIdDocument } from "../../../lib/graphql/funnel";
 import { useFunnel } from "./FunnelProvider";
@@ -33,29 +33,17 @@ export function SummaryForm() {
 
   if (confirmed) {
     return (
-      <Box
-        role="status"
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          textAlign: "center",
-          gap: 1.5,
-          py: 4,
-        }}
-      >
-        <Box sx={{ color: "primary.main" }}>
+      <AppStack role="status" alignItems="center" textAlign="center" gap={1.5} py={4}>
+        <AppText component="span" color="primary.main">
           <svg width="56" height="56" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
             <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
           </svg>
-        </Box>
-        <Typography variant="h3" sx={{ fontSize: "1.5rem" }}>
+        </AppText>
+        <AppHeading level={3} fontSize="1.5rem">
           {t("successTitle")}
-        </Typography>
-        <Typography variant="body1" color="text.secondary">
-          {t("successBody")}
-        </Typography>
-      </Box>
+        </AppHeading>
+        <AppText color="text.secondary">{t("successBody")}</AppText>
+      </AppStack>
     );
   }
 
@@ -69,42 +57,25 @@ export function SummaryForm() {
   const rows = orderSummaryRows(state, plan, labels);
 
   return (
-    <Box
-      component="dl"
-      sx={{
-        m: 0,
-        border: "1px solid",
-        borderColor: "divider",
-        borderRadius: 2,
-        overflow: "hidden",
-      }}
-    >
-      {rows.map((row, i) => (
-        <Box
+    <AppCard component="dl" padding={0} overflow="hidden" divider>
+      {rows.map((row) => (
+        <AppStack
           key={row.label}
-          sx={{
-            display: "flex",
-            alignItems: "baseline",
-            justifyContent: "space-between",
-            gap: 2,
-            px: 2,
-            py: 1.5,
-            borderTop: i === 0 ? "none" : "1px solid",
-            borderTopColor: "divider",
-          }}
+          direction="row"
+          alignItems="baseline"
+          justifyContent="space-between"
+          gap={2}
+          px={2}
+          py={1.5}
         >
-          <Typography component="dt" variant="body2" color="text.secondary">
+          <AppText component="dt" variant="body2" color="text.secondary">
             {row.label}
-          </Typography>
-          <Typography
-            component="dd"
-            variant="body2"
-            sx={{ m: 0, fontWeight: 600, textAlign: "right" }}
-          >
+          </AppText>
+          <AppText component="dd" variant="body2" fontWeight={600} align="right">
             {row.value}
-          </Typography>
-        </Box>
+          </AppText>
+        </AppStack>
       ))}
-    </Box>
+    </AppCard>
   );
 }

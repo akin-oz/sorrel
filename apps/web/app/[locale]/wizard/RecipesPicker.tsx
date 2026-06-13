@@ -2,11 +2,9 @@
 
 import { useState } from "react";
 
-import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
-import Chip from "@mui/material/Chip";
-import Typography from "@mui/material/Typography";
 import { useTranslations } from "next-intl";
+
+import { AppButton, AppChip, AppStack, AppText } from "@sorrel/ui";
 
 import { DIETARY_TAGS } from "../../../lib/dietary";
 import type { RecipeBlok } from "../../../types/storyblok.gen";
@@ -21,16 +19,16 @@ export function RecipesPicker({ recipes }: { recipes: RecipeBlok[] }) {
   const shown = filter ? recipes.filter((r) => r.dietaryTags.includes(filter)) : recipes;
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-      <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, justifyContent: "center" }}>
-        <Chip
+    <AppStack gap={2}>
+      <AppStack direction="row" wrap justifyContent="center" gap={1}>
+        <AppChip
           label={t("all")}
           onClick={() => setFilter(null)}
           color={filter === null ? "primary" : "default"}
           variant={filter === null ? "filled" : "outlined"}
         />
         {DIETARY_TAGS.map((tag) => (
-          <Chip
+          <AppChip
             key={tag}
             label={t(`tags.${tag}`)}
             onClick={() => setFilter(tag)}
@@ -38,27 +36,27 @@ export function RecipesPicker({ recipes }: { recipes: RecipeBlok[] }) {
             variant={filter === tag ? "filled" : "outlined"}
           />
         ))}
-      </Box>
+      </AppStack>
 
       {shown.map((recipe) => {
         const selected = state.recipeSlugs.includes(recipe.slug);
         return (
-          <Box key={recipe.slug} sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+          <AppStack key={recipe.slug} gap={1}>
             <RecipeCard blok={recipe} />
-            <Button
+            <AppButton
               onClick={() => dispatch({ type: "TOGGLE_RECIPE", slug: recipe.slug })}
               variant={selected ? "contained" : "outlined"}
               aria-pressed={selected}
             >
               {selected ? t("added") : t("add")}
-            </Button>
-          </Box>
+            </AppButton>
+          </AppStack>
         );
       })}
 
-      <Typography variant="body2" color="text.secondary" sx={{ textAlign: "center" }}>
+      <AppText variant="body2" color="text.secondary" align="center">
         {t("selected", { count: state.recipeSlugs.length })}
-      </Typography>
-    </Box>
+      </AppText>
+    </AppStack>
   );
 }

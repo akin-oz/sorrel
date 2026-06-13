@@ -2,11 +2,9 @@
 
 import { useEffect, useState } from "react";
 
-import Box from "@mui/material/Box";
-import MenuItem from "@mui/material/MenuItem";
-import Skeleton from "@mui/material/Skeleton";
-import TextField from "@mui/material/TextField";
 import { useTranslations } from "next-intl";
+
+import { AppField, AppSkeleton, AppStack } from "@sorrel/ui";
 
 import { useFunnel } from "./FunnelProvider";
 import { stepValidity } from "./validation";
@@ -48,11 +46,11 @@ export function ProfileForm() {
 
   if (!variant) {
     return (
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+      <AppStack gap={2}>
         {[0, 1, 2].map((i) => (
-          <Skeleton key={i} variant="rounded" height={56} />
+          <AppSkeleton key={i} variant="rounded" height={56} />
         ))}
-      </Box>
+      </AppStack>
     );
   }
 
@@ -65,8 +63,8 @@ export function ProfileForm() {
   const helperText = (field: ProfileField) => (showError(field) ? t("required") : undefined);
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-      <TextField
+    <AppStack gap={2}>
+      <AppField
         label={t("name")}
         placeholder={t("namePlaceholder")}
         value={cat?.name ?? ""}
@@ -79,7 +77,7 @@ export function ProfileForm() {
 
       {variant === "A" ? (
         <>
-          <TextField
+          <AppField
             label={t("age")}
             placeholder={t("agePlaceholder")}
             value={cat?.age ?? ""}
@@ -89,7 +87,7 @@ export function ProfileForm() {
             helperText={helperText("age")}
             fullWidth
           />
-          <TextField
+          <AppField
             label={t("weight")}
             placeholder={t("weightPlaceholder")}
             value={cat?.weight ?? ""}
@@ -102,34 +100,27 @@ export function ProfileForm() {
         </>
       ) : (
         <>
-          <TextField
+          <AppField
             select
             label={t("age")}
             value={cat?.age ?? DEFAULT_AGE}
             onChange={(e) => dispatch({ type: "SET_CAT", cat: { age: e.target.value } })}
+            options={AGE_OPTIONS.map((key) => ({ value: key, label: t(`ageOptions.${key}`) }))}
             fullWidth
-          >
-            {AGE_OPTIONS.map((key) => (
-              <MenuItem key={key} value={key}>
-                {t(`ageOptions.${key}`)}
-              </MenuItem>
-            ))}
-          </TextField>
-          <TextField
+          />
+          <AppField
             select
             label={t("weight")}
             value={cat?.weight ?? DEFAULT_WEIGHT}
             onChange={(e) => dispatch({ type: "SET_CAT", cat: { weight: e.target.value } })}
+            options={WEIGHT_OPTIONS.map((key) => ({
+              value: key,
+              label: t(`weightOptions.${key}`),
+            }))}
             fullWidth
-          >
-            {WEIGHT_OPTIONS.map((key) => (
-              <MenuItem key={key} value={key}>
-                {t(`weightOptions.${key}`)}
-              </MenuItem>
-            ))}
-          </TextField>
+          />
         </>
       )}
-    </Box>
+    </AppStack>
   );
 }

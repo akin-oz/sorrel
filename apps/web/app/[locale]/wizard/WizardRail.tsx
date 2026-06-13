@@ -1,11 +1,9 @@
 "use client";
 
 import { useQuery } from "@apollo/client/react";
-import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
 import { useLocale, useTranslations } from "next-intl";
 
-import { sorrelTheme } from "@sorrel/ui";
+import { AppBox, AppHeading, AppStack, AppText, sorrelTheme } from "@sorrel/ui";
 
 import { FunnelDraftByIdDocument } from "../../../lib/graphql/funnel";
 import { useFunnel } from "./FunnelProvider";
@@ -52,33 +50,27 @@ export function WizardRail() {
     const rows = orderSummaryRows(state, plan, labels);
     return (
       <RailColumn>
-        <Typography variant="overline" sx={{ color: sorrelTheme.mono, letterSpacing: "0.14em" }}>
+        <AppText variant="overline" color={sorrelTheme.mono} lineHeight={1.4}>
           {tRail("summaryHeading")}
-        </Typography>
-        <Box component="dl" sx={{ m: 0, display: "flex", flexDirection: "column", gap: 1.25 }}>
+        </AppText>
+        <AppStack component="dl" m={0} gap={1.25}>
           {rows.map((row) => (
-            <Box
+            <AppStack
               key={row.label}
-              sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                gap: 2,
-                alignItems: "baseline",
-              }}
+              direction="row"
+              justifyContent="space-between"
+              alignItems="baseline"
+              gap={2}
             >
-              <Typography component="dt" variant="body2" color="text.secondary">
+              <AppText component="dt" variant="body2" color="text.secondary">
                 {row.label}
-              </Typography>
-              <Typography
-                component="dd"
-                variant="body2"
-                sx={{ m: 0, fontWeight: 600, textAlign: "right" }}
-              >
+              </AppText>
+              <AppText component="dd" variant="body2" fontWeight={600} align="right">
                 {row.value}
-              </Typography>
-            </Box>
+              </AppText>
+            </AppStack>
           ))}
-        </Box>
+        </AppStack>
         <Reassurance text={tRail("reassurance")} />
       </RailColumn>
     );
@@ -87,13 +79,13 @@ export function WizardRail() {
   const hasDescription = tSteps.has(`${currentStep}.description`);
   return (
     <RailColumn>
-      <Typography variant="h3" component="h2" sx={{ fontSize: "2.125rem", lineHeight: 1.15, m: 0 }}>
+      <AppHeading level={3} component="h2" fontSize="2.125rem" lineHeight={1.15}>
         {tSteps(`${currentStep}.title`)}
-      </Typography>
+      </AppHeading>
       {hasDescription ? (
-        <Typography variant="body1" color="text.secondary" sx={{ fontSize: "1rem" }}>
+        <AppText color="text.secondary" fontSize="1rem">
           {tSteps(`${currentStep}.description`)}
-        </Typography>
+        </AppText>
       ) : null}
       <ResumeBanner />
       <Reassurance text={tRail("reassurance")} />
@@ -104,17 +96,19 @@ export function WizardRail() {
 /** A flush, full-height column; the chrome's rail cell paints its surface. */
 function RailColumn({ children }: { children: React.ReactNode }) {
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: 3, flex: 1, minHeight: "100%" }}>
+    <AppStack gap={3} flex={1} minHeight="100%">
       {children}
-    </Box>
+    </AppStack>
   );
 }
 
 /** Trust line pinned to the bottom of the rail. */
 function Reassurance({ text }: { text: string }) {
   return (
-    <Typography variant="body2" sx={{ mt: "auto", pt: 1, color: sorrelTheme.mono }}>
-      {text}
-    </Typography>
+    <AppBox mt="auto" pt={1}>
+      <AppText variant="body2" color={sorrelTheme.mono}>
+        {text}
+      </AppText>
+    </AppBox>
   );
 }

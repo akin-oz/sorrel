@@ -50,11 +50,15 @@ interface TypeTuning {
   color?: string;
   align?: TypographyProps["align"];
   maxWidth?: number | string;
+  /** Underline control — `none` for wordmark/nav links. */
+  textDecoration?: "none" | "underline";
 }
 
 type AppHeadingProps = TypeTuning & {
   level: 1 | 2 | 3;
+  fontWeight?: number;
   component?: TypographyProps["component"];
+  href?: string;
   children: ReactNode;
 };
 
@@ -62,17 +66,19 @@ type AppHeadingProps = TypeTuning & {
 export function AppHeading({
   level,
   fontSize,
+  fontWeight,
   lineHeight,
   color,
   align,
   maxWidth,
+  textDecoration,
   ...rest
 }: AppHeadingProps) {
   return (
     <Typography
       variant={`h${level}`}
       align={align}
-      sx={{ fontSize, lineHeight, color, maxWidth }}
+      sx={{ fontSize, fontWeight, lineHeight, color, maxWidth, textDecoration }}
       {...rest}
     />
   );
@@ -82,6 +88,7 @@ type AppTextProps = TypeTuning & {
   variant?: "body1" | "body2" | "overline" | "caption";
   fontWeight?: number;
   component?: TypographyProps["component"];
+  href?: string;
   id?: string;
   "aria-live"?: "polite" | "off" | "assertive";
   children: ReactNode;
@@ -96,13 +103,14 @@ export function AppText({
   color,
   align,
   maxWidth,
+  textDecoration,
   ...rest
 }: AppTextProps) {
   return (
     <Typography
       variant={variant}
       align={align}
-      sx={{ fontSize, fontWeight, lineHeight, color, maxWidth }}
+      sx={{ fontSize, fontWeight, lineHeight, color, maxWidth, textDecoration }}
       {...rest}
     />
   );
@@ -178,6 +186,7 @@ export function AppToggleGroup({ layout = "segmented", columns, ...props }: AppT
             minWidth: 0,
             flexDirection: "column",
             gap: "2px",
+            textTransform: "none",
             height: { xs: 96, md: 104 },
             borderRadius: `${appTokens.radius.surface}px`,
             border: "1.5px solid",
@@ -229,6 +238,8 @@ interface AppCardProps extends LayoutProps {
   overflow?: "hidden" | "visible";
   /** When set, the card becomes a flex container in this direction. */
   direction?: Responsive<"row" | "column">;
+  /** Insert a 1px divider between direct children (list rows). */
+  divider?: boolean;
   /** Convenience padding (theme units) — default 2.5; `px`/`py`/… override per axis. */
   padding?: Responsive<number | string>;
   component?: ElementType;
@@ -249,6 +260,7 @@ export function AppCard({
   borderBottom,
   overflow,
   direction,
+  divider,
   padding = 2.5,
   component = "div",
   id,
@@ -280,6 +292,9 @@ export function AppCard({
   if (direction) {
     base.display = "flex";
     base.flexDirection = direction;
+  }
+  if (divider) {
+    base["& > :not(:first-of-type)"] = { borderTop: "1px solid", borderColor: "divider" };
   }
   const ariaLive = (layout as { "aria-live"?: AppCardProps["aria-live"] })["aria-live"];
   return (
