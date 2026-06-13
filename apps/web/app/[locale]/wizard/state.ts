@@ -7,9 +7,12 @@
  */
 import { FUNNEL_STEPS, type FunnelStep } from "@sorrel/shared";
 
-/** A cat being configured. Fields grow when the CATS step form lands (its own spec). */
+/** A cat being configured. Age/weight are stored as strings (free text in arm A,
+ *  a chosen option in arm B); the schema-typed shape lands with the Apollo write-path. */
 export interface CatDraft {
   name: string;
+  age?: string;
+  weight?: string;
 }
 
 export interface FunnelState {
@@ -42,6 +45,7 @@ export type FunnelAction =
   | { type: "SET_DELIVERY_DATE"; date: string }
   | { type: "SET_FREQUENCY"; frequency: string }
   | { type: "TOGGLE_RECIPE"; slug: string }
+  | { type: "SET_CAT"; cat: Partial<CatDraft> }
   | { type: "RESET" };
 
 /** Index of a step in funnel order. */
@@ -71,6 +75,10 @@ export function funnelReducer(state: FunnelState, action: FunnelAction): FunnelS
           ? state.recipeSlugs.filter((slug) => slug !== action.slug)
           : [...state.recipeSlugs, action.slug],
       };
+    case "SET_CAT": {
+      const current = state.cats[0] ?? { name: "" };
+      return { ...state, cats: [{ ...current, ...action.cat }] };
+    }
     case "RESET":
       return initialFunnelState;
   }

@@ -11,6 +11,7 @@ import { DeliveryDatePicker, type DeliveryLabels, sorrelTheme } from "@sorrel/ui
 
 import type { RecipeBlok } from "../../../../types/storyblok.gen";
 import { useFunnel } from "../FunnelProvider";
+import { ProfileForm } from "../ProfileForm";
 import { RecipesPicker } from "../RecipesPicker";
 
 /**
@@ -49,7 +50,11 @@ function CatsStep() {
 }
 
 function ProfileStep() {
-  return <StepShell step="PROFILE" />;
+  return (
+    <StepShell step="PROFILE">
+      <ProfileForm />
+    </StepShell>
+  );
 }
 
 /** RECIPES is data-driven — rendered by the step page with Storyblok recipes. */

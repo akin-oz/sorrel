@@ -45,6 +45,13 @@ describe("funnelReducer", () => {
     expect(removed.recipeSlugs).toEqual([]);
   });
 
+  it("SET_CAT creates then merges the first cat", () => {
+    const named = funnelReducer(initialFunnelState, { type: "SET_CAT", cat: { name: "Miso" } });
+    expect(named.cats).toEqual([{ name: "Miso" }]);
+    const aged = funnelReducer(named, { type: "SET_CAT", cat: { age: "3 years" } });
+    expect(aged.cats).toEqual([{ name: "Miso", age: "3 years" }]);
+  });
+
   it("HYDRATE replaces the whole state (resume)", () => {
     const saved: FunnelState = {
       cats: [{ name: "Biscuit" }],
