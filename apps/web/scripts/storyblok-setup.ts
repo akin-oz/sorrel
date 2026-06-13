@@ -268,10 +268,14 @@ function mergeI18n(en: Json, de: Json): Json {
   return en;
 }
 
-async function upsertStory(slug: string, name: string, content: Json) {
+async function upsertStory(slug: string, name: string, content: Json, realPath: string) {
   const found = (await mapi<{ stories: { id: number }[] }>("GET", `/stories?with_slug=${slug}`))
     .stories;
-  const story = { name, slug, content };
+  // `real_path` is the route the Visual Editor previews. Stories are fetched by
+  // slug, but the app serves the landing at `/` (not `/home`) and has no
+  // per-recipe page — so point every story's preview at the landing route that
+  // actually renders it. Without this the editor iframe 404s on `/<slug>`.
+  const story = { name, slug, content, path: realPath };
   if (found.length) {
     await mapi("PUT", `/stories/${found[0].id}`, { story, publish: 1 });
     console.log(`  ↻ story ${slug} (published)`);
@@ -291,14 +295,15 @@ async function main() {
     homeFallbackContent("en") as unknown as Json,
     homeFallbackContent("de") as unknown as Json,
   );
-  await upsertStory("home", "Home", home);
+  await upsertStory("home", "Home", home, "/");
 
   const en = recipeFallback("en");
   const de = recipeFallback("de");
   for (const recipe of en) {
     const deRecipe = de.find((r) => r.slug === recipe.slug) ?? recipe;
     const content = mergeI18n(recipe as unknown as Json, deRecipe as unknown as Json);
-    await upsertStory(recipe.slug, recipe.name, content);
+    // Recipes render inside the landing's recipe showcase — preview them there.
+    await upsertStory(recipe.slug, recipe.name, content, "/");
   }
 
   console.log("Done.");
