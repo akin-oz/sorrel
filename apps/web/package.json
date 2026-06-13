@@ -11,6 +11,7 @@
     "test": "jest",
     "seed": "tsx scripts/seed-funnel.ts",
     "seed:mixpanel": "tsx scripts/seed-mixpanel.ts",
+    "seed:posthog": "tsx scripts/seed-posthog.ts",
     "storyblok:setup": "tsx scripts/storyblok-setup.ts"
   },
   "dependencies": {
