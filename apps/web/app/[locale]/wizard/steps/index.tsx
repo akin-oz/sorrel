@@ -31,8 +31,10 @@ function StepShell({ step, children }: { step: FunnelStep; children?: ReactNode 
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}>
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-        <Typography variant="overline" sx={{ color: "#A8967F", lineHeight: 1.4 }}>
+      {/* On desktop the heading lives in the left rail (WizardRail); here it shows
+          on mobile only, where there is no rail. */}
+      <Box sx={{ display: { xs: "flex", md: "none" }, flexDirection: "column", gap: 1 }}>
+        <Typography variant="overline" sx={{ color: sorrelTheme.mono, lineHeight: 1.4 }}>
           {tWizard("stepProgress", { current: stepNumber, total: FUNNEL_STEPS.length })}
         </Typography>
         <Typography variant="h3" sx={{ fontSize: "1.625rem", lineHeight: 1.2 }}>

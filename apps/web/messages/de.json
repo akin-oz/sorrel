@@ -11,7 +11,8 @@
     "incomplete": "Schließe diesen Schritt ab, um fortzufahren",
     "stepProgress": "Schritt {current} von {total}",
     "resume": "Fortsetzen",
-    "resumeBanner": "Willkommen zurück — wir haben gespeichert, wo du aufgehört hast."
+    "resumeBanner": "Willkommen zurück — wir haben gespeichert, wo du aufgehört hast.",
+    "saveExit": "Speichern & verlassen"
   },
   "ExitIntent": {
     "title": "Schon dabei zu gehen?",
@@ -48,7 +49,8 @@
   },
   "Cats": {
     "legend": "Anzahl der Katzen",
-    "count": "{count, plural, =1 {1 Katze} other {# Katzen}}"
+    "count": "{count, plural, =1 {1 Katze} other {# Katzen}}",
+    "unit": "{count, plural, =1 {Katze} other {Katzen}}"
   },
   "Profile": {
     "name": "Name",

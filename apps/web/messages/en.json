@@ -11,7 +11,8 @@
     "incomplete": "Complete this step to continue",
     "stepProgress": "Step {current} of {total}",
     "resume": "Resume",
-    "resumeBanner": "Welcome back — we saved where you left off."
+    "resumeBanner": "Welcome back — we saved where you left off.",
+    "saveExit": "Save & exit"
   },
   "ExitIntent": {
     "title": "Leaving so soon?",
@@ -48,7 +49,8 @@
   },
   "Cats": {
     "legend": "Number of cats",
-    "count": "{count, plural, =1 {1 cat} other {# cats}}"
+    "count": "{count, plural, =1 {1 cat} other {# cats}}",
+    "unit": "{count, plural, =1 {cat} other {cats}}"
   },
   "Profile": {
     "name": "Name",

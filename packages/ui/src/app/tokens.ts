@@ -19,10 +19,9 @@ export const appTokens = {
     pageMaxWidth: 1120,
     /** The funnel card / single-column mobile width, in px. */
     cardMaxWidth: 420,
-    /** Desktop funnel grid: context rail (420) on the left, form column on the right. */
+    /** Desktop funnel grid: context rail (420) on the left, form column on the right.
+     *  The panes are flush — divided by the rail's right border, with no gutter. */
     funnelColumns: "420px minmax(0, 1fr)",
-    /** Gutter between the funnel's rail + form columns, in theme spacing units. */
-    funnelGap: 6,
   },
   control: {
     /** Minimum interactive target height, in px. */

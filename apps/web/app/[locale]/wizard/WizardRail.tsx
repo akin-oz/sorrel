@@ -5,8 +5,11 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import { useLocale, useTranslations } from "next-intl";
 
+import { sorrelTheme } from "@sorrel/ui";
+
 import { FunnelDraftByIdDocument } from "../../../lib/graphql/funnel";
 import { useFunnel } from "./FunnelProvider";
+import { ResumeBanner } from "./ResumeBanner";
 import { type SummaryLabels, orderSummaryRows } from "./order-summary";
 
 // From PLAN onward the rail is the live order summary (matches the design handoff);
@@ -14,10 +17,12 @@ import { type SummaryLabels, orderSummaryRows } from "./order-summary";
 const SUMMARY_STEPS = new Set(["PLAN", "EMAIL", "SUMMARY"]);
 
 /**
- * Desktop-only funnel rail (spec 019). The handoff's two-column funnel puts the
- * wizard card on the left and this rail on the right: step context for CATS→DELIVERY,
- * the live "your plan so far" order summary (with the server price) from PLAN on.
- * Hidden on mobile by the chrome.
+ * Desktop-only funnel rail (spec 019). The handoff's two-pane shell puts this warm
+ * context rail on the left of the form: brand-toned step framing (the serif step
+ * question → subcopy → resume note) for CATS→DELIVERY, and the live "your plan so
+ * far" order summary (with the server price) from PLAN on. A reassurance line is
+ * pinned to the bottom. The chrome supplies the rail's surface (page tone, padding,
+ * right border) and hides it on mobile.
  */
 export function WizardRail() {
   const { state, currentStep, draftId } = useFunnel();
@@ -46,8 +51,8 @@ export function WizardRail() {
     };
     const rows = orderSummaryRows(state, plan, labels);
     return (
-      <RailPanel>
-        <Typography variant="overline" sx={{ color: "#A8967F" }}>
+      <RailColumn>
+        <Typography variant="overline" sx={{ color: sorrelTheme.mono, letterSpacing: "0.14em" }}>
           {tRail("summaryHeading")}
         </Typography>
         <Box component="dl" sx={{ m: 0, display: "flex", flexDirection: "column", gap: 1.25 }}>
@@ -74,44 +79,42 @@ export function WizardRail() {
             </Box>
           ))}
         </Box>
-      </RailPanel>
+        <Reassurance text={tRail("reassurance")} />
+      </RailColumn>
     );
   }
 
   const hasDescription = tSteps.has(`${currentStep}.description`);
   return (
-    <RailPanel>
-      <Typography variant="h2" sx={{ fontSize: "1.75rem", lineHeight: 1.2 }}>
+    <RailColumn>
+      <Typography variant="h3" component="h2" sx={{ fontSize: "2.125rem", lineHeight: 1.15, m: 0 }}>
         {tSteps(`${currentStep}.title`)}
       </Typography>
       {hasDescription ? (
-        <Typography variant="body1" color="text.secondary">
+        <Typography variant="body1" color="text.secondary" sx={{ fontSize: "1rem" }}>
           {tSteps(`${currentStep}.description`)}
         </Typography>
       ) : null}
-      <Typography variant="body2" sx={{ color: "#A8967F", mt: 1 }}>
-        {tRail("reassurance")}
-      </Typography>
-    </RailPanel>
+      <ResumeBanner />
+      <Reassurance text={tRail("reassurance")} />
+    </RailColumn>
   );
 }
 
-function RailPanel({ children }: { children: React.ReactNode }) {
+/** A flush, full-height column; the chrome's rail cell paints its surface. */
+function RailColumn({ children }: { children: React.ReactNode }) {
   return (
-    <Box
-      sx={{
-        maxWidth: 460,
-        display: "flex",
-        flexDirection: "column",
-        gap: 1.5,
-        p: 3,
-        borderRadius: "20px",
-        bgcolor: "background.paper",
-        border: "1px solid",
-        borderColor: "divider",
-      }}
-    >
+    <Box sx={{ display: "flex", flexDirection: "column", gap: 3, flex: 1, minHeight: "100%" }}>
       {children}
     </Box>
+  );
+}
+
+/** Trust line pinned to the bottom of the rail. */
+function Reassurance({ text }: { text: string }) {
+  return (
+    <Typography variant="body2" sx={{ mt: "auto", pt: 1, color: sorrelTheme.mono }}>
+      {text}
+    </Typography>
   );
 }
