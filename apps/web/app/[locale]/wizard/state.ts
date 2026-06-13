@@ -47,7 +47,12 @@ export type FunnelAction =
   | { type: "SET_EMAIL"; email: string }
   | { type: "TOGGLE_RECIPE"; slug: string }
   | { type: "SET_CAT"; cat: Partial<CatDraft> }
+  | { type: "SET_CAT_COUNT"; count: number }
   | { type: "RESET" };
+
+/** How many cats the funnel supports (CATS step, spec 016). */
+export const MIN_CATS = 1;
+export const MAX_CATS = 4;
 
 /** Index of a step in funnel order. */
 function stepIndex(step: FunnelStep): number {
@@ -81,6 +86,12 @@ export function funnelReducer(state: FunnelState, action: FunnelAction): FunnelS
     case "SET_CAT": {
       const current = state.cats[0] ?? { name: "" };
       return { ...state, cats: [{ ...current, ...action.cat }] };
+    }
+    case "SET_CAT_COUNT": {
+      // Resize to N (clamped 1–4), preserving existing drafts; pad with blanks.
+      const n = Math.max(MIN_CATS, Math.min(MAX_CATS, action.count));
+      const cats = Array.from({ length: n }, (_, i) => state.cats[i] ?? { name: "" });
+      return { ...state, cats };
     }
     case "RESET":
       return initialFunnelState;

@@ -45,6 +45,10 @@
       "description": "Prüfe alles und starte dann dein Abo."
     }
   },
+  "Cats": {
+    "legend": "Anzahl der Katzen",
+    "count": "{count, plural, =1 {1 Katze} other {# Katzen}}"
+  },
   "Profile": {
     "name": "Name",
     "namePlaceholder": "Der Name deiner Katze",

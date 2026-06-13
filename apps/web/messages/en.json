@@ -45,6 +45,10 @@
       "description": "Review everything, then start your subscription."
     }
   },
+  "Cats": {
+    "legend": "Number of cats",
+    "count": "{count, plural, =1 {1 cat} other {# cats}}"
+  },
   "Profile": {
     "name": "Name",
     "namePlaceholder": "Your cat's name",

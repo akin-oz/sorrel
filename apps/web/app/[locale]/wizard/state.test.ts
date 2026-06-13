@@ -60,6 +60,29 @@ describe("funnelReducer", () => {
     expect(aged.cats).toEqual([{ name: "Miso", age: "3 years" }]);
   });
 
+  it("SET_CAT_COUNT resizes the cats array, preserving existing drafts", () => {
+    const one = funnelReducer(initialFunnelState, { type: "SET_CAT_COUNT", count: 1 });
+    expect(one.cats).toEqual([{ name: "" }]);
+
+    // pad up to 3, keeping the first cat's data
+    const named = funnelReducer(one, { type: "SET_CAT", cat: { name: "Miso" } });
+    const three = funnelReducer(named, { type: "SET_CAT_COUNT", count: 3 });
+    expect(three.cats).toEqual([{ name: "Miso" }, { name: "" }, { name: "" }]);
+
+    // shrink back to 1, keeping the first
+    const back = funnelReducer(three, { type: "SET_CAT_COUNT", count: 1 });
+    expect(back.cats).toEqual([{ name: "Miso" }]);
+  });
+
+  it("SET_CAT_COUNT clamps to 1–4", () => {
+    expect(
+      funnelReducer(initialFunnelState, { type: "SET_CAT_COUNT", count: 0 }).cats,
+    ).toHaveLength(1);
+    expect(
+      funnelReducer(initialFunnelState, { type: "SET_CAT_COUNT", count: 9 }).cats,
+    ).toHaveLength(4);
+  });
+
   it("HYDRATE replaces the whole state (resume)", () => {
     const saved: FunnelState = {
       cats: [{ name: "Biscuit" }],

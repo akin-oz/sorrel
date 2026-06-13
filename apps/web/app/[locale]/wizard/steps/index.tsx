@@ -10,6 +10,7 @@ import { FUNNEL_STEPS, type FunnelStep } from "@sorrel/shared";
 import { DeliveryDatePicker, type DeliveryLabels, sorrelTheme } from "@sorrel/ui";
 
 import type { RecipeBlok } from "../../../../types/storyblok.gen";
+import { CatsForm } from "../CatsForm";
 import { EmailForm } from "../EmailForm";
 import { useFunnel } from "../FunnelProvider";
 import { PlanForm } from "../PlanForm";
@@ -48,7 +49,11 @@ function StepShell({ step, children }: { step: FunnelStep; children?: ReactNode 
 }
 
 function CatsStep() {
-  return <StepShell step="CATS" />;
+  return (
+    <StepShell step="CATS">
+      <CatsForm />
+    </StepShell>
+  );
 }
 
 function ProfileStep() {
