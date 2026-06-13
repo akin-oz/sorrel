@@ -49,14 +49,14 @@ const bloks = (whitelist: string[]) => ({
   restrict_components: true,
   component_whitelist: whitelist,
 });
+// Manual (inline) options — no `source`. `source: "internal"` would make Storyblok
+// pull from a datasource and ignore these inline options (empty, unbindable picker).
 const opt = (values: string[]) => ({
   type: "option",
-  source: "internal",
   options: values.map((v) => ({ name: v, value: v })),
 });
 const opts = (values: string[]) => ({
   type: "options",
-  source: "internal",
   options: values.map((v) => ({ name: v, value: v })),
 });
 
