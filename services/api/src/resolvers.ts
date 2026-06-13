@@ -158,7 +158,18 @@ export function computeDeliveryEstimate() {
   return { earliest, blockedWeekdays, leadDays: DEFAULT_LEAD_DAYS };
 }
 
-export function computePlan(input: PlanInput): Plan {
+/**
+ * The minimal shape `computePlan` needs — body weight per cat plus a cadence.
+ * Satisfied by both `PlanInput` (the query/mutation arg) and a stored
+ * `FunnelDraft` (the `FunnelDraft.plan` field resolver), so neither has to be
+ * reshaped at the call site.
+ */
+interface PlanComputeInput {
+  cats: ReadonlyArray<{ weightKg: number }>;
+  frequency: BoxFrequency;
+}
+
+export function computePlan(input: PlanComputeInput): Plan {
   const plan = computeDomainPlan({
     cats: input.cats.map((c) => ({ weightKg: c.weightKg })),
     frequency: FREQUENCY_TO_DOMAIN[input.frequency],
@@ -241,6 +252,16 @@ export function updateDraft(draftId: string, input: PlanInput): FunnelDraft {
   return updated;
 }
 
+/**
+ * Derive a draft's plan from its current cats + frequency. Null until a
+ * frequency is chosen (and there is at least one cat). Always recomputed,
+ * never stored — a resumed draft can never surface a stale price.
+ */
+export function draftPlan(draft: Pick<FunnelDraft, "cats" | "frequency">): Plan | null {
+  if (draft.frequency == null || draft.cats.length === 0) return null;
+  return computePlan({ cats: draft.cats, frequency: draft.frequency });
+}
+
 // ─── Resolver wiring ──────────────────────────────────────────────────────────
 
 export const resolvers: Resolvers = {
@@ -253,6 +274,12 @@ export const resolvers: Resolvers = {
     plan: (_parent, args) => computePlan(args.input),
     funnelDraft: (_parent, args) => getDraft(args.id),
     dietaryPrograms: () => DIETARY_PROGRAMS,
+  },
+
+  // `plan` is always derived from the draft's current cats + frequency — never
+  // stored — so a resumed or just-updated draft can never carry a stale price.
+  FunnelDraft: {
+    plan: (draft) => draftPlan(draft),
   },
 
   Mutation: {

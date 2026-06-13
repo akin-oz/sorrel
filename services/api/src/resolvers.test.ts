@@ -6,13 +6,22 @@ import {
   toIso,
 } from "@sorrel/domain";
 
-import { DietaryProgram, FunnelStep, Fussiness, Weekday } from "./__generated__/resolvers";
+import {
+  BoxFrequency,
+  Currency,
+  DietaryProgram,
+  FunnelStep,
+  Fussiness,
+  Weekday,
+} from "./__generated__/resolvers";
 import {
   DIETARY_PROGRAMS,
   blockedWeekdays,
   computeDeliveryEstimate,
+  draftPlan,
   getDraft,
   saveDraft,
+  updateDraft,
 } from "./resolvers";
 
 describe("computeDeliveryEstimate", () => {
@@ -83,6 +92,69 @@ describe("saveDraft + getDraft round-trip", () => {
 
   it("returns null for an unknown draft id", () => {
     expect(getDraft("nonexistent-id")).toBeNull();
+  });
+});
+
+describe("draftPlan (FunnelDraft.plan recompute)", () => {
+  const cat = {
+    id: "c1",
+    name: "Mochi",
+    ageMonths: 24,
+    neutered: true,
+    weightKg: 4,
+    fussiness: Fussiness.Selective,
+    allergies: [],
+    dietaryProgram: null,
+    vetConfirmed: false,
+  };
+
+  it("is null until a frequency is chosen", () => {
+    expect(draftPlan({ cats: [cat], frequency: null })).toBeNull();
+  });
+
+  it("is null when there are no cats", () => {
+    expect(draftPlan({ cats: [], frequency: BoxFrequency.Every_2Weeks })).toBeNull();
+  });
+
+  it("recomputes price + portion from cats and frequency", () => {
+    const plan = draftPlan({ cats: [cat], frequency: BoxFrequency.Every_4Weeks });
+    expect(plan).not.toBeNull();
+    expect(plan!.frequency).toBe(BoxFrequency.Every_4Weeks);
+    expect(plan!.mealsPerBox).toBe(28);
+    expect(plan!.portionGramsPerDay).toBe(120); // 4kg × 30g
+    expect(plan!.pricing.perBox.currency).toBe(Currency.Gbp);
+    expect(plan!.pricing.firstBox.amountMinor).toBeLessThan(plan!.pricing.perBox.amountMinor);
+  });
+
+  it("updateDraft → the plan tracks the new frequency (the optimistic-preview path)", () => {
+    const draft = saveDraft({
+      step: FunnelStep.Plan,
+      recipeSlugs: ["wild-caught-salmon"],
+      frequency: BoxFrequency.Every_4Weeks,
+      cats: [
+        {
+          name: "Mochi",
+          ageMonths: 24,
+          neutered: true,
+          weightKg: 4,
+          fussiness: Fussiness.Selective,
+          allergies: [],
+          vetConfirmationAcknowledged: false,
+        },
+      ],
+    });
+    const monthly = draftPlan(draft);
+    expect(monthly!.mealsPerBox).toBe(28);
+
+    const updated = updateDraft(draft.id, {
+      cats: [],
+      recipeSlugs: ["wild-caught-salmon"],
+      frequency: BoxFrequency.Every_2Weeks,
+    });
+    const fortnightly = draftPlan(updated);
+    expect(fortnightly!.mealsPerBox).toBe(14);
+    // half the meals → half the box price
+    expect(fortnightly!.pricing.perBox.amountMinor).toBe(monthly!.pricing.perBox.amountMinor / 2);
   });
 });
 

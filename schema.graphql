@@ -164,6 +164,8 @@ type FunnelDraft {
   recipeSlugs: [String!]!
   deliveryDate: Date
   frequency: BoxFrequency
+  "Recomputed plan + price for the draft's current cats and frequency, from the packages/domain pricing calc. Null until a frequency is chosen."
+  plan: Plan
   email: String
   "When the draft was last saved."
   updatedAt: DateTime!

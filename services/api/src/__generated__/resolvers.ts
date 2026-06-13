@@ -103,6 +103,8 @@ export type FunnelDraft = {
   email?: Maybe<Scalars['String']['output']>;
   frequency?: Maybe<BoxFrequency>;
   id: Scalars['ID']['output'];
+  /** Recomputed plan + price for the draft's current cats and frequency, from the packages/domain pricing calc. Null until a frequency is chosen. */
+  plan?: Maybe<Plan>;
   recipeSlugs: Array<Scalars['String']['output']>;
   step: FunnelStep;
   /** When the draft was last saved. */
@@ -417,6 +419,7 @@ export type FunnelDraftResolvers<ContextType = any, ParentType extends Resolvers
   email?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   frequency?: Resolver<Maybe<ResolversTypes['BoxFrequency']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  plan?: Resolver<Maybe<ResolversTypes['Plan']>, ParentType, ContextType>;
   recipeSlugs?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>;
   step?: Resolver<ResolversTypes['FunnelStep'], ParentType, ContextType>;
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
