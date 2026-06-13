@@ -71,5 +71,24 @@
     "label": "Sprache",
     "en": "EN",
     "de": "DE"
+  },
+  "Insights": {
+    "title": "Funnel-Einblicke",
+    "subtitle": "Synthetische Sitzungen, aufgeteilt nach dem PROFILE-Eingabe-A/B-Test. Variante B (Autovervollständigung mit Vorgaben) hebt den Schritt PROFILE → RECIPES — der 39→65-Hebel.",
+    "sessions": "{count} Sitzungen pro Variante",
+    "variantA": "A · Freitext",
+    "variantB": "B · Autovervollständigung",
+    "completion": "Abschluss",
+    "lift": "absolute Steigerung (B − A)",
+    "disclaimer": "Illustrative synthetische Daten, vom Seed-Skript erzeugt.",
+    "stepLabels": {
+      "CATS": "Katzen",
+      "PROFILE": "Profil",
+      "RECIPES": "Rezepte",
+      "DELIVERY": "Lieferung",
+      "PLAN": "Plan",
+      "EMAIL": "E-Mail",
+      "SUMMARY": "Zusammenfassung"
+    }
   }
 }
