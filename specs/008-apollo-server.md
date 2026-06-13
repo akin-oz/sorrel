@@ -55,6 +55,7 @@ Install `@apollo/server` and `graphql` (already present as a dev dep — promote
 - Starts on `localhost:4000` in development.
 
 `services/api/package.json` — new workspace package `@sorrel/api`:
+
 - `scripts: { dev, build, type-check, test }`
 - deps: `@apollo/server`, `graphql`
 - devDeps: none beyond what the root provides (ts-node, ts-jest, typescript already hoisted)
@@ -64,15 +65,15 @@ Install `@apollo/server` and `graphql` (already present as a dev dep — promote
 Every resolver in `Resolvers` must be implemented — no missing fields (the generated type
 enforces this at compile time). For this spec, resolvers return realistic in-memory stubs:
 
-| Query / Mutation | Stub return |
-|---|---|
-| `recipes` | 3–4 in-memory `Recipe` objects |
-| `deliveryEstimate` | derived from `packages/domain` `earliestDeliverableDate` + `BLOCKED_WEEKDAY_INDEXES` |
-| `plan` | fixed stub `Pricing` + portion calc forwarded to `packages/domain` (if a `portionCalc` export exists; otherwise inline stub) |
-| `funnelDraft` | returns `null` (field is nullable in the schema) |
-| `dietaryPrograms` | returns all three `DietaryProgram` values with `requiresVetConfirmation` |
-| `saveFunnelDraft` | stores draft in a module-level `Map`, returns it |
-| `updateFunnelPlan` | looks up draft by id, recomputes plan stub, returns updated draft |
+| Query / Mutation   | Stub return                                                                                                                  |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------------------- |
+| `recipes`          | 3–4 in-memory `Recipe` objects                                                                                               |
+| `deliveryEstimate` | derived from `packages/domain` `earliestDeliverableDate` + `BLOCKED_WEEKDAY_INDEXES`                                         |
+| `plan`             | fixed stub `Pricing` + portion calc forwarded to `packages/domain` (if a `portionCalc` export exists; otherwise inline stub) |
+| `funnelDraft`      | returns `null` (field is nullable in the schema)                                                                             |
+| `dietaryPrograms`  | returns all three `DietaryProgram` values with `requiresVetConfirmation`                                                     |
+| `saveFunnelDraft`  | stores draft in a module-level `Map`, returns it                                                                             |
+| `updateFunnelPlan` | looks up draft by id, recomputes plan stub, returns updated draft                                                            |
 
 `deliveryEstimate` is the one resolver that must call `packages/domain` — it is the
 contract proof that the domain and schema are aligned.
@@ -105,8 +106,8 @@ transform matching `packages/domain/jest.config.ts`).
 
 # Contract impact
 
-None — the schema does not change. This spec generates types *from* the schema and
-implements resolvers *against* those types.
+None — the schema does not change. This spec generates types _from_ the schema and
+implements resolvers _against_ those types.
 
 # Out of scope
 
@@ -119,10 +120,10 @@ implements resolvers *against* those types.
 
 # New dependencies (flagged for approval)
 
-| Package | Type | Version | Reason |
-|---|---|---|---|
-| `@graphql-codegen/typescript-resolvers` | devDep (root) | `^4.x` | codegen resolver types plugin |
-| `@apollo/server` | dep (`services/api`) | `^4.x` | the server itself |
+| Package                                 | Type                 | Version | Reason                        |
+| --------------------------------------- | -------------------- | ------- | ----------------------------- |
+| `@graphql-codegen/typescript-resolvers` | devDep (root)        | `^4.x`  | codegen resolver types plugin |
+| `@apollo/server`                        | dep (`services/api`) | `^4.x`  | the server itself             |
 
 `graphql` is already in root devDeps; it becomes a peer dep of `@apollo/server` — no new
 install needed.

@@ -1,7 +1,6 @@
-import { getTranslations, setRequestLocale } from "next-intl/server";
-
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import insights from "../../../lib/insights-data.json";
 
@@ -16,7 +15,11 @@ export default async function InsightsPage({ params }: { params: Promise<{ local
   const pct = new Intl.NumberFormat(locale, { style: "percent", maximumFractionDigits: 1 });
   const liftPp = ((variants.B.completionRate - variants.A.completionRate) * 100).toFixed(1);
 
-  function funnel(label: string, data: { viewed: number[]; completionRate: number }, color: string) {
+  function funnel(
+    label: string,
+    data: { viewed: number[]; completionRate: number },
+    color: string,
+  ) {
     return (
       <Box
         sx={{
@@ -41,13 +44,31 @@ export default async function InsightsPage({ params }: { params: Promise<{ local
             <Typography sx={{ width: 70, flexShrink: 0, fontSize: 13, color: "text.secondary" }}>
               {t(`stepLabels.${step}`)}
             </Typography>
-            <Box sx={{ flex: 1, height: 22, borderRadius: "6px", bgcolor: "#ECE4D9", overflow: "hidden" }}>
+            <Box
+              sx={{
+                flex: 1,
+                height: 22,
+                borderRadius: "6px",
+                bgcolor: "#ECE4D9",
+                overflow: "hidden",
+              }}
+            >
               <Box
-                sx={{ width: `${(data.viewed[i] / sessionsPerVariant) * 100}%`, height: "100%", bgcolor: color }}
+                sx={{
+                  width: `${(data.viewed[i] / sessionsPerVariant) * 100}%`,
+                  height: "100%",
+                  bgcolor: color,
+                }}
               />
             </Box>
             <Typography
-              sx={{ width: 48, flexShrink: 0, textAlign: "right", fontSize: 13, fontVariantNumeric: "tabular-nums" }}
+              sx={{
+                width: 48,
+                flexShrink: 0,
+                textAlign: "right",
+                fontSize: 13,
+                fontVariantNumeric: "tabular-nums",
+              }}
             >
               {pct.format(data.viewed[i] / sessionsPerVariant)}
             </Typography>
@@ -73,7 +94,13 @@ export default async function InsightsPage({ params }: { params: Promise<{ local
   return (
     <Box
       component="main"
-      sx={{ width: "100%", maxWidth: "52rem", mx: "auto", px: { xs: 2, sm: 3 }, py: { xs: 4, sm: 6 } }}
+      sx={{
+        width: "100%",
+        maxWidth: "52rem",
+        mx: "auto",
+        px: { xs: 2, sm: 3 },
+        py: { xs: 4, sm: 6 },
+      }}
     >
       <Typography variant="h1" sx={{ fontSize: { xs: 28, sm: 36 } }}>
         {t("title")}
@@ -84,7 +111,11 @@ export default async function InsightsPage({ params }: { params: Promise<{ local
 
       <Box sx={{ display: "flex", flexWrap: "wrap", gap: { xs: 3, sm: 6 }, my: { xs: 3, sm: 4 } }}>
         {stat(`${t("variantA")} · ${t("completion")}`, pct.format(variants.A.completionRate))}
-        {stat(`${t("variantB")} · ${t("completion")}`, pct.format(variants.B.completionRate), "primary.main")}
+        {stat(
+          `${t("variantB")} · ${t("completion")}`,
+          pct.format(variants.B.completionRate),
+          "primary.main",
+        )}
         {stat(t("lift"), `+${liftPp} pp`, "primary.main")}
       </Box>
 

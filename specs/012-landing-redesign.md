@@ -32,22 +32,22 @@ full-bleed responsive layout. One job: start the wizard.
 
 ## Blok schema extensions (`types/storyblok.gen.ts` + renderers under `app/_cms/`)
 
-| Blok | Fields | Renderer / notes |
-|---|---|---|
-| `site_nav` | `ctaLabel`, `ctaHref` | `SiteNav` — sticky-free top bar: terracotta mark + wordmark left, pill CTA right |
-| `hero` (extended) | + `eyebrow`, `reassurance`, `image?` (asset) | mono eyebrow, serif headline, subcopy, CTA + reassurance line, image (striped placeholder when unset); desktop splits 2-col |
-| `feature_grid` / `feature_item` (extended) | `feature_item` + `icon?` (`vet` \| `portion` \| `delivery`) | white cards; decorative geometric token-built icons (no SVG art); desktop 3-up |
-| `how_it_works` | `eyebrow`, `heading`, `steps` (`how_step`[]) | numbered serif figures on the page-tint band; desktop 3-col |
-| `how_step` | `title`, `body` | nested item |
-| `recipe_showcase` | `eyebrow`, `heading`, `subcopy` | renders the locale's recipes from the existing `getRecipes`/`recipeFallback` source (slug-keyed, single-sourced — no recipe copy duplicated into this blok); editorial cards, desktop 3-up |
-| `testimonial_section` | `eyebrow`, `items` (`testimonial_item`[]) | serif pull-quotes on the page-tint band; 1-col mobile, 2-col desktop |
-| `testimonial_item` | `quote`, `attribution` | nested item |
-| `faq_section` | `heading`, `items` (`faq_item`[]) | accessible disclosure accordion: real `<button>`s, `aria-expanded`/`aria-controls`, +/– affordance, 44px targets; desktop column narrows to 720px |
-| `faq_item` | `question`, `answer` | nested item |
-| `cta_section` (extended) | + `subcopy` | restyled as the accent band: cream mark, inverted (paper-on-accent) pill CTA |
-| `site_footer` | `columns` (`footer_column`[]), `legal` | ink band; link columns; legal line |
-| `footer_column` | `heading`, `links` (`footer_link`[]) | nested |
-| `footer_link` | `label`, `href` | locale-aware `Link` when `href` is set, plain text otherwise (no dead anchors invented) |
+| Blok                                       | Fields                                                      | Renderer / notes                                                                                                                                                                           |
+| ------------------------------------------ | ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `site_nav`                                 | `ctaLabel`, `ctaHref`                                       | `SiteNav` — sticky-free top bar: terracotta mark + wordmark left, pill CTA right                                                                                                           |
+| `hero` (extended)                          | + `eyebrow`, `reassurance`, `image?` (asset)                | mono eyebrow, serif headline, subcopy, CTA + reassurance line, image (striped placeholder when unset); desktop splits 2-col                                                                |
+| `feature_grid` / `feature_item` (extended) | `feature_item` + `icon?` (`vet` \| `portion` \| `delivery`) | white cards; decorative geometric token-built icons (no SVG art); desktop 3-up                                                                                                             |
+| `how_it_works`                             | `eyebrow`, `heading`, `steps` (`how_step`[])                | numbered serif figures on the page-tint band; desktop 3-col                                                                                                                                |
+| `how_step`                                 | `title`, `body`                                             | nested item                                                                                                                                                                                |
+| `recipe_showcase`                          | `eyebrow`, `heading`, `subcopy`                             | renders the locale's recipes from the existing `getRecipes`/`recipeFallback` source (slug-keyed, single-sourced — no recipe copy duplicated into this blok); editorial cards, desktop 3-up |
+| `testimonial_section`                      | `eyebrow`, `items` (`testimonial_item`[])                   | serif pull-quotes on the page-tint band; 1-col mobile, 2-col desktop                                                                                                                       |
+| `testimonial_item`                         | `quote`, `attribution`                                      | nested item                                                                                                                                                                                |
+| `faq_section`                              | `heading`, `items` (`faq_item`[])                           | accessible disclosure accordion: real `<button>`s, `aria-expanded`/`aria-controls`, +/– affordance, 44px targets; desktop column narrows to 720px                                          |
+| `faq_item`                                 | `question`, `answer`                                        | nested item                                                                                                                                                                                |
+| `cta_section` (extended)                   | + `subcopy`                                                 | restyled as the accent band: cream mark, inverted (paper-on-accent) pill CTA                                                                                                               |
+| `site_footer`                              | `columns` (`footer_column`[]), `legal`                      | ink band; link columns; legal line                                                                                                                                                         |
+| `footer_column`                            | `heading`, `links` (`footer_link`[])                        | nested                                                                                                                                                                                     |
+| `footer_link`                              | `label`, `href`                                             | locale-aware `Link` when `href` is set, plain text otherwise (no dead anchors invented)                                                                                                    |
 
 All new renderers spread `storyblokEditable(blok)`; `Page`'s `renderBlok` switch and
 `PageBodyBlok` union grow accordingly. Existing blok fields stay backwards-compatible
@@ -65,7 +65,7 @@ All new renderers spread `storyblokEditable(blok)`; `Page`'s `renderBlok` switch
 
 - `homeFallbackContent` returns the full nine-blok body in design order:
   `site_nav · hero · feature_grid · how_it_works · recipe_showcase ·
-  testimonial_section · faq_section · cta_section · site_footer` — copy verbatim from
+testimonial_section · faq_section · cta_section · site_footer` — copy verbatim from
   the design (which itself lifted the existing fallback copy), with German translations
   for every new string. FAQ answers for the four questions the design leaves collapsed
   are short, authored here, and flagged for editorial review in the Storyblok space.

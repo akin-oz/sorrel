@@ -84,10 +84,10 @@ it now to front-load the App Router setup and the stack signal.
   - **Keyed (`NEXT_PUBLIC_POSTHOG_KEY` present): `posthogSink`** — a thin adapter wrapping
     `posthog-js` whose only job is `sink.emit(event) → posthog.capture(event.name, props)`.
     The SDK never leaks past this one file; the rest of the app speaks only `FunnelEvent`.
-  PostHog is the chosen vendor because it covers both halves of the thesis: native funnel
-  visualization (the 39→65 drop-off) **and** feature flags/experiments for the `variant`
-  A/B path. The `variant` prop stays vendor-agnostic — sourcing it from PostHog flags today
-  does not preclude swapping the flag provider later, since the events don't depend on it.
+    PostHog is the chosen vendor because it covers both halves of the thesis: native funnel
+    visualization (the 39→65 drop-off) **and** feature flags/experiments for the `variant`
+    A/B path. The `variant` prop stays vendor-agnostic — sourcing it from PostHog flags today
+    does not preclude swapping the flag provider later, since the events don't depend on it.
 - Fire, with correct typed props:
   - `funnel_step_viewed` on each step mount (prop: `step`, `variant` when an A/B flag is
     present).
@@ -164,15 +164,15 @@ analytics contract; changes neither. No `schema.graphql` or `packages/domain` ed
 
 # New dependencies (flagged for approval)
 
-| Package | Type | Reason |
-|---|---|---|
-| `@sorrel/ui` | dep (`apps/web`) | the `DeliveryDatePicker` + `BrandLogo` |
-| `@sorrel/analytics` | dep (`apps/web`) | the typed tracker |
-| `@sorrel/shared` | dep (`apps/web`) | `FUNNEL_STEPS` / `FunnelStep` |
-| `posthog-js` | dep (`apps/web`) | analytics sink — wrapped behind `posthogSink`, only loaded when `NEXT_PUBLIC_POSTHOG_KEY` is set |
-| `@mui/material` | dep (`apps/web`) | the component library named in the architecture |
-| `@emotion/react` · `@emotion/styled` | dep (`apps/web`) | MUI's styling engine (its peer deps) |
-| `@mui/material-nextjs` | dep (`apps/web`) | App Router emotion cache for SSR |
+| Package                              | Type             | Reason                                                                                           |
+| ------------------------------------ | ---------------- | ------------------------------------------------------------------------------------------------ |
+| `@sorrel/ui`                         | dep (`apps/web`) | the `DeliveryDatePicker` + `BrandLogo`                                                           |
+| `@sorrel/analytics`                  | dep (`apps/web`) | the typed tracker                                                                                |
+| `@sorrel/shared`                     | dep (`apps/web`) | `FUNNEL_STEPS` / `FunnelStep`                                                                    |
+| `posthog-js`                         | dep (`apps/web`) | analytics sink — wrapped behind `posthogSink`, only loaded when `NEXT_PUBLIC_POSTHOG_KEY` is set |
+| `@mui/material`                      | dep (`apps/web`) | the component library named in the architecture                                                  |
+| `@emotion/react` · `@emotion/styled` | dep (`apps/web`) | MUI's styling engine (its peer deps)                                                             |
+| `@mui/material-nextjs`               | dep (`apps/web`) | App Router emotion cache for SSR                                                                 |
 
 Three internal workspaces plus the external packages above: `posthog-js` (confined to the
 `posthogSink` adapter, unloaded on the default path) and the MUI + emotion stack (the named

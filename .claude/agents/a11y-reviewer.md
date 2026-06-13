@@ -19,6 +19,7 @@ superset of the brief. Hold it to the full bar below; hold other wizard inputs t
 the relevant subset.
 
 ## Modal / picker checklist
+
 1. **Focus trap** — focus is contained while the modal is open.
 2. **ESC closes** and **backdrop click closes** with correct cancel semantics.
 3. **Return focus** — focus returns to the trigger ("change") button on close.
@@ -29,13 +30,16 @@ the relevant subset.
 8. **Single selection** is announced (`aria-pressed`/`aria-selected`), month-boundary navigation is reachable by keyboard.
 
 ## Wizard input checklist
+
 - Labels tied to controls; `field_error` states are announced (`aria-describedby`, `role="alert"`/`aria-live`).
 - Autocomplete (the variant-B step) is operable by keyboard and screen reader.
 
 ## Method
+
 - Read the component + its tests/stories. If `axe`/`jest-axe`/Cypress axe is wired, note whether the centerpiece is covered.
 
 ## Output
+
 ```
 ## A11y audit — [component] — [timestamp]
 
@@ -51,4 +55,5 @@ the relevant subset.
 ### Verified
 [checklist items confirmed present]
 ```
+
 Never return blank — if clean, list every checklist item you confirmed.

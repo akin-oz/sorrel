@@ -87,8 +87,7 @@ authored once and shared lives in `@sorrel/shared`.
   The two `exit_intent_*` events make the exit-intent recovery modal (a proven conversion
   win, fired by the wizard in spec 010) measurable: recovery rate = `exit_intent_recovered`
   ÷ `exit_intent_shown`. A dismissal-then-leave needs no separate event — it is the absence
-  of a `recovered` followed by `funnel_abandoned`. They live in the contract (not in spec
-  010) because every funnel event belongs in one typed firewall.
+  of a `recovered` followed by `funnel_abandoned`. They live in the contract (not in spec 010) because every funnel event belongs in one typed firewall.
 
 - `packages/analytics/src/sink.ts` — the transport seam so web and seed share one contract
   but different destinations:
@@ -120,7 +119,7 @@ authored once and shared lives in `@sorrel/shared`.
 
 None to `schema.graphql` or `packages/domain`. This **creates** a second contract
 (`FunnelEvent`) alongside the GraphQL one. The schema-sync test makes `schema.graphql`'s
-`FunnelStep` and `@sorrel/shared`'s `FUNNEL_STEPS` mutually binding — but it only *asserts*
+`FunnelStep` and `@sorrel/shared`'s `FUNNEL_STEPS` mutually binding — but it only _asserts_
 the existing schema, it does not change it.
 
 # Out of scope

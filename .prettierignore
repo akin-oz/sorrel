@@ -16,5 +16,9 @@ coverage
 **/__generated__/**
 apps/web/lib/gql
 
+# Generated / auto-written data (not authored by hand)
+apps/web/lib/insights-data.json
+.claude/context-snapshot.md
+
 # System files
 .DS_Store

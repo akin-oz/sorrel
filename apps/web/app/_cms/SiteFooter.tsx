@@ -66,7 +66,9 @@ export function SiteFooter({ blok }: { blok: SiteFooterBlok }) {
       >
         <Box sx={{ display: "flex", alignItems: "center", gap: 1, color: sorrelTheme.onAccent }}>
           <BrandLogo size={22} />
-          <Typography sx={{ fontFamily: FONT_SERIF, fontWeight: 700, fontSize: { xs: 20, md: 22 } }}>
+          <Typography
+            sx={{ fontFamily: FONT_SERIF, fontWeight: 700, fontSize: { xs: 20, md: 22 } }}
+          >
             Sorrel
           </Typography>
         </Box>

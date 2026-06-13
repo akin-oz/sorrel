@@ -1,9 +1,10 @@
 "use client";
 
+import type { ElementType, ReactNode } from "react";
+
 import Box from "@mui/material/Box";
 import type { SxProps, Theme } from "@mui/material/styles";
 import type { storyblokEditable } from "@storyblok/react/rsc";
-import type { ElementType, ReactNode } from "react";
 
 /**
  * Full-bleed section band (spec 012). Each blok owns its background colour and

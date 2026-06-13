@@ -51,14 +51,14 @@ same pattern as `FUNNEL_STEPS` ↔ schema in spec 009.
 Content types and nestable bloks (schema authored in the space; shapes below). Each maps to a
 component under `apps/web/app/_cms/`:
 
-| Blok | Fields | Renderer |
-|---|---|---|
-| `page` (content type) | `body` (bloks) | `Page` — maps children |
-| `hero` | `headline`, `subcopy`, `ctaLabel`, `ctaHref` | `Hero` (MUI) |
-| `feature_grid` | `heading`, `items` (`feature_item`[]) | `FeatureGrid` |
-| `feature_item` | `title`, `body` | `FeatureItem` |
-| `cta_section` | `heading`, `ctaLabel`, `ctaHref` | `CtaSection` |
-| `recipe` (content type) | `name`, `slug`, `description`, `image` (asset), `dietaryTags` (multi-option) | `RecipeCard` |
+| Blok                    | Fields                                                                       | Renderer               |
+| ----------------------- | ---------------------------------------------------------------------------- | ---------------------- |
+| `page` (content type)   | `body` (bloks)                                                               | `Page` — maps children |
+| `hero`                  | `headline`, `subcopy`, `ctaLabel`, `ctaHref`                                 | `Hero` (MUI)           |
+| `feature_grid`          | `heading`, `items` (`feature_item`[])                                        | `FeatureGrid`          |
+| `feature_item`          | `title`, `body`                                                              | `FeatureItem`          |
+| `cta_section`           | `heading`, `ctaLabel`, `ctaHref`                                             | `CtaSection`           |
+| `recipe` (content type) | `name`, `slug`, `description`, `image` (asset), `dietaryTags` (multi-option) | `RecipeCard`           |
 
 Every blok renderer spreads `storyblokEditable(blok)` so the visual editor can select it.
 
@@ -138,7 +138,8 @@ When no Storyblok token is set (`STORYBLOK_PREVIEW_TOKEN` / `STORYBLOK_PUBLIC_TO
 
 # Manual provisioning (prerequisite, like the PostHog key)
 
-The user creates the space and content in Storyblok (the visual editing *is* the showcase):
+The user creates the space and content in Storyblok (the visual editing _is_ the showcase):
+
 - Create a space; define the bloks above; author the `home` story and a few `recipe` stories.
 - Set the space **Visual Editor** preview URL to `https://<site>/api/draft?...`.
 - Add a **publish webhook** → `https://<site>/api/storyblok/revalidate`.
@@ -164,11 +165,11 @@ domain/ui unit tests update to the new shape.
 
 # New dependencies (flagged for approval)
 
-| Package | Type | Reason |
-|---|---|---|
-| `@storyblok/react` | dep (`apps/web`) | SDK, RSC rendering, the visual-editor Bridge |
-| `storyblok-generate-ts` | devDep (root) | generate typed bloks from the space schema |
-| `next-intl` | dep (`apps/web`) | en/de routing, message catalogs, hreflang |
+| Package                 | Type             | Reason                                       |
+| ----------------------- | ---------------- | -------------------------------------------- |
+| `@storyblok/react`      | dep (`apps/web`) | SDK, RSC rendering, the visual-editor Bridge |
+| `storyblok-generate-ts` | devDep (root)    | generate typed bloks from the space schema   |
+| `next-intl`             | dep (`apps/web`) | en/de routing, message catalogs, hreflang    |
 
 The Storyblok CLI is used via `npx storyblok` (no install). No content SDK leaks past the
 `_cms/` renderers and `storyblok.ts`.

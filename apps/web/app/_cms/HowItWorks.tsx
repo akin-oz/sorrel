@@ -63,7 +63,10 @@ export function HowItWorks({ blok }: { blok: HowItWorksBlok }) {
       }}
     >
       <Box sx={{ display: "flex", flexDirection: "column", gap: { xs: 0.75, md: 1 } }}>
-        <Typography variant="overline" sx={{ fontSize: { xs: 11, md: 12 }, color: sorrelTheme.mono }}>
+        <Typography
+          variant="overline"
+          sx={{ fontSize: { xs: 11, md: 12 }, color: sorrelTheme.mono }}
+        >
           {blok.eyebrow}
         </Typography>
         <Typography variant="h2" sx={{ fontSize: { xs: 24, md: 32 } }}>

@@ -8,6 +8,7 @@ between the human and the agent, and the git log is the demo: spec → approval 
 implementation → green checks → merge.
 
 ## Lifecycle
+
 1. **Propose** — `/spec-new <gap>` (or the `spec-author` agent) writes `NNN-name.md`
    with `approved: no`. Nothing is built yet.
 2. **Approve** — a human reviews and flips the front-matter to `approved: yes`.
@@ -17,11 +18,13 @@ implementation → green checks → merge.
    `.claude/hooks/guard-commit.sh`).
 
 ## Numbering
+
 Zero-padded, monotonically increasing: `001`, `002`, … Use `_template.md` as the
 starting point. `tier` follows the architecture tiers (1 credible core, 2 JD
 coverage, 3 closers).
 
 ## How this is enforced
+
 - `.claude/rules/no-invention.md` — no endpoints/props/deps/UI states outside an approved spec.
 - `.claude/rules/source-of-truth.md` — `schema.graphql` + `packages/domain` are canonical.
 - `.claude/rules/verification.md` — green typecheck + tests in-turn; "should work" is banned.

@@ -114,8 +114,7 @@ const HOME: Record<string, HomeStrings> = {
         },
         {
           question: "What if my cat turns her nose up?",
-          answer:
-            "Fussy starts are normal. Tell us what happened and we'll help you swap recipes.",
+          answer: "Fussy starts are normal. Tell us what happened and we'll help you swap recipes.",
         },
         {
           question: "Can I pause or cancel?",

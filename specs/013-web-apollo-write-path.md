@@ -31,6 +31,7 @@ optimistic price-preview the funnel is meant to show:
 # Scope
 
 ## Domain — pricing becomes canonical
+
 - New `packages/domain/src/pricing/` — move `computePlan` + money helpers out of the resolver;
   unit-test portion calc + plan invariants (mirrors the calendar tests' rigor).
 - `services/api` imports pricing from `@sorrel/domain` (no inline logic).
@@ -54,17 +55,20 @@ reverse:
   future session (human or model) can't reintroduce the same violation unnoticed.
 
 ## Contract — `FunnelDraft.plan` + a working mutation
+
 - Add `plan: Plan` to `FunnelDraft` in `schema.graphql`; re-run `yarn codegen` (resolver types).
 - `updateFunnelPlan` recomputes the plan from `cats` + `recipeSlugs` + `frequency` via the
   domain, returns the updated draft incl. `plan`.
 
 ## Web Apollo client (RSC-safe)
+
 - `@apollo/client` + `@apollo/client-integration-nextjs` (`registerApolloClient` for a
   per-request RSC client — no cross-user cache bleed) + a client-side provider for islands.
 - `codegen.ts` gains the **`apps/web` client-preset target** (typed documents) — closes the
   hand-written-enum gap (FunnelStep/DietaryTag generated, sync-guard tests retired).
 
 ## GraphQL endpoint — co-located Route Handler
+
 `services/api` is a local standalone mock (`localhost:4000`), not deployed; only the web app
 ships to Vercel. To make the write-path real in production, mount the **same schema +
 `@sorrel/api` resolvers** as a Next Route Handler at `apps/web/app/api/graphql/route.ts`
@@ -73,6 +77,7 @@ with no second service, and the resolvers are reused — no logic duplication. `
 exposes its `resolvers`/`typeDefs` for import; the standalone server stays for local dev.
 
 ## Two mutations on the funnel
+
 - `saveFunnelDraft` — `optimisticResponse` + `cache.modify` autosave (abandonment recovery now
   truly server-backed, fulfilling the README "resume" claim).
 - `updateFunnelPlan` on the PLAN step — frequency toggle drives a React 19 `useOptimistic`
@@ -80,6 +85,7 @@ exposes its `resolvers`/`typeDefs` for import; the standalone server stays for l
   in-flight affordance (matches the design).
 
 ## EMAIL step (server action)
+
 - `useActionState` + a server action with server-side validation — the `field_error` emit and
   the "server actions vs Apollo mutations" talking point.
 
@@ -89,20 +95,23 @@ exposes its `resolvers`/`typeDefs` for import; the standalone server stays for l
 moves **into** `packages/domain` (the canonical home) — not duplicated. No breaking field changes.
 
 # Out of scope (own specs)
+
 - The A/B variant wiring + seed/insights — spec 014.
 - CI mirror of codegen drift — spec 015.
 
 # New dependencies (flagged for approval)
-| Package | Type | Reason |
-|---|---|---|
-| `@apollo/client` | dep (`apps/web`) | the GraphQL client |
-| `@apollo/client-integration-nextjs` | dep (`apps/web`) | RSC `registerApolloClient` |
-| `rxjs` | dep (`apps/web`) | required (non-optional) peer of `@apollo/client` 4.x — its Observable engine; the client will not run without it |
-| `@apollo/server` | dep (`apps/web`) | hosts the co-located GraphQL Route Handler (same version as `services/api`) |
-| `@as-integrations/next` | dep (`apps/web`) | adapts `@apollo/server` to a Next App Router Route Handler |
-| `@graphql-codegen/client-preset` | devDep (root) | typed documents for `apps/web` |
+
+| Package                             | Type             | Reason                                                                                                           |
+| ----------------------------------- | ---------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `@apollo/client`                    | dep (`apps/web`) | the GraphQL client                                                                                               |
+| `@apollo/client-integration-nextjs` | dep (`apps/web`) | RSC `registerApolloClient`                                                                                       |
+| `rxjs`                              | dep (`apps/web`) | required (non-optional) peer of `@apollo/client` 4.x — its Observable engine; the client will not run without it |
+| `@apollo/server`                    | dep (`apps/web`) | hosts the co-located GraphQL Route Handler (same version as `services/api`)                                      |
+| `@as-integrations/next`             | dep (`apps/web`) | adapts `@apollo/server` to a Next App Router Route Handler                                                       |
+| `@graphql-codegen/client-preset`    | devDep (root)    | typed documents for `apps/web`                                                                                   |
 
 # Acceptance criteria
+
 - [ ] `computePlan` lives in `packages/domain` with unit tests; the resolver imports it (no inline pricing)
 - [ ] Anti-drift guardrail in place: tightened `source-of-truth.md` + a `guard-domain-logic`
       PreToolUse hook that flags pricing/plan logic written outside `packages/domain`
@@ -115,4 +124,5 @@ moves **into** `packages/domain` (the canonical home) — not duplicated. No bre
 - [ ] No real-brand names/assets
 
 # Analytics
+
 EMAIL validation failures fire `field_error` (step, field, error) via the spec-009 contract.

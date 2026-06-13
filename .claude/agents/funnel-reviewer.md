@@ -18,6 +18,7 @@ Conversion is an engineering discipline — every step must be a clean, measured
 analytics unit. No style or architecture notes.
 
 Context (from the architecture):
+
 - The wizard is URL-segmented (`/wizard/[step]`) so each step is a deep-linkable analytics unit.
 - The typed event contract lives in `packages/analytics` and is shared by web + seed scripts.
 - Required events: `funnel_step_viewed`, `step_completed`, `field_error`, `funnel_abandoned`.
@@ -25,6 +26,7 @@ Context (from the architecture):
 - Abandonment recovery: state persisted locally + a `saveFunnelDraft` mutation; resume mid-funnel.
 
 ## Check for
+
 1. **Missing or mistyped events** — a step that renders without `funnel_step_viewed`, a submit without `step_completed`, a validation failure without `field_error`.
 2. **Untyped / ad-hoc events** — `track(...)` calls that bypass the `packages/analytics` typed contract or use string literals not in it.
 3. **Missing props** — events that omit `step`, or A/B-flagged steps that omit `variant`.
@@ -32,6 +34,7 @@ Context (from the architecture):
 5. **Drift between web and seed script** — events fired by the app that the seed generator does not know about (breaks the drop-off curve).
 
 ## Output
+
 ```
 ## Funnel instrumentation audit — [scope] — [timestamp]
 
@@ -47,4 +50,5 @@ Context (from the architecture):
 ### Coverage map
 [step → events confirmed firing]
 ```
+
 Never return blank — if clean, print the step→event coverage map you verified.

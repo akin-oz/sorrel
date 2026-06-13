@@ -1,11 +1,10 @@
 "use client";
 
-import { useTranslations } from "next-intl";
-
 import Box from "@mui/material/Box";
 import MenuItem from "@mui/material/MenuItem";
 import Skeleton from "@mui/material/Skeleton";
 import TextField from "@mui/material/TextField";
+import { useTranslations } from "next-intl";
 
 import { useFunnel } from "./FunnelProvider";
 
