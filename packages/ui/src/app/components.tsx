@@ -274,20 +274,25 @@ export function AppCard({
     bgcolor: TONE_BG[tone],
     borderRadius: radius ?? `${appTokens.radius.surface}px`,
   };
+  // Borders set width/style/colour separately — never the `border` shorthand, which
+  // (in a responsive media query) resets border-colour back to currentColor.
   if (border !== false) {
-    base.border =
-      border === true || border === undefined
-        ? "1px solid"
-        : mapResponsive(border, (b) => (b ? "1px solid" : "none"));
+    base.borderStyle = "solid";
     base.borderColor = "divider";
+    base.borderWidth =
+      border === true || border === undefined
+        ? "1px"
+        : mapResponsive(border, (b) => (b ? "1px" : "0px"));
   }
   if (borderRight) {
-    base.borderRight = "1px solid";
+    base.borderRightStyle = "solid";
     base.borderRightColor = "divider";
+    base.borderRightWidth = "1px";
   }
   if (borderBottom !== undefined) {
-    base.borderBottom = mapResponsive(borderBottom, (b) => (b ? "1px solid" : "none"));
+    base.borderBottomStyle = "solid";
     base.borderBottomColor = "divider";
+    base.borderBottomWidth = mapResponsive(borderBottom, (b) => (b ? "1px" : "0px"));
   }
   if (shadow !== undefined) {
     base.boxShadow = mapResponsive(shadow, (b) => (b ? appTokens.shadow.card : "none"));
