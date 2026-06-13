@@ -23,6 +23,7 @@ import {
   initialFunnelState,
   stepFromSegment,
 } from "./state";
+import { type Variant, useVariant } from "./useVariant";
 
 const STORAGE_KEY = "sorrel.funnel.v1";
 
@@ -33,6 +34,8 @@ interface FunnelContextValue {
   track: Track;
   /** Current step derived from the URL, or null off a known step. */
   currentStep: FunnelStep | null;
+  /** The A/B bucket for this session (spec 014); null until resolved on the client. */
+  variant: Variant | null;
 }
 
 const FunnelContext = createContext<FunnelContextValue | null>(null);
@@ -48,6 +51,15 @@ export function FunnelProvider({ children }: { children: ReactNode }) {
     if (!trackerRef.current) trackerRef.current = createAppTracker();
     trackerRef.current(event);
   }, []);
+
+  // The A/B bucket, sourced from PostHog's feature flag (or the offline fallback).
+  // Resolves async, so it is read via a ref at event-fire time — a late variant
+  // update must not re-fire funnel_step_viewed.
+  const variant = useVariant();
+  const variantRef = useRef<Variant | null>(variant);
+  useEffect(() => {
+    variantRef.current = variant;
+  }, [variant]);
 
   const pathname = usePathname();
   const currentStep = stepFromSegment(pathname?.split("/")[2] ?? "");
@@ -75,7 +87,7 @@ export function FunnelProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!currentStep) return;
     dispatch({ type: "ADVANCE", step: currentStep });
-    track({ name: "funnel_step_viewed", step: currentStep });
+    track({ name: "funnel_step_viewed", step: currentStep, variant: variantRef.current ?? undefined });
   }, [currentStep, track]);
 
   // Abandonment: leaving the tab/page before SUMMARY is a drop-off.
@@ -90,8 +102,8 @@ export function FunnelProvider({ children }: { children: ReactNode }) {
   }, [currentStep, track]);
 
   const value = useMemo<FunnelContextValue>(
-    () => ({ state, dispatch, track, currentStep }),
-    [state, track, currentStep],
+    () => ({ state, dispatch, track, currentStep, variant }),
+    [state, track, currentStep, variant],
   );
 
   return <FunnelContext.Provider value={value}>{children}</FunnelContext.Provider>;

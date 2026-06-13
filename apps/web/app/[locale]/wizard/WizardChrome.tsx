@@ -20,7 +20,7 @@ import { useExitIntent } from "./useExitIntent";
 const INACTIVE_SEGMENT = "#E3D8C8";
 
 export function WizardChrome({ children }: { children: ReactNode }) {
-  const { currentStep, track } = useFunnel();
+  const { currentStep, track, variant } = useFunnel();
   const router = useRouter();
   const t = useTranslations("Wizard");
 
@@ -29,11 +29,11 @@ export function WizardChrome({ children }: { children: ReactNode }) {
 
   const handleNext = useCallback(() => {
     if (!currentStep) return;
-    track({ name: "step_completed", step: currentStep });
+    track({ name: "step_completed", step: currentStep, variant: variant ?? undefined });
     if (!isLastStep(currentStep)) {
       router.push(`/wizard/${segmentForStep(nextStep(currentStep))}`);
     }
-  }, [currentStep, track, router]);
+  }, [currentStep, track, router, variant]);
 
   const handleBack = useCallback(() => {
     if (!currentStep || isFirstStep(currentStep)) return;

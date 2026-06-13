@@ -12,9 +12,6 @@ import { type Track, createMemorySink, createTracker } from "@sorrel/analytics";
 import { createPosthogSink } from "./posthogSink";
 
 export function createAppTracker(): Track {
-  const key = process.env.NEXT_PUBLIC_POSTHOG_KEY;
-  const sink = key
-    ? createPosthogSink(key, process.env.NEXT_PUBLIC_POSTHOG_HOST)
-    : createMemorySink();
+  const sink = process.env.NEXT_PUBLIC_POSTHOG_KEY ? createPosthogSink() : createMemorySink();
   return createTracker(sink);
 }
