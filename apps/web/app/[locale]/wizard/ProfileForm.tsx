@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useState } from "react";
+
 import Box from "@mui/material/Box";
 import MenuItem from "@mui/material/MenuItem";
 import Skeleton from "@mui/material/Skeleton";
@@ -7,16 +9,22 @@ import TextField from "@mui/material/TextField";
 import { useTranslations } from "next-intl";
 
 import { useFunnel } from "./FunnelProvider";
+import { stepValidity } from "./validation";
 
 const AGE_OPTIONS = ["kitten", "young", "adult", "senior"] as const;
 const WEIGHT_OPTIONS = ["s", "m", "l", "xl"] as const;
+const DEFAULT_AGE = "young";
+const DEFAULT_WEIGHT = "m";
+
+type ProfileField = "name" | "age" | "weight";
 
 /**
- * The PROFILE A/B form (spec 014) — the 39→65 lever, live.
+ * The PROFILE A/B form (spec 014) — the 39→65 lever, with validation (spec 020).
  *
- *   Variant A (control): free-text inputs. Empty fields fire `field_error` — the
- *     friction the autocomplete removes.
- *   Variant B (test): selects pre-set to sensible defaults; no free-text stalls.
+ *   Variant A (control): free-text inputs; empty required fields show an inline
+ *     error on blur and fire `field_error` — the friction the autocomplete removes.
+ *   Variant B (test): selects pre-set to sensible defaults, seeded into state so
+ *     the plan + validation reflect what's on screen (no free-text stalls).
  *
  * The variant comes from PostHog (via the provider) and resolves async, so this
  * renders a stable skeleton until it is known — identical on the server and the
@@ -26,6 +34,17 @@ export function ProfileForm() {
   const t = useTranslations("Profile");
   const { variant, state, dispatch, track } = useFunnel();
   const cat = state.cats[0];
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
+
+  // Variant B's selects display defaults; commit them to state so validation and
+  // the plan reflect the on-screen values (the smart-default that removes friction).
+  useEffect(() => {
+    if (variant !== "B") return;
+    const patch: Partial<{ age: string; weight: string }> = {};
+    if (!cat?.age) patch.age = DEFAULT_AGE;
+    if (!cat?.weight) patch.weight = DEFAULT_WEIGHT;
+    if (Object.keys(patch).length > 0) dispatch({ type: "SET_CAT", cat: patch });
+  }, [variant, cat?.age, cat?.weight, dispatch]);
 
   if (!variant) {
     return (
@@ -37,9 +56,13 @@ export function ProfileForm() {
     );
   }
 
-  function requireOnBlur(field: string, value: string | undefined) {
+  const { errors } = stepValidity("PROFILE", state);
+  function blur(field: ProfileField, value: string | undefined) {
+    setTouched((prev) => ({ ...prev, [field]: true }));
     if (!value?.trim()) track({ name: "field_error", step: "PROFILE", field, error: "required" });
   }
+  const showError = (field: ProfileField) => Boolean(touched[field] && errors[field]);
+  const helperText = (field: ProfileField) => (showError(field) ? t("required") : undefined);
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
@@ -48,7 +71,9 @@ export function ProfileForm() {
         placeholder={t("namePlaceholder")}
         value={cat?.name ?? ""}
         onChange={(e) => dispatch({ type: "SET_CAT", cat: { name: e.target.value } })}
-        onBlur={(e) => requireOnBlur("name", e.target.value)}
+        onBlur={(e) => blur("name", e.target.value)}
+        error={showError("name")}
+        helperText={helperText("name")}
         fullWidth
       />
 
@@ -59,7 +84,9 @@ export function ProfileForm() {
             placeholder={t("agePlaceholder")}
             value={cat?.age ?? ""}
             onChange={(e) => dispatch({ type: "SET_CAT", cat: { age: e.target.value } })}
-            onBlur={(e) => requireOnBlur("age", e.target.value)}
+            onBlur={(e) => blur("age", e.target.value)}
+            error={showError("age")}
+            helperText={helperText("age")}
             fullWidth
           />
           <TextField
@@ -67,7 +94,9 @@ export function ProfileForm() {
             placeholder={t("weightPlaceholder")}
             value={cat?.weight ?? ""}
             onChange={(e) => dispatch({ type: "SET_CAT", cat: { weight: e.target.value } })}
-            onBlur={(e) => requireOnBlur("weight", e.target.value)}
+            onBlur={(e) => blur("weight", e.target.value)}
+            error={showError("weight")}
+            helperText={helperText("weight")}
             fullWidth
           />
         </>
@@ -76,7 +105,7 @@ export function ProfileForm() {
           <TextField
             select
             label={t("age")}
-            value={cat?.age ?? "young"}
+            value={cat?.age ?? DEFAULT_AGE}
             onChange={(e) => dispatch({ type: "SET_CAT", cat: { age: e.target.value } })}
             fullWidth
           >
@@ -89,7 +118,7 @@ export function ProfileForm() {
           <TextField
             select
             label={t("weight")}
-            value={cat?.weight ?? "m"}
+            value={cat?.weight ?? DEFAULT_WEIGHT}
             onChange={(e) => dispatch({ type: "SET_CAT", cat: { weight: e.target.value } })}
             fullWidth
           >

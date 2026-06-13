@@ -8,6 +8,7 @@
     "back": "Zurück",
     "continue": "Weiter",
     "confirm": "Plan bestätigen",
+    "incomplete": "Schließe diesen Schritt ab, um fortzufahren",
     "stepProgress": "Schritt {current} von {total}",
     "resume": "Fortsetzen",
     "resumeBanner": "Willkommen zurück — wir haben gespeichert, wo du aufgehört hast."

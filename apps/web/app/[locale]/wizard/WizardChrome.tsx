@@ -17,13 +17,17 @@ import { useFunnel } from "./FunnelProvider";
 import { WizardRail } from "./WizardRail";
 import { isFirstStep, isLastStep, nextStep, prevStep, segmentForStep } from "./state";
 import { useExitIntent } from "./useExitIntent";
+import { stepValidity } from "./validation";
 
 const INACTIVE_SEGMENT = "#E3D8C8";
 
 export function WizardChrome({ children }: { children: ReactNode }) {
-  const { currentStep, track, variant, confirmed, confirm } = useFunnel();
+  const { state, currentStep, track, variant, confirmed, confirm } = useFunnel();
   const router = useRouter();
   const t = useTranslations("Wizard");
+
+  // Gate Continue/Confirm on the current step's validity (spec 020).
+  const validity = currentStep ? stepValidity(currentStep, state) : { valid: true, errors: {} };
 
   const stepNumber = currentStep ? FUNNEL_STEPS.indexOf(currentStep) + 1 : 0;
   const total = FUNNEL_STEPS.length;
@@ -164,15 +168,27 @@ export function WizardChrome({ children }: { children: ReactNode }) {
             <ResumeBanner />
             {children}
             {currentStep && showCta ? (
-              <Button
-                variant="contained"
-                size="large"
-                fullWidth
-                onClick={handleNext}
-                sx={{ mt: "auto" }}
-              >
-                {isLastStep(currentStep) ? t("confirm") : t("continue")}
-              </Button>
+              <Box sx={{ mt: "auto", display: "flex", flexDirection: "column", gap: 1 }}>
+                <Button
+                  variant="contained"
+                  size="large"
+                  fullWidth
+                  onClick={handleNext}
+                  disabled={!validity.valid}
+                >
+                  {isLastStep(currentStep) ? t("confirm") : t("continue")}
+                </Button>
+                {!validity.valid ? (
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    aria-live="polite"
+                    sx={{ textAlign: "center" }}
+                  >
+                    {t("incomplete")}
+                  </Typography>
+                ) : null}
+              </Box>
             ) : null}
           </Box>
         </Box>

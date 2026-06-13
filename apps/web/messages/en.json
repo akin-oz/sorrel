@@ -8,6 +8,7 @@
     "back": "Back",
     "continue": "Continue",
     "confirm": "Confirm plan",
+    "incomplete": "Complete this step to continue",
     "stepProgress": "Step {current} of {total}",
     "resume": "Resume",
     "resumeBanner": "Welcome back — we saved where you left off."
