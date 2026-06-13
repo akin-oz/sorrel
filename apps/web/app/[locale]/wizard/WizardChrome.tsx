@@ -77,7 +77,7 @@ export function WizardChrome({ children }: { children: ReactNode }) {
     >
       <AppCard
         tone="paper"
-        border={false}
+        border={{ xs: false, sm: true }}
         padding={0}
         radius={{ xs: 0, sm: "24px" }}
         shadow={{ xs: false, sm: true }}

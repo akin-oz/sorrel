@@ -229,8 +229,9 @@ interface AppCardProps extends LayoutProps {
   radius?: Responsive<number | string>;
   /** Lifted card shadow (responsive). */
   shadow?: Responsive<boolean>;
-  /** Full 1px border on all sides (default true). Set false for shell/banner surfaces. */
-  border?: boolean;
+  /** Full 1px border on all sides (default true; responsive — e.g. `{ xs: false, sm: true }`
+   *  for a card that's full-bleed on mobile but outlined when floating). */
+  border?: Responsive<boolean>;
   /** 1px border on the right only (the rail divider). */
   borderRight?: boolean;
   /** 1px border on the bottom (responsive — the desktop top-bar divider). */
@@ -273,8 +274,11 @@ export function AppCard({
     bgcolor: TONE_BG[tone],
     borderRadius: radius ?? `${appTokens.radius.surface}px`,
   };
-  if (border) {
-    base.border = "1px solid";
+  if (border !== false) {
+    base.border =
+      border === true || border === undefined
+        ? "1px solid"
+        : mapResponsive(border, (b) => (b ? "1px solid" : "none"));
     base.borderColor = "divider";
   }
   if (borderRight) {
