@@ -88,6 +88,17 @@
     "portionPerDay": "{grams}g Futter pro Tag",
     "mealsPerBox": "{meals} Mahlzeiten pro Box"
   },
+  "Email": {
+    "label": "E-Mail-Adresse",
+    "placeholder": "du@beispiel.de",
+    "hint": "Wir senden deinen Plan hierhin und sichern deinen Fortschritt.",
+    "submit": "Plan speichern",
+    "saved": "Gespeichert — sieh in deinem Postfach nach deinem Plan.",
+    "error": {
+      "required": "Bitte gib deine E-Mail-Adresse ein.",
+      "invalid": "Das sieht nicht nach einer gültigen E-Mail-Adresse aus."
+    }
+  },
   "Picker": {
     "dialogTitle": "Liefertag wählen",
     "cancel": "Abbrechen",

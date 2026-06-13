@@ -44,6 +44,7 @@ export type FunnelAction =
   | { type: "ADVANCE"; step: FunnelStep }
   | { type: "SET_DELIVERY_DATE"; date: string }
   | { type: "SET_FREQUENCY"; frequency: string }
+  | { type: "SET_EMAIL"; email: string }
   | { type: "TOGGLE_RECIPE"; slug: string }
   | { type: "SET_CAT"; cat: Partial<CatDraft> }
   | { type: "RESET" };
@@ -68,6 +69,8 @@ export function funnelReducer(state: FunnelState, action: FunnelAction): FunnelS
       return { ...state, deliveryDate: action.date };
     case "SET_FREQUENCY":
       return { ...state, frequency: action.frequency };
+    case "SET_EMAIL":
+      return { ...state, email: action.email };
     case "TOGGLE_RECIPE":
       return {
         ...state,

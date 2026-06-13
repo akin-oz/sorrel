@@ -10,6 +10,7 @@ import { FUNNEL_STEPS, type FunnelStep } from "@sorrel/shared";
 import { DeliveryDatePicker, type DeliveryLabels, sorrelTheme } from "@sorrel/ui";
 
 import type { RecipeBlok } from "../../../../types/storyblok.gen";
+import { EmailForm } from "../EmailForm";
 import { useFunnel } from "../FunnelProvider";
 import { PlanForm } from "../PlanForm";
 import { ProfileForm } from "../ProfileForm";
@@ -107,7 +108,11 @@ function PlanStep() {
 }
 
 function EmailStep() {
-  return <StepShell step="EMAIL" />;
+  return (
+    <StepShell step="EMAIL">
+      <EmailForm />
+    </StepShell>
+  );
 }
 
 function SummaryStep() {

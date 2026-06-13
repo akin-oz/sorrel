@@ -45,6 +45,14 @@ describe("funnelReducer", () => {
     expect(removed.recipeSlugs).toEqual([]);
   });
 
+  it("SET_EMAIL records the captured email", () => {
+    const next = funnelReducer(initialFunnelState, {
+      type: "SET_EMAIL",
+      email: "owner@example.com",
+    });
+    expect(next.email).toBe("owner@example.com");
+  });
+
   it("SET_CAT creates then merges the first cat", () => {
     const named = funnelReducer(initialFunnelState, { type: "SET_CAT", cat: { name: "Miso" } });
     expect(named.cats).toEqual([{ name: "Miso" }]);

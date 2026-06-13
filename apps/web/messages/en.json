@@ -88,6 +88,17 @@
     "portionPerDay": "{grams}g of food per day",
     "mealsPerBox": "{meals} meals per box"
   },
+  "Email": {
+    "label": "Email address",
+    "placeholder": "you@example.com",
+    "hint": "We'll send your plan here and keep your progress safe.",
+    "submit": "Save my plan",
+    "saved": "Saved — check your inbox for your plan.",
+    "error": {
+      "required": "Please enter your email address.",
+      "invalid": "That doesn't look like a valid email address."
+    }
+  },
   "Picker": {
     "dialogTitle": "Choose a delivery day",
     "cancel": "Cancel",
