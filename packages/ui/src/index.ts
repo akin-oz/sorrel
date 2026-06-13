@@ -12,3 +12,6 @@ export {
   type DeliveryTheme,
   type DeliveryThemeName,
 } from "./theme/tokens";
+
+// The App* adaptive layer (spec 018).
+export * from "./app";
