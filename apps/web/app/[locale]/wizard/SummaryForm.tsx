@@ -7,13 +7,7 @@ import { useLocale, useTranslations } from "next-intl";
 
 import { FunnelDraftByIdDocument } from "../../../lib/graphql/funnel";
 import { useFunnel } from "./FunnelProvider";
-import { toBoxFrequency } from "./draft-input";
-
-/** "wild-caught-salmon" → "Wild-caught salmon" (display only; the slug stays canonical). */
-function humanizeSlug(slug: string): string {
-  const spaced = slug.replace(/-/g, " ");
-  return spaced.charAt(0).toUpperCase() + spaced.slice(1);
-}
+import { type SummaryLabels, orderSummaryRows } from "./order-summary";
 
 /**
  * SUMMARY step (spec 017) — the funnel's last step.
@@ -65,39 +59,14 @@ export function SummaryForm() {
     );
   }
 
-  const frequency = toBoxFrequency(state.frequency);
-  const deliveryLabel = state.deliveryDate
-    ? new Intl.DateTimeFormat(locale === "de" ? "de-DE" : "en-GB", {
-        weekday: "long",
-        day: "numeric",
-        month: "long",
-        timeZone: "UTC",
-      }).format(new Date(state.deliveryDate))
-    : null;
-
-  const rows: { label: string; value: string }[] = [
-    { label: t("cats"), value: tCats("count", { count: state.cats.length || 1 }) },
-  ];
-  if (state.recipeSlugs.length > 0) {
-    rows.push({ label: t("recipes"), value: state.recipeSlugs.map(humanizeSlug).join(", ") });
-  }
-  if (deliveryLabel) rows.push({ label: t("delivery"), value: deliveryLabel });
-  if (frequency) {
-    rows.push({
-      label: t("frequency"),
-      value: tPlan(frequency === "EVERY_2_WEEKS" ? "everyTwoWeeks" : "everyFourWeeks"),
-    });
-  }
-  if (plan) {
-    rows.push({
-      label: t("price"),
-      value: t("priceValue", {
-        first: plan.pricing.firstBox.formatted,
-        box: plan.pricing.perBox.formatted,
-      }),
-    });
-  }
-  if (state.email) rows.push({ label: t("email"), value: state.email });
+  const labels: SummaryLabels = {
+    label: (key) => t(key),
+    priceValue: (vars) => t("priceValue", vars),
+    frequency: (freq) => tPlan(freq === "EVERY_2_WEEKS" ? "everyTwoWeeks" : "everyFourWeeks"),
+    catCount: (count) => tCats("count", { count }),
+    locale,
+  };
+  const rows = orderSummaryRows(state, plan, labels);
 
   return (
     <Box

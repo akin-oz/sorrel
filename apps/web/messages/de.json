@@ -81,6 +81,10 @@
       "SENSITIVE": "Sensibel"
     }
   },
+  "Rail": {
+    "summaryHeading": "Dein Plan bisher",
+    "reassurance": "Tierärztlich entwickelt · Kostenlose Lieferung · Jederzeit kündbar"
+  },
   "Summary": {
     "cats": "Katzen",
     "recipes": "Rezepte",

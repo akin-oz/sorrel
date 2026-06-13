@@ -81,6 +81,10 @@
       "SENSITIVE": "Sensitive"
     }
   },
+  "Rail": {
+    "summaryHeading": "Your plan so far",
+    "reassurance": "Vet-formulated · Free delivery · Cancel anytime"
+  },
   "Summary": {
     "cats": "Cats",
     "recipes": "Recipes",
