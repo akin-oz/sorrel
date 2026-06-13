@@ -27,6 +27,8 @@ export interface DeliveryTheme {
   dayMuted: string;
   pillBg: string;
   pillText: string;
+  /** Modal backdrop scrim + shadow colour (ink-based, per brand). */
+  scrim: string;
   /** Day-cell + input corner radius (px). */
   radiusControl: number;
   /** CTA corner radius (px) — pill (999) for Sorrel, soft for Bramble. */
@@ -58,6 +60,7 @@ export const sorrelTheme: DeliveryTheme = {
   dayMuted: "#C9BCA9",
   pillBg: "#E7EDE2",
   pillText: "#3F5238",
+  scrim: "rgba(46,37,32,0.5)",
   radiusControl: 12,
   radiusCta: 999,
   radiusPill: 999,
@@ -79,6 +82,7 @@ export const brambleTheme: DeliveryTheme = {
   dayMuted: "#B3B8A6",
   pillBg: "#E3EBDC",
   pillText: "#33502F",
+  scrim: "rgba(37,43,35,0.5)",
   radiusControl: 8,
   radiusCta: 10,
   radiusPill: 6,

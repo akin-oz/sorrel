@@ -2,6 +2,7 @@
 
 import {
   type CSSProperties,
+  type AnimationEvent as ReactAnimationEvent,
   type KeyboardEvent as ReactKeyboardEvent,
   type RefObject,
   useEffect,
@@ -144,6 +145,17 @@ export function DeliveryDatePicker({
   const cellRefs = useRef<Map<IsoDate, HTMLButtonElement>>(new Map());
   const pendingConfirm = useRef<IsoDate | null>(null);
   const hasOpened = useRef(false);
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const finalized = useRef(true);
+
+  // Safety net: if animationend never fires (reduced-motion near-zero duration, an
+  // interrupted animation), the modal must not stick in "closing" forever.
+  useEffect(
+    () => () => {
+      if (closeTimer.current) clearTimeout(closeTimer.current);
+    },
+    [],
+  );
 
   const labelId = useId();
   const monthId = useId();
@@ -182,16 +194,32 @@ export function DeliveryDatePicker({
     } else {
       pendingConfirm.current = null;
     }
+    finalized.current = false;
     setState("closing");
     onOpenChange?.(false);
+    if (closeTimer.current) clearTimeout(closeTimer.current);
+    closeTimer.current = setTimeout(finishClose, 320); // > the 180ms exit animation
   }
 
-  function handleAnimationEnd() {
-    if (state !== "closing") return;
+  // Unmount on the exit animation's end — once. Either the scoped animationend or the
+  // safety-net timeout gets here first; the `finalized` ref makes it idempotent.
+  function finishClose() {
+    if (finalized.current) return;
+    finalized.current = true;
+    if (closeTimer.current) {
+      clearTimeout(closeTimer.current);
+      closeTimer.current = null;
+    }
     setState("closed");
     const confirmed = pendingConfirm.current;
     pendingConfirm.current = null;
     if (confirmed !== null) onConfirm?.(confirmed);
+  }
+
+  function handleAnimationEnd(event: ReactAnimationEvent<HTMLDivElement>) {
+    // Only the modal's OWN exit animation — not a bubbled descendant animation.
+    if (event.target !== event.currentTarget) return;
+    finishClose();
   }
 
   function selectIfDeliverable(iso: IsoDate) {
@@ -439,7 +467,7 @@ interface ModalProps {
   weeks: (DateCell | null)[][];
   activeIso: IsoDate;
   cellRefs: RefObject<Map<IsoDate, HTMLButtonElement>>;
-  onAnimationEnd: () => void;
+  onAnimationEnd: (e: ReactAnimationEvent<HTMLDivElement>) => void;
   onDialogKeyDown: (e: ReactKeyboardEvent<HTMLDivElement>) => void;
   onGridKeyDown: (e: ReactKeyboardEvent<HTMLDivElement>) => void;
   onBackdrop: () => void;
@@ -475,7 +503,7 @@ function Modal(props: ModalProps) {
         className="sdp-backdrop"
         data-state={state}
         onClick={props.onBackdrop}
-        style={{ position: "absolute", inset: 0, background: "rgba(46,37,32,0.5)" }}
+        style={{ position: "absolute", inset: 0, background: theme.scrim }}
       />
       <div
         ref={dialogRef}
@@ -494,7 +522,7 @@ function Modal(props: ModalProps) {
           transform: "translateY(-50%)",
           background: theme.surface,
           borderRadius: theme.radiusControl + 8,
-          boxShadow: "0 32px 64px -24px rgba(46,37,32,0.5)",
+          boxShadow: `0 32px 64px -24px ${theme.scrim}`,
           padding: "20px 16px 16px",
           display: "flex",
           flexDirection: "column",
@@ -671,22 +699,22 @@ function DayCell({ theme, locale, labels, cell, isActive, cellRefs, onSelect }: 
   }
 
   return (
-    <button
-      type="button"
-      className="sdp-cell"
-      role="gridcell"
-      ref={(el) => {
-        if (el) cellRefs.current.set(cell.iso, el);
-        else cellRefs.current.delete(cell.iso);
-      }}
-      tabIndex={isActive ? 0 : -1}
-      aria-label={cell.blocked && reasonText ? `${cell.day} — ${reasonText}` : undefined}
-      aria-selected={cell.isSelected}
-      aria-disabled={cell.blocked || undefined}
-      onClick={() => onSelect(cell.iso)}
-      style={{ ...base, ...skin, cursor: cell.blocked ? "default" : "pointer" }}
-    >
-      {cell.day}
-    </button>
+    <div role="gridcell" aria-selected={cell.isSelected}>
+      <button
+        type="button"
+        className="sdp-cell"
+        ref={(el) => {
+          if (el) cellRefs.current.set(cell.iso, el);
+          else cellRefs.current.delete(cell.iso);
+        }}
+        tabIndex={isActive ? 0 : -1}
+        aria-label={cell.blocked && reasonText ? `${cell.day} — ${reasonText}` : undefined}
+        aria-disabled={cell.blocked || undefined}
+        onClick={() => onSelect(cell.iso)}
+        style={{ ...base, ...skin, width: "100%", cursor: cell.blocked ? "default" : "pointer" }}
+      >
+        {cell.day}
+      </button>
+    </div>
   );
 }
