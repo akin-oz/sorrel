@@ -107,6 +107,18 @@ packages/analytics  Typed funnel-event contract, shared by web and seed scripts
 `packages/domain` are the single sources of truth, so an invented field, prop shape, or
 endpoint becomes a compile error before any human reads the diff.
 
+**One analytics contract, swappable destinations.** The funnel is instrumented once
+against the typed `FunnelEvent` contract (`packages/analytics`); a thin `AnalyticsSink`
+seam fans those events to vendors that never touch the emit sites. **PostHog is the
+backend of record** — it owns product analytics, the `profile-input` feature flag the
+wizard reads, and the A/B experiment. Mixpanel rides the same seam as a second
+destination — one line in `analytics.ts`, zero changes to instrumentation — to prove the
+contract is vendor-agnostic, not because two vendors are needed; it's opt-in per
+environment (`NEXT_PUBLIC_MIXPANEL_TOKEN`), so production runs single-vendor by default.
+Both backends are populated for the demo (`yarn workspace @sorrel/frontend seed:posthog`
+/ `seed:mixpanel`), each showing the same CATS→SUMMARY funnel with the PROFILE-input
+lever (variant A ≈26% → B ≈36% completion).
+
 ---
 
 ## How this was built — the AI workflow
