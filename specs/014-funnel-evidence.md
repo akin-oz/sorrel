@@ -47,8 +47,10 @@ This spec makes the lever real and visible — no Apollo dependency, so it ships
   Screenshots acceptable as a fallback per the prep's cut order.
 
 ## Second sink (vendor breadth)
-- A ~25-line `mixpanelSink` beside `posthogSink` (the `AnalyticsSink` seam is one method), as the
-  seed/insights destination; register Mixpanel in `.mcp.json`. PostHog stays the live funnel sink.
+- A ~25-line `mixpanelSink` beside `posthogSink` (the `AnalyticsSink` seam is one method); the
+  app tracker fans events out to every configured vendor. PostHog stays the live funnel +
+  experiments source (its MCP — `Create-Experiment`, `Create-Feature-Flag`, `Run-Query` — is
+  already connected); Mixpanel is the second destination that demonstrates the seam.
 
 # Contract impact
 None to `schema.graphql`. Uses the existing spec-009 event contract (no new event types — only
@@ -63,7 +65,7 @@ populates `variant`/`field` props already defined).
 # New dependencies (flagged for approval)
 | Package | Type | Reason |
 |---|---|---|
-| `mixpanel-browser` | dep (`apps/web`) | the second analytics sink (seed/insights destination) |
+| `mixpanel-browser` (+ `@types/mixpanel-browser`) | dep / devDep (`apps/web`) | the second analytics sink |
 | `tsx` | devDep (root) | TS runner for the seed script (`ts-node/esm` hits a require-cycle on Node 24) |
 
 # Acceptance criteria
@@ -71,7 +73,7 @@ populates `variant`/`field` props already defined).
 - [ ] `variant` is set on `funnel_step_viewed` + `step_completed` — the funnel is splittable by arm
 - [ ] Seed script emits a variant-split drop-off curve to JSON (deterministic, offline)
 - [ ] `/insights` renders the curve + A/B lift from the seeded JSON
-- [ ] `mixpanelSink` added behind the sink seam; `.mcp.json` registers Mixpanel
+- [ ] `mixpanelSink` added behind the sink seam; the tracker fans out to every configured vendor
 - [ ] `yarn type-check` + `yarn lint` clean; tests green; `next build` green
 - [ ] No real-brand names/assets; testimonials/figures clearly illustrative
 

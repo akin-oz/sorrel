@@ -1,17 +1,28 @@
 /**
- * App tracker construction (spec 010) — env-selected sink, deterministic default.
+ * App tracker construction (specs 010 + 014) — env-selected sinks, deterministic
+ * default.
  *
- *   key present  -> posthogSink   (real funnel + experiments)
- *   no key       -> memorySink    (offline, reproducible; tests and the demo)
+ *   PostHog key   -> posthogSink    (the live funnel + experiments source)
+ *   Mixpanel token-> mixpanelSink   (a second destination, via the same seam)
+ *   neither       -> memorySink     (offline, reproducible; tests and the demo)
  *
- * The vendor SDK lives only behind `createPosthogSink`; this module decides
- * which sink to bind and returns the typed tracker the rest of the app uses.
+ * Vendor SDKs live only behind their sinks; this module fans events out to every
+ * configured destination and returns the typed tracker the rest of the app uses.
  */
-import { type Track, createMemorySink, createTracker } from "@sorrel/analytics";
+import { type AnalyticsSink, type Track, createMemorySink, createTracker } from "@sorrel/analytics";
 
+import { createMixpanelSink } from "./mixpanelSink";
 import { createPosthogSink } from "./posthogSink";
 
+function fanOut(sinks: AnalyticsSink[]): AnalyticsSink {
+  return { emit: (event) => sinks.forEach((sink) => sink.emit(event)) };
+}
+
 export function createAppTracker(): Track {
-  const sink = process.env.NEXT_PUBLIC_POSTHOG_KEY ? createPosthogSink() : createMemorySink();
-  return createTracker(sink);
+  const sinks: AnalyticsSink[] = [];
+  if (process.env.NEXT_PUBLIC_POSTHOG_KEY) sinks.push(createPosthogSink());
+  const mixpanelToken = process.env.NEXT_PUBLIC_MIXPANEL_TOKEN;
+  if (mixpanelToken) sinks.push(createMixpanelSink(mixpanelToken));
+
+  return createTracker(sinks.length > 0 ? fanOut(sinks) : createMemorySink());
 }
