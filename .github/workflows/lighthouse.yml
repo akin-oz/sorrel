@@ -1,0 +1,39 @@
+name: Lighthouse
+
+# Mobile performance/SEO/a11y budget (spec 015). Builds the app, then runs
+# Lighthouse CI (lighthouserc.json) against the landing + a wizard step. The
+# accessibility and best-practices budgets are hard errors; performance and SEO
+# warn toward the 0.95 target (see docs/lighthouse.md for the measured medians
+# and why the localhost SEO/canonical check understates production).
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+concurrency:
+  group: lighthouse-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lighthouse:
+    name: Mobile budget
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: yarn
+
+      - name: Install
+        run: yarn install --frozen-lockfile
+
+      - name: Build
+        run: yarn workspace @sorrel/frontend build
+
+      - name: Lighthouse CI (ubuntu-latest ships Chrome)
+        run: yarn lighthouse
