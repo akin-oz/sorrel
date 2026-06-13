@@ -12,5 +12,9 @@ out
 # Test coverage
 coverage
 
+# Generated code (owned by graphql-codegen; verified by `yarn codegen:check`)
+**/__generated__/**
+apps/web/lib/gql
+
 # System files
 .DS_Store

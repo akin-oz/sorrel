@@ -64,6 +64,14 @@ reverse:
 - `codegen.ts` gains the **`apps/web` client-preset target** (typed documents) — closes the
   hand-written-enum gap (FunnelStep/DietaryTag generated, sync-guard tests retired).
 
+## GraphQL endpoint — co-located Route Handler
+`services/api` is a local standalone mock (`localhost:4000`), not deployed; only the web app
+ships to Vercel. To make the write-path real in production, mount the **same schema +
+`@sorrel/api` resolvers** as a Next Route Handler at `apps/web/app/api/graphql/route.ts`
+(`@apollo/server` + `@as-integrations/next`). The funnel works end-to-end on the live deploy
+with no second service, and the resolvers are reused — no logic duplication. `services/api`
+exposes its `resolvers`/`typeDefs` for import; the standalone server stays for local dev.
+
 ## Two mutations on the funnel
 - `saveFunnelDraft` — `optimisticResponse` + `cache.modify` autosave (abandonment recovery now
   truly server-backed, fulfilling the README "resume" claim).
@@ -89,6 +97,9 @@ moves **into** `packages/domain` (the canonical home) — not duplicated. No bre
 |---|---|---|
 | `@apollo/client` | dep (`apps/web`) | the GraphQL client |
 | `@apollo/client-integration-nextjs` | dep (`apps/web`) | RSC `registerApolloClient` |
+| `rxjs` | dep (`apps/web`) | required (non-optional) peer of `@apollo/client` 4.x — its Observable engine; the client will not run without it |
+| `@apollo/server` | dep (`apps/web`) | hosts the co-located GraphQL Route Handler (same version as `services/api`) |
+| `@as-integrations/next` | dep (`apps/web`) | adapts `@apollo/server` to a Next App Router Route Handler |
 | `@graphql-codegen/client-preset` | devDep (root) | typed documents for `apps/web` |
 
 # Acceptance criteria

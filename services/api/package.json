@@ -2,6 +2,12 @@
   "name": "@sorrel/api",
   "version": "1.0.0",
   "private": true,
+  "main": "src/schema.ts",
+  "exports": {
+    ".": "./src/schema.ts",
+    "./schema": "./src/schema.ts",
+    "./resolvers": "./src/resolvers.ts"
+  },
   "scripts": {
     "dev": "node --loader ts-node/esm src/index.ts",
     "build": "tsc",

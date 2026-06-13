@@ -1,11 +1,29 @@
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
+import { join } from "node:path";
+
+// Monorepo root, two levels up from apps/web.
+const monorepoRoot = join(import.meta.dirname, "..", "..");
 
 const nextConfig: NextConfig = {
   reactCompiler: true,
   // Workspace packages ship TS/TSX source (main -> src/index.ts), so Next must
-  // transpile them rather than treat them as pre-built node_modules.
-  transpilePackages: ["@sorrel/ui", "@sorrel/analytics", "@sorrel/shared"],
+  // transpile them rather than treat them as pre-built node_modules. @sorrel/api
+  // (+ its @sorrel/domain dependency) back the co-located GraphQL Route Handler.
+  transpilePackages: [
+    "@sorrel/ui",
+    "@sorrel/analytics",
+    "@sorrel/shared",
+    "@sorrel/api",
+    "@sorrel/domain",
+  ],
+  // In a workspace the trace root is the monorepo, not apps/web.
+  outputFileTracingRoot: monorepoRoot,
+  // The GraphQL Route Handler reads schema.graphql (the contract root) at runtime;
+  // make sure it ships in that function's serverless bundle.
+  outputFileTracingIncludes: {
+    "/api/graphql": ["../../schema.graphql"],
+  },
 };
 
 const withNextIntl = createNextIntlPlugin();

@@ -19,6 +19,20 @@ const config: CodegenConfig = {
     "services/api/src/__generated__/resolvers.ts": {
       plugins: ["typescript", "typescript-resolvers"],
     },
+    // apps/web — typed documents (client preset). Operations live in
+    // apps/web/lib/graphql/**; the wizard imports the generated TypedDocumentNodes
+    // and never hand-writes a network type. Enums emit as string unions so the
+    // wizard's stored values (e.g. "EVERY_2_WEEKS") pass straight into variables.
+    "apps/web/lib/gql/": {
+      preset: "client",
+      documents: ["apps/web/lib/graphql/**/*.ts"],
+      presetConfig: { fragmentMasking: false },
+      config: {
+        enumsAsTypes: true,
+        scalars: { Date: "string", DateTime: "string" },
+        useTypeImports: true,
+      },
+    },
   },
 };
 
