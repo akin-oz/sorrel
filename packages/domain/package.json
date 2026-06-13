@@ -6,7 +6,8 @@
   "types": "src/index.ts",
   "exports": {
     ".": "./src/index.ts",
-    "./delivery": "./src/delivery/index.ts"
+    "./delivery": "./src/delivery/index.ts",
+    "./pricing": "./src/pricing/index.ts"
   },
   "scripts": {
     "type-check": "tsc --noEmit",

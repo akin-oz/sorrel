@@ -2,7 +2,11 @@ import { GraphQLScalarType, Kind } from "graphql";
 
 import {
   BLOCKED_WEEKDAY_INDEXES,
+  type CurrencyCode,
   DEFAULT_LEAD_DAYS,
+  type BoxFrequency as DomainBoxFrequency,
+  type Money as DomainMoney,
+  computePlan as computeDomainPlan,
   earliestDeliverableDate,
   toIso,
 } from "@sorrel/domain";
@@ -12,6 +16,8 @@ import {
   Currency,
   DietaryProgram,
   type FunnelDraft,
+  type Money,
+  type Plan,
   type PlanInput,
   type RecipeFilter,
   Resolvers,
@@ -118,13 +124,31 @@ export const DIETARY_PROGRAMS = [
   },
 ];
 
-// ─── Plain business-logic functions (tested directly) ─────────────────────────
+// ─── Domain ⇄ GraphQL boundary ──────────────────────────────────────────────
+//
+// Pricing, portion calc, and plan invariants live in `@sorrel/domain` (the
+// source of truth). The resolver only translates the domain's string-union
+// enums onto the generated GraphQL enums — it never re-implements the maths.
 
-function stubMoney(amountMinor: number) {
+const FREQUENCY_TO_DOMAIN: Record<BoxFrequency, DomainBoxFrequency> = {
+  [BoxFrequency.Every_2Weeks]: "EVERY_2_WEEKS",
+  [BoxFrequency.Every_4Weeks]: "EVERY_4_WEEKS",
+};
+
+const FREQUENCY_TO_GRAPHQL: Record<DomainBoxFrequency, BoxFrequency> = {
+  EVERY_2_WEEKS: BoxFrequency.Every_2Weeks,
+  EVERY_4_WEEKS: BoxFrequency.Every_4Weeks,
+};
+
+const CURRENCY_TO_GRAPHQL: Record<CurrencyCode, Currency> = {
+  GBP: Currency.Gbp,
+};
+
+function toGraphQLMoney(m: DomainMoney): Money {
   return {
-    amountMinor,
-    currency: Currency.Gbp,
-    formatted: `£${(amountMinor / 100).toFixed(2)}`,
+    amountMinor: m.amountMinor,
+    currency: CURRENCY_TO_GRAPHQL[m.currency],
+    formatted: m.formatted,
   };
 }
 
@@ -134,20 +158,19 @@ export function computeDeliveryEstimate() {
   return { earliest, blockedWeekdays, leadDays: DEFAULT_LEAD_DAYS };
 }
 
-export function computePlan(input: PlanInput) {
-  const { cats, frequency } = input;
-  const mealsPerBox = frequency === BoxFrequency.Every_2Weeks ? 14 : 28;
-  const portionGramsPerDay = Math.round(cats.reduce((sum, c) => sum + c.weightKg * 30, 0));
-  const perDayMinor = portionGramsPerDay * 4;
-  const perBoxMinor = perDayMinor * mealsPerBox;
+export function computePlan(input: PlanInput): Plan {
+  const plan = computeDomainPlan({
+    cats: input.cats.map((c) => ({ weightKg: c.weightKg })),
+    frequency: FREQUENCY_TO_DOMAIN[input.frequency],
+  });
   return {
-    frequency,
-    portionGramsPerDay,
-    mealsPerBox,
+    frequency: FREQUENCY_TO_GRAPHQL[plan.frequency],
+    portionGramsPerDay: plan.portionGramsPerDay,
+    mealsPerBox: plan.mealsPerBox,
     pricing: {
-      perDay: stubMoney(perDayMinor),
-      perBox: stubMoney(perBoxMinor),
-      firstBox: stubMoney(Math.round(perBoxMinor * 0.5)),
+      perDay: toGraphQLMoney(plan.pricing.perDay),
+      perBox: toGraphQLMoney(plan.pricing.perBox),
+      firstBox: toGraphQLMoney(plan.pricing.firstBox),
     },
   };
 }
