@@ -23,6 +23,7 @@ import {
   initialFunnelState,
   stepFromSegment,
 } from "./state";
+import { useDraftAutosave } from "./useDraftAutosave";
 import { type Variant, useVariant } from "./useVariant";
 
 const STORAGE_KEY = "sorrel.funnel.v1";
@@ -36,6 +37,8 @@ interface FunnelContextValue {
   currentStep: FunnelStep | null;
   /** The A/B bucket for this session (spec 014); null until resolved on the client. */
   variant: Variant | null;
+  /** Server draft id once the autosave has persisted one (spec 013); null until then. */
+  draftId: string | null;
 }
 
 const FunnelContext = createContext<FunnelContextValue | null>(null);
@@ -64,6 +67,9 @@ export function FunnelProvider({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const currentStep = stepFromSegment(pathname?.split("/")[2] ?? "");
 
+  // Server-backed autosave (spec 013): persists the draft and hands back its id.
+  const draftId = useDraftAutosave(state, currentStep);
+
   // Resume: hydrate once from localStorage, then persist on every change.
   const hydratedRef = useRef(false);
   useEffect(() => {
@@ -87,7 +93,11 @@ export function FunnelProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!currentStep) return;
     dispatch({ type: "ADVANCE", step: currentStep });
-    track({ name: "funnel_step_viewed", step: currentStep, variant: variantRef.current ?? undefined });
+    track({
+      name: "funnel_step_viewed",
+      step: currentStep,
+      variant: variantRef.current ?? undefined,
+    });
   }, [currentStep, track]);
 
   // Abandonment: leaving the tab/page before SUMMARY is a drop-off.
@@ -102,8 +112,8 @@ export function FunnelProvider({ children }: { children: ReactNode }) {
   }, [currentStep, track]);
 
   const value = useMemo<FunnelContextValue>(
-    () => ({ state, dispatch, track, currentStep, variant }),
-    [state, track, currentStep, variant],
+    () => ({ state, dispatch, track, currentStep, variant, draftId }),
+    [state, track, currentStep, variant, draftId],
   );
 
   return <FunnelContext.Provider value={value}>{children}</FunnelContext.Provider>;

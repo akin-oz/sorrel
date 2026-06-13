@@ -77,6 +77,17 @@
       "SENSITIVE": "Sensibel"
     }
   },
+  "Plan": {
+    "frequencyLegend": "Lieferrhythmus",
+    "everyTwoWeeks": "Alle 2 Wochen",
+    "everyFourWeeks": "Alle 4 Wochen",
+    "summary": "Dein Plan",
+    "perBox": "Pro Box",
+    "firstBox": "Erste Box",
+    "updating": "Wird aktualisiert…",
+    "portionPerDay": "{grams}g Futter pro Tag",
+    "mealsPerBox": "{meals} Mahlzeiten pro Box"
+  },
   "Picker": {
     "dialogTitle": "Liefertag wählen",
     "cancel": "Abbrechen",

@@ -77,6 +77,17 @@
       "SENSITIVE": "Sensitive"
     }
   },
+  "Plan": {
+    "frequencyLegend": "Delivery frequency",
+    "everyTwoWeeks": "Every 2 weeks",
+    "everyFourWeeks": "Every 4 weeks",
+    "summary": "Your plan",
+    "perBox": "Per box",
+    "firstBox": "First box",
+    "updating": "Updating…",
+    "portionPerDay": "{grams}g of food per day",
+    "mealsPerBox": "{meals} meals per box"
+  },
   "Picker": {
     "dialogTitle": "Choose a delivery day",
     "cancel": "Cancel",

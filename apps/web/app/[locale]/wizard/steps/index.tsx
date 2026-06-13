@@ -11,6 +11,7 @@ import { DeliveryDatePicker, type DeliveryLabels, sorrelTheme } from "@sorrel/ui
 
 import type { RecipeBlok } from "../../../../types/storyblok.gen";
 import { useFunnel } from "../FunnelProvider";
+import { PlanForm } from "../PlanForm";
 import { ProfileForm } from "../ProfileForm";
 import { RecipesPicker } from "../RecipesPicker";
 
@@ -98,7 +99,11 @@ function DeliveryStep() {
 }
 
 function PlanStep() {
-  return <StepShell step="PLAN" />;
+  return (
+    <StepShell step="PLAN">
+      <PlanForm />
+    </StepShell>
+  );
 }
 
 function EmailStep() {
