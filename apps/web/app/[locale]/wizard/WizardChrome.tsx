@@ -103,6 +103,7 @@ export function WizardChrome({ children }: { children: ReactNode }) {
           {currentStep ? (
             <Box
               role="progressbar"
+              aria-label={t("stepProgress", { current: stepNumber, total })}
               aria-valuemin={1}
               aria-valuemax={total}
               aria-valuenow={stepNumber}
