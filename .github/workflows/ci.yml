@@ -1,0 +1,62 @@
+name: CI
+
+# The fuller gate (spec 015): everything the local Stop hook approximates, made
+# visible in the PR tab. type-check + lint + format + codegen sync + the full
+# unit-test matrix. "Wrong is un-mergeable" — provable here, not just locally.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# One in-flight run per ref; cancel superseded pushes.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Verify
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: yarn
+
+      - name: Install
+        run: yarn install --frozen-lockfile
+
+      - name: Contract codegen is in sync with schema.graphql
+        run: yarn codegen:check
+
+      - name: Type-check (all workspaces)
+        run: yarn type-check
+
+      - name: Lint (root config + apps/web)
+        run: yarn lint
+
+      - name: Format check
+        run: yarn format:check
+
+      - name: Unit tests — domain (pricing, portion, calendar)
+        run: yarn workspace @sorrel/domain test
+
+      - name: Unit tests — shared (funnel-step schema sync)
+        run: yarn workspace @sorrel/shared test
+
+      - name: Unit tests — analytics (funnel event contract)
+        run: yarn workspace @sorrel/analytics test
+
+      - name: Unit tests — api (resolvers, plan recompute)
+        run: yarn workspace @sorrel/api test
+
+      - name: Unit tests — frontend (wizard state, email validation)
+        run: yarn workspace @sorrel/frontend test
+
+      - name: Production build
+        run: yarn workspace @sorrel/frontend build
