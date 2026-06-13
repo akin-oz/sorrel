@@ -302,8 +302,8 @@ async function main() {
   for (const recipe of en) {
     const deRecipe = de.find((r) => r.slug === recipe.slug) ?? recipe;
     const content = mergeI18n(recipe as unknown as Json, deRecipe as unknown as Json);
-    // Recipes render inside the landing's recipe showcase — preview them there.
-    await upsertStory(recipe.slug, recipe.name, content, "/");
+    // Each recipe has its own preview route so the Visual Editor opens it directly.
+    await upsertStory(recipe.slug, recipe.name, content, `/recipes/${recipe.slug}`);
   }
 
   console.log("Done.");
