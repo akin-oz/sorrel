@@ -37,6 +37,13 @@ export interface DeliveryLabels {
   freeDelivery: string;
   blockedWeekday: (weekday: string) => string;
   beforeEarliest: (date: string) => string;
+  /**
+   * Live-region announcement when keyboard navigation moves the draft selection
+   * onto a deliverable day (spec 025, R3). `date` is the pre-formatted long date
+   * (e.g. "Wednesday 17 June"). Host-overridable; the English default below ships
+   * the picker without requiring a translation change.
+   */
+  selectionAnnouncement: (date: string) => string;
 }
 
 export const DEFAULT_DELIVERY_LABELS: DeliveryLabels = {
@@ -49,6 +56,7 @@ export const DEFAULT_DELIVERY_LABELS: DeliveryLabels = {
   freeDelivery: "Free delivery",
   blockedWeekday: (weekday) => `No deliveries on ${weekday}s`,
   beforeEarliest: (date) => `Earliest delivery is ${date}`,
+  selectionAnnouncement: (date) => `Delivery set to ${date}`,
 };
 
 // 2024-01-01 is a Monday — reference point for naming a Monday-first weekday index.
@@ -105,12 +113,63 @@ const GRID_KEYS: ReadonlySet<string> = new Set([
 
 function getFocusable(root: HTMLElement | null): HTMLElement[] {
   if (!root) return [];
+  // R8 (spec 025): blocked day cells carry `aria-disabled="true"` and never the
+  // native `disabled` attribute (they keep DOM focusability for roving tabindex).
+  // The `:not([aria-disabled="true"])` clause excludes them belt-and-braces — the
+  // roving `tabIndex={-1}` is the primary guard, this makes the contract explicit.
   const nodes = root.querySelectorAll<HTMLElement>(
-    'button:not([disabled]), [tabindex]:not([tabindex="-1"])',
+    'button:not([disabled]):not([aria-disabled="true"]), [tabindex]:not([tabindex="-1"])',
   );
   return Array.from(nodes).filter(
     (el) => el.offsetParent !== null || el === document.activeElement,
   );
+}
+
+// R2 (spec 025): whether the engine implements the native `inert` attribute.
+// Evergreen browsers do; older Safari does not, in which case we additionally
+// mark the same nodes `aria-hidden="true"` as a defensive fallback.
+const SUPPORTS_INERT = typeof HTMLElement !== "undefined" && "inert" in HTMLElement.prototype;
+
+/**
+ * R2 (spec 025): neutralise everything outside the open dialog so an AT virtual
+ * cursor cannot escape the modal subtree (WCAG 2.4.3 / 4.1.2).
+ *
+ * The picker renders the overlay inline (not portalled), so "mark every body
+ * child that is not the overlay" generalises to walking each ancestor level from
+ * the overlay up to `<body>` and marking every *sibling* off that path. The
+ * overlay's own subtree — backdrop + dialog + live region — is never touched, so
+ * backdrop-click-to-close keeps working. Host-agnostic: no page-root attribute
+ * required. Returns a cleanup that restores each node's prior state exactly.
+ */
+function neutraliseBackground(overlay: HTMLElement): () => void {
+  const touched: Array<{ el: Element; hadInert: boolean; prevAriaHidden: string | null }> = [];
+
+  let node: Element | null = overlay;
+  while (node && node !== document.body) {
+    const parent: Element | null = node.parentElement;
+    if (!parent) break;
+    for (const sibling of Array.from(parent.children)) {
+      if (sibling === node) continue;
+      touched.push({
+        el: sibling,
+        hadInert: sibling.hasAttribute("inert"),
+        prevAriaHidden: sibling.getAttribute("aria-hidden"),
+      });
+      sibling.setAttribute("inert", "");
+      if (!SUPPORTS_INERT) sibling.setAttribute("aria-hidden", "true");
+    }
+    node = parent;
+  }
+
+  return () => {
+    for (const { el, hadInert, prevAriaHidden } of touched) {
+      if (!hadInert) el.removeAttribute("inert");
+      if (!SUPPORTS_INERT) {
+        if (prevAriaHidden === null) el.removeAttribute("aria-hidden");
+        else el.setAttribute("aria-hidden", prevAriaHidden);
+      }
+    }
+  };
 }
 
 export function DeliveryDatePicker({
@@ -139,8 +198,11 @@ export function DeliveryDatePicker({
   const [draft, setDraft] = useState<IsoDate>(committed);
   const [activeIso, setActiveIso] = useState<IsoDate>(committed);
   const [focusTick, setFocusTick] = useState(0);
+  // R3 (spec 025): live-region message for screen readers. "" is silent.
+  const [announcement, setAnnouncement] = useState("");
 
   const changeRef = useRef<HTMLButtonElement>(null);
+  const overlayRef = useRef<HTMLDivElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
   const cellRefs = useRef<Map<IsoDate, HTMLButtonElement>>(new Map());
   const pendingConfirm = useRef<IsoDate | null>(null);
@@ -178,10 +240,22 @@ export function DeliveryDatePicker({
     }
   }, [state]);
 
+  // R2 (spec 025): mark the rest of the page inert while the dialog is OPEN. The
+  // cleanup restores it on every transition out of "open" — including the exit
+  // animation ("closing") and unmount-mid-closing — so AT returns to the page as
+  // soon as the dialog starts dismissing.
+  useEffect(() => {
+    if (state !== "open") return;
+    const overlay = overlayRef.current;
+    if (!overlay) return;
+    return neutraliseBackground(overlay);
+  }, [state]);
+
   function open() {
     hasOpened.current = true;
     setDraft(committed);
     setActiveIso(committed);
+    setAnnouncement("");
     setState("open");
     setFocusTick((n) => n + 1);
     onOpenChange?.(true);
@@ -222,9 +296,28 @@ export function DeliveryDatePicker({
     finishClose();
   }
 
-  function selectIfDeliverable(iso: IsoDate) {
+  function announceSelection(iso: IsoDate) {
+    setAnnouncement(
+      resolvedLabels.selectionAnnouncement(
+        formatDate(iso, locale, { weekday: "long", day: "numeric", month: "long" }),
+      ),
+    );
+  }
+
+  // Click / Enter / Space on a cell. R3 (spec 025): a deliverable day commits the
+  // draft and announces the selection; a blocked day is a NO-OP that echoes its
+  // localised reason to the live region instead of silently doing nothing.
+  function attemptSelect(iso: IsoDate) {
     const cell = monthView.cells.find((c) => c.iso === iso);
-    if (cell && !cell.blocked) setDraft(iso);
+    if (!cell) return;
+    if (cell.blocked) {
+      if (cell.blockedReason) {
+        setAnnouncement(blockedReasonText(cell.blockedReason, locale, resolvedLabels));
+      }
+      return;
+    }
+    setDraft(iso);
+    announceSelection(iso);
   }
 
   function handleDialogKeyDown(event: ReactKeyboardEvent<HTMLDivElement>) {
@@ -250,11 +343,18 @@ export function DeliveryDatePicker({
   function handleGridKeyDown(event: ReactKeyboardEvent<HTMLDivElement>) {
     if (GRID_KEYS.has(event.key)) {
       event.preventDefault();
-      setActiveIso(moveFocus(activeIso, event.key as GridKey, viewYear, viewMonth));
+      const next = moveFocus(activeIso, event.key as GridKey, viewYear, viewMonth);
+      setActiveIso(next);
       setFocusTick((n) => n + 1);
+      // R3 (spec 025): announce the draft when focus lands on a deliverable day.
+      // On a blocked day the cell's own aria-label is read natively, so clear the
+      // status region rather than leaving a stale "Delivery set to …".
+      const nextCell = monthView.cells.find((c) => c.iso === next);
+      if (nextCell && !nextCell.blocked) announceSelection(next);
+      else setAnnouncement("");
     } else if (event.key === "Enter" || event.key === " ") {
       event.preventDefault();
-      selectIfDeliverable(activeIso);
+      attemptSelect(activeIso);
     }
   }
 
@@ -281,6 +381,7 @@ export function DeliveryDatePicker({
           locale={locale}
           labels={resolvedLabels}
           state={state}
+          overlayRef={overlayRef}
           dialogRef={dialogRef}
           labelId={labelId}
           monthId={monthId}
@@ -288,12 +389,13 @@ export function DeliveryDatePicker({
           month={viewMonth}
           weeks={toWeeks(monthView.leadingBlanks, monthView.cells)}
           activeIso={activeIso}
+          announcement={announcement}
           cellRefs={cellRefs}
           onAnimationEnd={handleAnimationEnd}
           onDialogKeyDown={handleDialogKeyDown}
           onGridKeyDown={handleGridKeyDown}
           onBackdrop={() => requestClose(false)}
-          onSelect={selectIfDeliverable}
+          onSelect={attemptSelect}
           onCancel={() => requestClose(false)}
           onConfirm={() => requestClose(true)}
         />
@@ -459,6 +561,7 @@ interface ModalProps {
   locale: string;
   labels: DeliveryLabels;
   state: DialogState;
+  overlayRef: RefObject<HTMLDivElement | null>;
   dialogRef: RefObject<HTMLDivElement | null>;
   labelId: string;
   monthId: string;
@@ -466,6 +569,7 @@ interface ModalProps {
   month: number;
   weeks: (DateCell | null)[][];
   activeIso: IsoDate;
+  announcement: string;
   cellRefs: RefObject<Map<IsoDate, HTMLButtonElement>>;
   onAnimationEnd: (e: ReactAnimationEvent<HTMLDivElement>) => void;
   onDialogKeyDown: (e: ReactKeyboardEvent<HTMLDivElement>) => void;
@@ -482,6 +586,7 @@ function Modal(props: ModalProps) {
     locale,
     labels,
     state,
+    overlayRef,
     dialogRef,
     labelId,
     monthId,
@@ -489,6 +594,7 @@ function Modal(props: ModalProps) {
     month,
     weeks,
     activeIso,
+    announcement,
     cellRefs,
   } = props;
   const monthLabel = new Intl.DateTimeFormat(locale, {
@@ -498,7 +604,7 @@ function Modal(props: ModalProps) {
   }).format(new Date(Date.UTC(year, month - 1, 1)));
   const weekdayHeaders = Array.from({ length: 7 }, (_, i) => weekdayName(i, locale, "narrow"));
   return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 1000 }}>
+    <div ref={overlayRef} style={{ position: "fixed", inset: 0, zIndex: 1000 }}>
       <div
         className="sdp-backdrop"
         data-state={state}
@@ -531,6 +637,23 @@ function Modal(props: ModalProps) {
           marginInline: "auto",
         }}
       >
+        {/* R3 (spec 025): visually-hidden polite live region for AT announcements. */}
+        <div
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+          style={{
+            position: "absolute",
+            width: 1,
+            height: 1,
+            overflow: "hidden",
+            clip: "rect(0 0 0 0)",
+            clipPath: "inset(50%)",
+            whiteSpace: "nowrap",
+          }}
+        >
+          {announcement}
+        </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 2, padding: "0 4px" }}>
           <div
             id={labelId}
@@ -698,23 +821,26 @@ function DayCell({ theme, locale, labels, cell, isActive, cellRefs, onSelect }: 
     };
   }
 
+  // R4 (spec 025): role="gridcell" + aria-selected live on the focused <button>
+  // itself, not a wrapper, so screen readers announce selection state on the
+  // element roving tabindex actually focuses. (Empty cells keep their wrapper.)
   return (
-    <div role="gridcell" aria-selected={cell.isSelected}>
-      <button
-        type="button"
-        className="sdp-cell"
-        ref={(el) => {
-          if (el) cellRefs.current.set(cell.iso, el);
-          else cellRefs.current.delete(cell.iso);
-        }}
-        tabIndex={isActive ? 0 : -1}
-        aria-label={cell.blocked && reasonText ? `${cell.day} — ${reasonText}` : undefined}
-        aria-disabled={cell.blocked || undefined}
-        onClick={() => onSelect(cell.iso)}
-        style={{ ...base, ...skin, width: "100%", cursor: cell.blocked ? "default" : "pointer" }}
-      >
-        {cell.day}
-      </button>
-    </div>
+    <button
+      type="button"
+      role="gridcell"
+      aria-selected={cell.isSelected}
+      className="sdp-cell"
+      ref={(el) => {
+        if (el) cellRefs.current.set(cell.iso, el);
+        else cellRefs.current.delete(cell.iso);
+      }}
+      tabIndex={isActive ? 0 : -1}
+      aria-label={cell.blocked && reasonText ? `${cell.day} — ${reasonText}` : undefined}
+      aria-disabled={cell.blocked || undefined}
+      onClick={() => onSelect(cell.iso)}
+      style={{ ...base, ...skin, width: "100%", cursor: cell.blocked ? "default" : "pointer" }}
+    >
+      {cell.day}
+    </button>
   );
 }

@@ -59,8 +59,9 @@ describe("DeliveryDatePicker", () => {
       const dialog = await openDialog(user);
       await user.click(screen.getByRole("button", { name: DEFAULT_DELIVERY_LABELS.cancel }));
 
+      // Day cells carry role="gridcell" (spec 025 R4), not the implicit button role.
       const someCell = within(dialog)
-        .getAllByRole("button")
+        .getAllByRole("gridcell")
         .find((b) => b.classList.contains("sdp-cell"));
       expect(someCell).toBeTruthy();
 
@@ -230,7 +231,7 @@ describe("DeliveryDatePicker", () => {
       renderPicker();
       const dialog = await openDialog(user);
 
-      await user.click(within(dialog).getByRole("button", { name: BLOCKED_FRIDAY_LABEL }));
+      await user.click(within(dialog).getByRole("gridcell", { name: BLOCKED_FRIDAY_LABEL }));
       expect(selectedDayText(dialog)).toBe(EARLIEST_DAY);
 
       await user.keyboard("{Escape}");
@@ -323,6 +324,91 @@ describe("DeliveryDatePicker", () => {
       expect(results).toHaveNoViolations();
 
       // Close cleanly so the safety-net timer does not leak.
+      await user.keyboard("{Escape}");
+      finishCloseAnimation(dialog);
+    });
+  });
+
+  describe("background inertness (spec 025 R2)", () => {
+    it("marks the page outside the dialog inert while open and restores it on close", async () => {
+      const user = userEvent.setup();
+      renderPicker();
+      // The closed card (and its Change button) sit beside the overlay — capture
+      // it before opening, because once it is inert it leaves the a11y tree.
+      const change = screen.getByRole("button", { name: DEFAULT_DELIVERY_LABELS.change });
+      const card = change.parentElement as HTMLElement;
+      expect(card.hasAttribute("inert")).toBe(false);
+
+      const dialog = await openDialog(user);
+      expect(card.hasAttribute("inert")).toBe(true);
+
+      // Decision 2: inert is dropped the instant we enter "closing", before the
+      // exit animation finishes, so AT can return to the page sooner.
+      await user.keyboard("{Escape}");
+      expect(card.hasAttribute("inert")).toBe(false);
+      expect(card.hasAttribute("aria-hidden")).toBe(false);
+
+      finishCloseAnimation(dialog);
+    });
+  });
+
+  describe("aria-selected on the focused element (spec 025 R4)", () => {
+    it("puts role=gridcell + aria-selected on the focusable button itself", async () => {
+      const user = userEvent.setup();
+      renderPicker();
+      const dialog = await openDialog(user);
+
+      const selected = within(dialog).getByRole("gridcell", { selected: true });
+      expect(selected.tagName).toBe("BUTTON");
+      expect(selected).toHaveAttribute("aria-selected", "true");
+      // On open the selected day is also the focused day — selection state now
+      // lives on the element the screen reader actually lands on.
+      expect(selected).toHaveFocus();
+
+      await user.keyboard("{Escape}");
+      finishCloseAnimation(dialog);
+    });
+  });
+
+  describe("live-region announcements (spec 025 R3)", () => {
+    it("announces the selection when arrowing onto a deliverable day", async () => {
+      const user = userEvent.setup();
+      renderPicker();
+      const dialog = await openDialog(user);
+      const status = within(dialog).getByRole("status");
+      expect(status).toBeEmptyDOMElement();
+
+      // 15 (Mon) → 16 (Tue, blocked: clears) → 17 (Wed, deliverable: announces).
+      await user.keyboard("{ArrowRight}");
+      expect(status).toBeEmptyDOMElement();
+      await user.keyboard("{ArrowRight}");
+      expect(status).toHaveTextContent("Delivery set to Wednesday 17 June");
+
+      await user.keyboard("{Escape}");
+      finishCloseAnimation(dialog);
+    });
+
+    it("announces the localised reason when a blocked day is clicked", async () => {
+      const user = userEvent.setup();
+      renderPicker();
+      const dialog = await openDialog(user);
+
+      await user.click(within(dialog).getByRole("gridcell", { name: BLOCKED_FRIDAY_LABEL }));
+      expect(within(dialog).getByRole("status")).toHaveTextContent("No deliveries on Fridays");
+
+      await user.keyboard("{Escape}");
+      finishCloseAnimation(dialog);
+    });
+
+    it("announces the localised reason on Enter over a blocked active cell", async () => {
+      const user = userEvent.setup();
+      renderPicker();
+      const dialog = await openDialog(user);
+
+      // 15 → ArrowRight → active = 16 (Tue, blocked); Enter echoes the reason.
+      await user.keyboard("{ArrowRight}{Enter}");
+      expect(within(dialog).getByRole("status")).toHaveTextContent("No deliveries on Tuesdays");
+
       await user.keyboard("{Escape}");
       finishCloseAnimation(dialog);
     });
