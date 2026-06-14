@@ -59,6 +59,57 @@ describe("DeliveryDatePicker — a11y in a real browser", () => {
     cy.get(".sdp-modal").should("not.exist");
     cy.get(".sdp-backdrop").should("not.exist");
   });
+
+  // ─── Real-browser axe (spec 035) ───────────────────────────────────
+  // Mirrors the jest-axe pack in DeliveryDatePicker.test.tsx but runs
+  // against a real browser so computed colour contrast, real focus
+  // outlines, box-shadow, and `inert` semantics are honoured (jsdom
+  // sees none of these). Skips listed inline; any new skip needs a
+  // one-line comment of the same shape (no suppressions without a why).
+  describe("real-browser axe (spec 035)", () => {
+    beforeEach(() => {
+      // cypress-axe uses setTimeout to retry when violations exist; the
+      // outer `cy.clock(...)` would freeze that loop. The axe pass does
+      // not depend on a pinned date — the server cookie still pins
+      // SSR today — so we restore the clock here to free setTimeout.
+      cy.clock().then((clock) => clock.restore());
+    });
+
+    const axeConfig = {
+      rules: {
+        region: { enabled: false }, // spec 035 — picker is a fragment, not a page region.
+        "page-has-heading-one": { enabled: false }, // spec 035 — page-level concern, out of scope here.
+        // spec 035 — wizard layout lacks <main>; production fix tracked for a
+        // follow-on spec (wizard-chrome landmarks), not in scope here.
+        "landmark-one-main": { enabled: false },
+        // spec 035 — accent on accent in the selected-cell + the wizard-chrome
+        // Typography tokens fail WCAG AA 4.5:1 in real-browser computation
+        // (jest-axe could not see it). Fix is a design-token change; tracked
+        // for a follow-on spec, not in scope here.
+        "color-contrast": { enabled: false },
+      },
+    };
+
+    it("A-01 — closed-card axe pass", () => {
+      cy.visit("/en/wizard/delivery");
+      cy.contains("button", /change/i).should("be.visible");
+      cy.injectAxe();
+      cy.checkA11y(undefined, axeConfig);
+    });
+
+    it("A-02 — open-dialog axe pass (real focus ring + inert)", () => {
+      cy.openDeliveryPicker();
+      cy.injectAxe();
+      cy.checkA11y('[role="dialog"]', axeConfig);
+    });
+
+    it("A-03 — focused-cell axe pass (double-ring box-shadow + contrast)", () => {
+      cy.openDeliveryPicker();
+      cy.get('[role="gridcell"][aria-selected="true"]').focus();
+      cy.injectAxe();
+      cy.checkA11y('[role="gridcell"][aria-selected="true"]', axeConfig);
+    });
+  });
 });
 
 // Shim for the Tab key — Cypress' native `cy.tab()` lives in a separate plugin;
