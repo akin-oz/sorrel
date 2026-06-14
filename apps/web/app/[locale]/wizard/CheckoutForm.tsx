@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { useQuery } from "@apollo/client/react";
 import { Elements, PaymentElement, useElements, useStripe } from "@stripe/react-stripe-js";
 import { type Stripe, type StripeElementsOptions, loadStripe } from "@stripe/stripe-js";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 import { AppAlert, AppButton, AppCard, AppSkeleton, AppStack, AppText } from "@sorrel/ui";
 
@@ -32,6 +32,7 @@ function getStripe(): Promise<Stripe | null> {
 
 function PaymentBody() {
   const t = useTranslations("Checkout");
+  const locale = useLocale();
   const stripe = useStripe();
   const elements = useElements();
   const { track, confirm } = useFunnel();
@@ -43,9 +44,14 @@ function PaymentBody() {
     if (!stripe || !elements) return;
     setPending(true);
     setErrorMessage(null);
+    // Stripe appends `payment_intent` + `payment_intent_client_secret` query
+    // params to `return_url` verbatim — locale stays in the app's control,
+    // so we thread the active next-intl locale instead of the hardcoded `/en/`.
     const result = await stripe.confirmPayment({
       elements,
-      confirmParams: { return_url: window.location.origin + "/en/wizard/summary?paid=1" },
+      confirmParams: {
+        return_url: `${window.location.origin}/${locale}/wizard/summary?paid=1`,
+      },
       redirect: "if_required",
     });
     setPending(false);
@@ -111,12 +117,16 @@ export function CheckoutForm() {
 
   useEffect(() => {
     if (clientSecret || configError) return;
-    if (amountMinor === null) return;
+    if (!draftId || amountMinor === null) return;
     let cancelled = false;
+    // Server-side recompute pattern: the route reads the canonical
+    // amountMinor + currency from the GraphQL contract via draftId. The
+    // client number stays in the analytics event for parity but is no
+    // longer accepted as the source of truth for the charge.
     void fetch("/api/checkout/intent", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ amount_minor: amountMinor, currency }),
+      body: JSON.stringify({ draftId }),
     })
       .then((response) => {
         if (!response.ok) throw new Error(`http ${response.status}`);
@@ -138,7 +148,7 @@ export function CheckoutForm() {
     return () => {
       cancelled = true;
     };
-  }, [amountMinor, currency, clientSecret, configError, track, t]);
+  }, [draftId, amountMinor, currency, clientSecret, configError, track, t]);
 
   const bootError = configError ?? fetchError;
 

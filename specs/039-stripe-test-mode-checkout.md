@@ -98,6 +98,11 @@ that:
   only — no `sx`, no raw `@mui`).
 - On submit, calls `stripe.confirmPayment({ elements, confirmParams: { return_url } })`.
   The `return_url` points at the post-success route (Decision A picks which).
+  The route locale is read via `useLocale()` from `next-intl` and threaded
+  into the path — Stripe only appends `payment_intent` +
+  `payment_intent_client_secret` query params to the URL we provide; the
+  path itself stays in our control, so a hardcoded `/en/` would silently
+  break the German funnel.
 - Wires the submit-pending and error states via a thin local `useState`
   (the shape matches `EmailForm`'s).
 - Reads the cached `clientSecret` from a small client-side fetch to
@@ -142,6 +147,13 @@ exporting `POST`). It:
   `process.env.STRIPE_SECRET_KEY` so the SDK constructs once per process,
   not per request. The key is read **inside** the handler (not at module
   top-level) so a build-time absence does not crash the bundle.
+- Passes an Idempotency-Key keyed on the draft id
+  (`{ idempotencyKey: \`pi-${draftId}\` }`) as the second argument to
+`stripe.paymentIntents.create`. Stripe's docs explicitly recommend this on
+`create` to guard against double-fetches (React StrictMode, network
+  retry, fast back-button); the PaymentIntent's own status-based dedup is
+  strong once an intent exists, but doesn't prevent two intents being
+  created for the same draft.
 
 ## 4. Webhook route (in scope, default YES)
 
