@@ -1,8 +1,8 @@
 "use client";
 
-import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
 import { useLocale, useTranslations } from "next-intl";
+
+import { AppStack, AppText } from "@sorrel/ui";
 
 import { usePathname, useRouter } from "../../i18n/navigation";
 import { routing } from "../../i18n/routing";
@@ -15,24 +15,28 @@ export function LocaleSwitcher() {
   const t = useTranslations("LocaleSwitcher");
 
   return (
-    <Box role="group" aria-label={t("label")} sx={{ display: "flex", gap: 0.25 }}>
-      {routing.locales.map((locale) => (
-        <Button
-          key={locale}
-          size="small"
-          onClick={() => router.replace(pathname, { locale })}
-          aria-current={locale === active ? "true" : undefined}
-          sx={{
-            minWidth: 32,
-            px: 0.75,
-            fontSize: 13,
-            fontWeight: locale === active ? 700 : 500,
-            color: locale === active ? "primary.main" : "text.secondary",
-          }}
-        >
-          {t(locale)}
-        </Button>
-      ))}
-    </Box>
+    <AppStack direction="row" gap={0.25} role="group" aria-label={t("label")}>
+      {routing.locales.map((locale) => {
+        const isActive = locale === active;
+        return (
+          <button
+            key={locale}
+            type="button"
+            className="app-unstyled-button app-locale-toggle"
+            onClick={() => router.replace(pathname, { locale })}
+            aria-current={isActive ? "true" : undefined}
+          >
+            <AppText
+              component="span"
+              fontSize={13}
+              fontWeight={isActive ? 700 : 500}
+              color={isActive ? "primary.main" : "text.secondary"}
+            >
+              {t(locale)}
+            </AppText>
+          </button>
+        );
+      })}
+    </AppStack>
   );
 }

@@ -1,5 +1,6 @@
-/* Resets, base typography, and the page background come from MUI CssBaseline +
-   the Sorrel theme (app/theme.ts). Keep this file for genuinely global rules only. */
+/* Resets, base typography, and the page background come from CssBaseline + the
+   Sorrel theme inside AppThemeProvider (@sorrel/ui). Keep this file for genuinely
+   global rules only. */
 html,
 body {
   min-height: 100%;
@@ -11,6 +12,28 @@ body {
 :focus-visible {
   outline: 2px solid #a14d27;
   outline-offset: 2px;
+}
+
+/* Native-button reset for App*-composed interactive controls (the FAQ accordion
+   trigger, the locale toggle) — keeps the apps/web ban on inline `sx` while
+   stripping the browser's default button chrome. */
+.app-unstyled-button {
+  appearance: none;
+  background: none;
+  border: 0;
+  margin: 0;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+.app-faq-trigger {
+  width: 100%;
+  text-align: left;
+}
+.app-locale-toggle {
+  padding: 2px 6px;
+  min-width: 32px;
 }
 
 /* Respect prefers-reduced-motion everywhere, including MUI transitions. */

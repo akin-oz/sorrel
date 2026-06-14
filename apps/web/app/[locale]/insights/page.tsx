@@ -1,10 +1,18 @@
-import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
-import insights from "../../../lib/insights-data.json";
+import {
+  AppBox,
+  AppCard,
+  AppContainer,
+  AppGrid,
+  AppHeading,
+  AppMeter,
+  AppStack,
+  AppText,
+  sorrelTheme,
+} from "@sorrel/ui";
 
-const MUTED = "#A8967F";
+import insights from "../../../lib/insights-data.json";
 
 export default async function InsightsPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -21,95 +29,61 @@ export default async function InsightsPage({ params }: { params: Promise<{ local
     color: string,
   ) {
     return (
-      <Box
-        sx={{
-          bgcolor: "background.paper",
-          border: "1.5px solid",
-          borderColor: "divider",
-          borderRadius: "16px",
-          p: { xs: 2, sm: 2.5 },
-          display: "flex",
-          flexDirection: "column",
-          gap: 1.25,
-        }}
+      <AppCard
+        tone="paper"
+        radius="16px"
+        padding={{ xs: 2, sm: 2.5 }}
+        direction="column"
+        gap={1.25}
       >
-        <Box sx={{ display: "flex", alignItems: "baseline", justifyContent: "space-between" }}>
-          <Typography sx={{ fontWeight: 700, color }}>{label}</Typography>
-          <Typography sx={{ fontFamily: "var(--font-serif)", fontSize: 22, fontWeight: 700 }}>
+        <AppStack direction="row" alignItems="baseline" justifyContent="space-between">
+          <AppText fontWeight={700} color={color}>
+            {label}
+          </AppText>
+          <AppHeading level={3} component="span" fontSize={22} fontWeight={700}>
             {pct.format(data.completionRate)}
-          </Typography>
-        </Box>
+          </AppHeading>
+        </AppStack>
         {steps.map((step, i) => (
-          <Box key={step} sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-            <Typography sx={{ width: 70, flexShrink: 0, fontSize: 13, color: "text.secondary" }}>
-              {t(`stepLabels.${step}`)}
-            </Typography>
-            <Box
-              sx={{
-                flex: 1,
-                height: 22,
-                borderRadius: "6px",
-                bgcolor: "#ECE4D9",
-                overflow: "hidden",
-              }}
-            >
-              <Box
-                sx={{
-                  width: `${(data.viewed[i] / sessionsPerVariant) * 100}%`,
-                  height: "100%",
-                  bgcolor: color,
-                }}
-              />
-            </Box>
-            <Typography
-              sx={{
-                width: 48,
-                flexShrink: 0,
-                textAlign: "right",
-                fontSize: 13,
-                fontVariantNumeric: "tabular-nums",
-              }}
-            >
-              {pct.format(data.viewed[i] / sessionsPerVariant)}
-            </Typography>
-          </Box>
+          <AppStack key={step} direction="row" alignItems="center" gap={1.5}>
+            <AppBox width={70} flexShrink={0}>
+              <AppText fontSize={13} color="text.secondary">
+                {t(`stepLabels.${step}`)}
+              </AppText>
+            </AppBox>
+            <AppMeter value={data.viewed[i] / sessionsPerVariant} color={color} />
+            <AppBox width={48} flexShrink={0} textAlign="right">
+              <AppText fontSize={13}>{pct.format(data.viewed[i] / sessionsPerVariant)}</AppText>
+            </AppBox>
+          </AppStack>
         ))}
-      </Box>
+      </AppCard>
     );
   }
 
   function stat(label: string, value: string, color?: string) {
     return (
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 0.25 }}>
-        <Typography variant="overline" sx={{ color: MUTED, lineHeight: 1.4 }}>
+      <AppStack gap={0.25}>
+        <AppText variant="overline" color={sorrelTheme.mono} lineHeight={1.4}>
           {label}
-        </Typography>
-        <Typography sx={{ fontFamily: "var(--font-serif)", fontSize: 28, fontWeight: 700, color }}>
+        </AppText>
+        <AppHeading level={3} component="span" fontSize={28} fontWeight={700} color={color}>
           {value}
-        </Typography>
-      </Box>
+        </AppHeading>
+      </AppStack>
     );
   }
 
   return (
-    <Box
-      component="main"
-      sx={{
-        width: "100%",
-        maxWidth: "52rem",
-        mx: "auto",
-        px: { xs: 2, sm: 3 },
-        py: { xs: 4, sm: 6 },
-      }}
-    >
-      <Typography variant="h1" sx={{ fontSize: { xs: 28, sm: 36 } }}>
+    <AppContainer component="main" width="52rem" px={{ xs: 2, sm: 3 }} py={{ xs: 4, sm: 6 }}>
+      <AppHeading level={1} fontSize={{ xs: 28, sm: 36 }}>
         {t("title")}
-      </Typography>
-      <Typography color="text.secondary" sx={{ mt: 1, maxWidth: "40rem" }}>
-        {t("subtitle")}
-      </Typography>
+      </AppHeading>
+      <AppBox mt={1} maxWidth="40rem">
+        <AppText color="text.secondary">{t("subtitle")}</AppText>
+      </AppBox>
 
-      <Box sx={{ display: "flex", flexWrap: "wrap", gap: { xs: 3, sm: 6 }, my: { xs: 3, sm: 4 } }}>
+      <AppStack direction="row" wrap gap={{ xs: 3, sm: 6 }} my={{ xs: 3, sm: 4 }}>
         {stat(`${t("variantA")} · ${t("completion")}`, pct.format(variants.A.completionRate))}
         {stat(
           `${t("variantB")} · ${t("completion")}`,
@@ -117,14 +91,18 @@ export default async function InsightsPage({ params }: { params: Promise<{ local
           "primary.main",
         )}
         {stat(t("lift"), `+${liftPp} pp`, "primary.main")}
-      </Box>
+      </AppStack>
 
-      <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" }, gap: 2 }}>
-        {funnel(t("variantA"), variants.A, MUTED)}
+      <AppGrid columns={{ xs: "1fr", md: "1fr 1fr" }} gap={2}>
+        {funnel(t("variantA"), variants.A, sorrelTheme.mono)}
         {funnel(t("variantB"), variants.B, "primary.main")}
-      </Box>
+      </AppGrid>
 
-      <Typography sx={{ mt: 3, fontSize: 12, color: MUTED }}>{t("disclaimer")}</Typography>
-    </Box>
+      <AppBox mt={3}>
+        <AppText fontSize={12} color={sorrelTheme.mono}>
+          {t("disclaimer")}
+        </AppText>
+      </AppBox>
+    </AppContainer>
   );
 }

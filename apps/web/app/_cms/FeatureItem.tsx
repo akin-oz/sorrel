@@ -1,120 +1,79 @@
 "use client";
 
-import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
 import { storyblokEditable } from "@storyblok/react/rsc";
 
-import { sorrelTheme } from "@sorrel/ui";
+import { AppCard, AppStack, AppText, sorrelTheme } from "@sorrel/ui";
 
 import type { FeatureIcon, FeatureItemBlok } from "../../types/storyblok.gen";
 
-/** Decorative token-built glyphs (spec 012) — simple shapes, no SVG art. */
+/** Decorative token-built glyphs (spec 012/018) — simple inline-SVG shapes. */
 function Glyph({ icon }: { icon: FeatureIcon }) {
-  const size = { xs: 36, md: 40 };
   if (icon === "vet") {
+    // Tinted circle with a solid centre dot.
     return (
-      <Box
-        aria-hidden
-        sx={{
-          width: size,
-          height: size,
-          borderRadius: "50%",
-          bgcolor: sorrelTheme.accentTint,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          flexShrink: 0,
-        }}
-      >
-        <Box sx={{ width: 14, height: 14, borderRadius: "50%", bgcolor: "primary.main" }} />
-      </Box>
+      <svg width={40} height={40} viewBox="0 0 40 40" aria-hidden>
+        <circle cx={20} cy={20} r={20} fill={sorrelTheme.accentTint} />
+        <circle cx={20} cy={20} r={7} fill={sorrelTheme.accent} />
+      </svg>
     );
   }
   if (icon === "portion") {
+    // Tinted rotated square with a solid centre square.
     return (
-      <Box
-        aria-hidden
-        sx={{
-          width: size,
-          height: size,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          flexShrink: 0,
-        }}
-      >
-        <Box
-          sx={{
-            width: 24,
-            height: 24,
-            bgcolor: sorrelTheme.accentTint,
-            transform: "rotate(45deg)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <Box sx={{ width: 10, height: 10, bgcolor: "primary.main" }} />
-        </Box>
-      </Box>
+      <svg width={40} height={40} viewBox="0 0 40 40" aria-hidden>
+        <rect
+          x={20}
+          y={3}
+          width={24}
+          height={24}
+          fill={sorrelTheme.accentTint}
+          transform="rotate(45 20 20)"
+        />
+        <rect
+          x={20}
+          y={13}
+          width={10}
+          height={10}
+          fill={sorrelTheme.accent}
+          transform="rotate(45 20 20)"
+        />
+      </svg>
     );
   }
+  // Bowl: tinted dome over a solid bar, bottom-aligned.
   return (
-    <Box
-      aria-hidden
-      sx={{
-        width: size,
-        height: size,
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "flex-end",
-        gap: "2px",
-        flexShrink: 0,
-      }}
-    >
-      <Box
-        sx={{
-          width: 32,
-          height: 16,
-          borderRadius: "16px 16px 0 0",
-          bgcolor: sorrelTheme.accentTint,
-        }}
-      />
-      <Box sx={{ width: 32, height: 5, borderRadius: "2px", bgcolor: "primary.main" }} />
-    </Box>
+    <svg width={40} height={40} viewBox="0 0 40 40" aria-hidden>
+      <path d="M4 35 a16 16 0 0 1 32 0 Z" fill={sorrelTheme.accentTint} />
+      <rect x={4} y={37} width={32} height={5} rx={2} fill={sorrelTheme.accent} />
+    </svg>
   );
 }
 
 export function FeatureItem({ blok }: { blok: FeatureItemBlok }) {
   return (
-    <Box
-      {...storyblokEditable(blok)}
-      sx={{
-        bgcolor: sorrelTheme.surface,
-        border: "1.5px solid",
-        borderColor: "divider",
-        borderRadius: "16px",
-        p: { xs: 2.25, md: 3.25 },
-        display: "flex",
-        flexDirection: { xs: "row", md: "column" },
-        alignItems: "flex-start",
-        gap: { xs: 1.75, md: 1.75 },
-      }}
+    <AppCard
+      tone="surface"
+      radius="16px"
+      padding={{ xs: 2.25, md: 3.25 }}
+      direction={{ xs: "row", md: "column" }}
+      alignItems="flex-start"
+      gap={1.75}
+      editable={storyblokEditable(blok)}
     >
       {blok.icon ? <Glyph icon={blok.icon} /> : null}
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
-        <Typography sx={{ fontSize: { xs: 16, md: 17 }, fontWeight: 600, color: "text.primary" }}>
+      <AppStack gap={0.5}>
+        <AppText fontWeight={600} color="text.primary" fontSize={{ xs: 16, md: 17 }}>
           {blok.title}
-        </Typography>
-        <Typography
+        </AppText>
+        <AppText
           variant="body2"
           color="text.secondary"
-          sx={{ fontSize: { xs: 14, md: 15 }, lineHeight: 1.55 }}
+          fontSize={{ xs: 14, md: 15 }}
+          lineHeight={1.55}
         >
           {blok.body}
-        </Typography>
-      </Box>
-    </Box>
+        </AppText>
+      </AppStack>
+    </AppCard>
   );
 }

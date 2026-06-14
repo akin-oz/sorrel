@@ -1,17 +1,15 @@
-import { AppRouterCacheProvider } from "@mui/material-nextjs/v16-appRouter";
-import CssBaseline from "@mui/material/CssBaseline";
-import { ThemeProvider } from "@mui/material/styles";
 import type { Metadata } from "next";
 import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
 import { IBM_Plex_Mono, Public_Sans, Source_Serif_4 } from "next/font/google";
 import { notFound } from "next/navigation";
 
+import { AppThemeProvider } from "@sorrel/ui";
+
 import { routing } from "../../i18n/routing";
 import { SITE_URL } from "../../lib/site";
 import { StoryblokProvider } from "../_cms/StoryblokProvider";
 import "../globals.css";
-import theme from "../theme";
 
 // display:swap + preload the fonts in the first paint (serif headline is the LCP
 // element; sans is body copy) so text renders immediately (spec 015 LCP lever).
@@ -77,12 +75,7 @@ export default async function LocaleLayout({
       <body>
         <NextIntlClientProvider locale={locale} messages={messages}>
           <StoryblokProvider>
-            <AppRouterCacheProvider>
-              <ThemeProvider theme={theme}>
-                <CssBaseline />
-                {children}
-              </ThemeProvider>
-            </AppRouterCacheProvider>
+            <AppThemeProvider>{children}</AppThemeProvider>
           </StoryblokProvider>
         </NextIntlClientProvider>
       </body>

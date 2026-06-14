@@ -1,9 +1,8 @@
-import Box from "@mui/material/Box";
-import Container from "@mui/material/Container";
-import Typography from "@mui/material/Typography";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { draftMode } from "next/headers";
 import { notFound } from "next/navigation";
+
+import { AppBox, AppLink, AppStack, AppText } from "@sorrel/ui";
 
 import { Link } from "../../../../i18n/navigation";
 import { getRecipes } from "../../../../lib/cms";
@@ -30,21 +29,26 @@ export default async function RecipePage({
   const t = await getTranslations("Recipes");
 
   return (
-    <Container
-      maxWidth="sm"
-      sx={{ py: { xs: 4, md: 8 }, display: "flex", flexDirection: "column", gap: 2.5 }}
+    <AppStack
+      component="main"
+      maxWidth={600}
+      mx="auto"
+      width="100%"
+      px={{ xs: 2, sm: 3 }}
+      py={{ xs: 4, md: 8 }}
+      gap={2.5}
     >
-      <Typography variant="body2" sx={{ color: "text.secondary" }}>
-        <Link href="/" style={{ color: "inherit", textDecoration: "none" }}>
+      <AppText variant="body2" color="text.secondary">
+        <AppLink href="/" component={Link} color="inherit">
           ← Sorrel
-        </Link>
-      </Typography>
-      <Box sx={{ maxWidth: 440 }}>
+        </AppLink>
+      </AppText>
+      <AppBox maxWidth={440}>
         <RecipeCard blok={recipe} />
-      </Box>
-      <Typography variant="body2" color="text.secondary">
+      </AppBox>
+      <AppText variant="body2" color="text.secondary">
         {t("all")}: /recipes/{recipe.slug}
-      </Typography>
-    </Container>
+      </AppText>
+    </AppStack>
   );
 }

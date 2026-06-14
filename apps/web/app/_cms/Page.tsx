@@ -1,7 +1,8 @@
 "use client";
 
-import Box from "@mui/material/Box";
 import { storyblokEditable } from "@storyblok/react/rsc";
+
+import { AppBox } from "@sorrel/ui";
 
 import type { PageBlok, PageBodyBlok } from "../../types/storyblok.gen";
 import { CtaSection } from "./CtaSection";
@@ -44,8 +45,8 @@ function renderBlok(blok: PageBodyBlok) {
  */
 export function Page({ blok }: { blok: PageBlok }) {
   return (
-    <Box component="main" {...storyblokEditable(blok)} sx={{ width: "100%" }}>
+    <AppBox component="main" width="100%" editable={storyblokEditable(blok)}>
       {blok.body?.map(renderBlok)}
-    </Box>
+    </AppBox>
   );
 }
