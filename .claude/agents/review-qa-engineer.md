@@ -72,8 +72,8 @@ step per package) and the `verify-on-stop.sh` hook approximates it locally.
 1. **No Cypress / Playwright e2e — the Tier-2 gap.** There is **zero** end-to-end test:
    no browser-driven CATS→SUMMARY happy-path click-through, no resume-from-draft flow, no
    exit-intent path. Grep proves it (`grep -ri "cypress\|playwright"` over the repo, minus
-   node_modules, returns nothing; no `cypress/` dir, no e2e job in `ci.yml`). The unit
-   suite verifies the _pieces_; nothing verifies the _funnel actually completes in a
+   node*modules, returns nothing; no `cypress/` dir, no e2e job in `ci.yml`). The unit
+   suite verifies the \_pieces*; nothing verifies the _funnel actually completes in a
    browser_. For a conversion-funnel demo held to the project's quality bar, this is the
    highest-value missing test. Spell out the minimal happy-path spec that would close it and
    where it would live.
