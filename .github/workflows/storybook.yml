@@ -1,0 +1,33 @@
+name: Storybook
+
+# Spec 038 — build-gate for the centerpiece + App* layer Storybook. The gate is
+# build-only: we prove Storybook compiles. No Chromatic / Percy / visual
+# regression; public deployment of the static output is a follow-on spec.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: storybook-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build Storybook
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: yarn
+      - name: Install
+        run: yarn install --frozen-lockfile
+      - name: Build Storybook
+        env:
+          CI: "true"
+        run: yarn workspace @sorrel/ui build-storybook

@@ -214,9 +214,10 @@ Tiers ship in order; nothing ships below the Tier-1 line.
 - **Tier 2 — coverage:** CMS-driven landing/recipe content, i18n (en/de) with hreflang,
   CI (typecheck, lint, unit matrix, codegen + format gates, a spec-trailer gate, Lighthouse
   budget — all as PR gates), one Cypress happy path, JSON-LD, sitemap/robots.
-- **Tier 3 — closers:** funnel-insights page from seeded events (spec 023, shipped).
-  **Unstarted, no spec yet:** Storybook, Stripe test mode. _(Real-browser axe rules on
-  the calendar dialog shipped under spec 035 — no longer a future closer.)_
+- **Tier 3 — closers:** funnel-insights page from seeded events (spec 023, shipped);
+  Storybook on the centerpiece + App\* layer (spec 038, shipped — `yarn workspace
+@sorrel/ui storybook`). **Unstarted, no spec yet:** Stripe test mode.
+  _(Real-browser axe rules on the calendar dialog shipped under spec 035.)_
 
 **Landed:** the monorepo + AI-governance layer (`.claude/` + `specs/`), the delivery-date
 picker (`packages/ui`), the GraphQL contract + mock Apollo API (`schema.graphql`,
