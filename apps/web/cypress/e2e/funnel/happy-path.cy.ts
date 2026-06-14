@@ -36,43 +36,51 @@ describe("Funnel happy path", () => {
       },
     });
 
+    // The chrome's Continue button is always called "Continue" except on the
+    // last step ("Confirm plan"). Helper to advance past the current step.
+    const clickContinue = () =>
+      cy
+        .contains("button", /^Continue$/)
+        .should("not.be.disabled")
+        .click();
+
     // 1 — CATS
     cy.location("pathname").should("include", "/wizard/cats");
-    cy.get('[role="alert"]').should("not.exist");
-    cy.contains("button", /^2$/).click();
-    cy.contains("button", /continue/i).click();
+    // Each AppToggleOption carries its plural-aware aria-label ("1 cat" / "2 cats" / …).
+    cy.get('button[aria-label="2 cats"]').click();
+    clickContinue();
 
-    // 2 — PROFILE
+    // 2 — PROFILE (variant A, the control). The skeleton resolves once
+    // useVariant settles via the window-override microtask.
     cy.location("pathname").should("include", "/wizard/profile");
-    cy.get('input[name="name"], input[id*="name"]').first().type("Whiskers");
-    cy.contains("button", /adult/i).click();
-    cy.contains("button", /average/i).click();
-    cy.contains("button", /continue/i).click();
+    cy.get('input[name="name"], input[type="text"]').first().type("Whiskers");
+    // Age pill "3–7 years" (key=adult). Weight pill "4–5 kg" (key=m).
+    cy.contains("button", "3–7 years").click();
+    cy.contains("button", "4–5 kg").click();
+    clickContinue();
 
-    // 3 — RECIPES
+    // 3 — RECIPES — each card has an "Add" button.
     cy.location("pathname").should("include", "/wizard/recipes");
-    cy.get('[role="button"], button')
-      .contains(/chicken|salmon|turkey/i)
-      .first()
-      .click();
-    cy.contains("button", /continue/i).click();
+    cy.contains("button", /^Add$/).first().click();
+    cy.contains("button", /^Added$/, { timeout: 6000 }).should("exist");
+    clickContinue();
 
-    // 4 — DELIVERY
+    // 4 — DELIVERY (the picker centerpiece).
     cy.location("pathname").should("include", "/wizard/delivery");
     cy.contains("button", /change/i).click();
     cy.get('[role="dialog"]').should("be.visible");
     cy.get('[role="gridcell"]').contains(/^17$/).click();
-    cy.contains("button", /confirm/i).click();
-    cy.contains("button", /continue/i).click();
+    cy.contains("button", /^Confirm$/).click();
+    clickContinue();
 
     // 5 — PLAN
     cy.location("pathname").should("include", "/wizard/plan");
-    cy.contains("button", /continue/i).click();
+    clickContinue();
 
-    // 6 — EMAIL (server action)
+    // 6 — EMAIL (server action).
     cy.location("pathname").should("include", "/wizard/email");
     cy.get('input[type="email"]').type("test@example.com");
-    cy.contains("button", /continue/i).click();
+    clickContinue();
 
     // 7 — SUMMARY
     cy.location("pathname").should("include", "/wizard/summary");
