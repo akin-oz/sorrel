@@ -23,9 +23,10 @@ const SESSIONS_PER_VARIANT = 1000;
 
 // Per-transition retention (fraction continuing to the next step), by variant.
 // Index i = FUNNEL_STEPS[i] → FUNNEL_STEPS[i+1]. The lever is index 1
-// (PROFILE → RECIPES): free-text (A) stalls; autocomplete-with-defaults (B) lifts.
+// (PROFILE → RECIPES): inline pills (A, every option visible) vs autocomplete-with-
+// defaults (B). A is a credible control, so the gap narrows — but B still lifts.
 const RETENTION: Record<Variant, number[]> = {
-  A: [0.82, 0.55, 0.81, 0.89, 0.86, 0.91],
+  A: [0.82, 0.7, 0.81, 0.89, 0.86, 0.91],
   B: [0.82, 0.78, 0.81, 0.89, 0.86, 0.91],
 };
 

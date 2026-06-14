@@ -4,10 +4,10 @@
  * (capture `/batch`), so the demo's funnel insight + dashboard have data.
  *
  * Same canonical drop-off as seed-funnel.ts / seed-mixpanel.ts: variant B (PROFILE
- * autocomplete) lifts PROFILE→RECIPES; the free-text control (A) also throws more
- * validation `field_error`s at PROFILE. Deterministic ($insert_id stable per event),
- * so PostHog dedups re-runs. PostHog accepts historical timestamps, so sessions
- * spread across the trailing two weeks.
+ * autocomplete with smart defaults) lifts PROFILE→RECIPES over variant A (inline
+ * pills, every option visible) — a credible control, so the gap is real but smaller.
+ * Deterministic ($insert_id stable per event), so PostHog dedups re-runs. PostHog
+ * accepts historical timestamps, so sessions spread across the trailing two weeks.
  *
  *   NEXT_PUBLIC_POSTHOG_KEY=… yarn workspace @sorrel/frontend seed:posthog
  *
@@ -29,7 +29,7 @@ const BATCH = 100;
 // Per-transition retention by variant — mirrors seed-funnel.ts (the canonical curve).
 // Index i = FUNNEL_STEPS[i] → [i+1]; index 1 (PROFILE→RECIPES) is the lever.
 const RETENTION: Record<Variant, number[]> = {
-  A: [0.82, 0.55, 0.81, 0.89, 0.86, 0.91],
+  A: [0.82, 0.7, 0.81, 0.89, 0.86, 0.91],
   B: [0.82, 0.78, 0.81, 0.89, 0.86, 0.91],
 };
 
@@ -82,7 +82,8 @@ function send(event: FunnelEvent, distinctId: string, timeSec: number, insertId:
 const NOW = Math.floor(Date.now() / 1000);
 
 /** One session: views 0..furthest, completes 0..furthest-1; abandons or converts.
- *  Variant A drops more at PROFILE and emits a validation field_error there. */
+ *  Variant A drops a little more at PROFILE; pills emit no per-field error (spec 022 —
+ *  the signal is the disabled-Continue gate, not a field_error). */
 function emitSession(variant: Variant, furthest: number, index: number) {
   const distinctId = `seed_${variant}_${index}`;
   const start = NOW - (index % DAYS) * 86400 - (index % 11) * 3600 - 600;
@@ -93,20 +94,6 @@ function emitSession(variant: Variant, furthest: number, index: number) {
   for (let i = 0; i <= furthest; i += 1) {
     send({ name: "funnel_step_viewed", step: FUNNEL_STEPS[i], variant }, distinctId, at(), id());
     seq += 1;
-    if (FUNNEL_STEPS[i] === "PROFILE" && variant === "A" && index % 3 === 0) {
-      send(
-        {
-          name: "field_error",
-          step: "PROFILE",
-          field: index % 2 ? "weight" : "age",
-          error: "required",
-        },
-        distinctId,
-        at(),
-        id(),
-      );
-      seq += 1;
-    }
     if (i < furthest) {
       send({ name: "step_completed", step: FUNNEL_STEPS[i], variant }, distinctId, at(), id());
       seq += 1;

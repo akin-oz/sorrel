@@ -12,14 +12,25 @@ import {
   sorrelTheme,
 } from "@sorrel/ui";
 
-import insights from "../../../lib/insights-data.json";
+import staticInsights from "../../../lib/insights-data.json";
+import { type InsightsData, fetchLiveInsights } from "../../../lib/insights-posthog";
+
+// ISR: rebuild at most hourly so the live PostHog read stays fresh without hammering
+// the Query API on every request (spec 023).
+export const revalidate = 3600;
 
 export default async function InsightsPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("Insights");
 
-  const { sessionsPerVariant, steps, variants } = insights;
+  // Live PostHog funnel when a server key is present; else the deterministic static
+  // JSON (keyless CI/offline builds render this — the fallback is the "error" state).
+  const live = await fetchLiveInsights();
+  const insights: InsightsData = live ?? (staticInsights as InsightsData);
+  const source = live ? "live" : "seed";
+
+  const { steps, variants } = insights;
   const pct = new Intl.NumberFormat(locale, { style: "percent", maximumFractionDigits: 1 });
   const liftPp = ((variants.B.completionRate - variants.A.completionRate) * 100).toFixed(1);
 
@@ -28,6 +39,7 @@ export default async function InsightsPage({ params }: { params: Promise<{ local
     data: { viewed: number[]; completionRate: number },
     color: string,
   ) {
+    const cohort = data.viewed[0] || 1;
     return (
       <AppCard
         tone="paper"
@@ -51,9 +63,9 @@ export default async function InsightsPage({ params }: { params: Promise<{ local
                 {t(`stepLabels.${step}`)}
               </AppText>
             </AppBox>
-            <AppMeter value={data.viewed[i] / sessionsPerVariant} color={color} />
+            <AppMeter value={data.viewed[i] / cohort} color={color} />
             <AppBox width={48} flexShrink={0} textAlign="right">
-              <AppText fontSize={13}>{pct.format(data.viewed[i] / sessionsPerVariant)}</AppText>
+              <AppText fontSize={13}>{pct.format(data.viewed[i] / cohort)}</AppText>
             </AppBox>
           </AppStack>
         ))}
@@ -100,7 +112,7 @@ export default async function InsightsPage({ params }: { params: Promise<{ local
 
       <AppBox mt={3}>
         <AppText fontSize={12} color={sorrelTheme.mono}>
-          {t("disclaimer")}
+          {t(source === "live" ? "disclaimerLive" : "disclaimer")}
         </AppText>
       </AppBox>
     </AppContainer>

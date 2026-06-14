@@ -64,8 +64,9 @@ measured**. The instrument is the typed analytics contract, not opinion.
 
 - **URL-segmented steps** (`/wizard/[step]`) → clean per-step attribution → measured by
   `funnel_step_viewed` → `step_completed` drop-off per step.
-- **Autocomplete with smart defaults vs. free text**, behind a flag → less friction at the
-  step that drops the most → measured by `step_completed` split by `variant`.
+- **Autocomplete with smart defaults vs. inline pills (all options visible)**, behind a flag
+  → a credible A/B at the step that drops the most → measured by `step_completed` split by
+  `variant`.
 - **Local draft + `saveFunnelDraft` server autosave** → recover abandoned sessions
   → measured by resume rate after `funnel_abandoned`.
 - **Exit-intent recovery modal** (desktop) → intercept the abandonment gesture with a reason
@@ -126,7 +127,11 @@ contract is vendor-agnostic, not because two vendors are needed; it's opt-in per
 environment (`NEXT_PUBLIC_MIXPANEL_TOKEN`), so production runs single-vendor by default.
 Both backends are populated for the demo (`yarn workspace @sorrel/frontend seed:posthog`
 / `seed:mixpanel`), each showing the same CATS→SUMMARY funnel with the PROFILE-input
-lever (variant A ≈26% → B ≈36% completion).
+lever (variant A ≈32% → B ≈36% completion — inline pills are a credible control, so the
+gap is real but smaller). The `/insights` page reads the **live** PostHog funnel when a
+server-only `POSTHOG_PERSONAL_API_KEY` (+ `POSTHOG_PROJECT_ID`) is set — created in PostHog
+with `query:read` scope, never `NEXT_PUBLIC_*`, since the public `phc_` ingestion key can't
+query — and falls back to the committed seed JSON otherwise, so keyless builds stay green.
 
 ---
 
