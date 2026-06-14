@@ -21,6 +21,7 @@ import {
   moveFocus,
   parseIso,
   toIso,
+  toWeeks,
 } from "@sorrel/domain";
 
 import { useInjectDeliveryStyles } from "./theme/styles";
@@ -402,20 +403,6 @@ export function DeliveryDatePicker({
       )}
     </div>
   );
-}
-
-function toWeeks(leadingBlanks: number, cells: DateCell[]): (DateCell | null)[][] {
-  const flat: (DateCell | null)[] = [
-    ...Array.from({ length: leadingBlanks }, () => null),
-    ...cells,
-  ];
-  const weeks: (DateCell | null)[][] = [];
-  for (let i = 0; i < flat.length; i += 7) {
-    const week = flat.slice(i, i + 7);
-    while (week.length < 7) week.push(null);
-    weeks.push(week);
-  }
-  return weeks;
 }
 
 interface ClosedCardProps {

@@ -195,6 +195,24 @@ export function clampToMonth(iso: IsoDate, year: number, month: number): IsoDate
   return iso;
 }
 
+/**
+ * Pack a flat list of month cells into Monday-first week rows, padding the
+ * trailing row with `null` to 7 columns. The leading-blanks count comes from
+ * `buildMonthView` and reflects how many `null`s precede day 1 to align it
+ * under its Monday-first column. Pure; the UI consumes this for the grid
+ * layout without re-implementing the math (spec 030).
+ */
+export function toWeeks<T>(leadingBlanks: number, cells: readonly T[]): (T | null)[][] {
+  const flat: (T | null)[] = [...Array.from({ length: leadingBlanks }, () => null), ...cells];
+  const weeks: (T | null)[][] = [];
+  for (let i = 0; i < flat.length; i += 7) {
+    const week = flat.slice(i, i + 7);
+    while (week.length < 7) week.push(null);
+    weeks.push(week);
+  }
+  return weeks;
+}
+
 export type GridKey = "ArrowLeft" | "ArrowRight" | "ArrowUp" | "ArrowDown" | "Home" | "End";
 
 /** Roving-tabindex movement within a single month grid (clamped to month bounds). */

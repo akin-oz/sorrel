@@ -9,6 +9,9 @@ import {
   isDeliverableWeekday,
   mondayIndex,
   moveFocus,
+  parseIso,
+  toIso,
+  toWeeks,
 } from "./calendar";
 
 describe("daysInMonth (month boundaries)", () => {
@@ -164,7 +167,7 @@ describe("buildMonthView", () => {
     expect(byDay(17)?.blocked).toBe(false); // Wed, after earliest
   });
 
-  it("emits all 30 days of June so the inlined toWeeks math yields a partial trailing row", () => {
+  it("emits all 30 days of June so the imported toWeeks yields a partial trailing row", () => {
     // June 2026 ends on Tuesday 30 (mondayIndex 1, non-Sunday).
     const view = buildMonthView(2026, 6, { earliest });
 
@@ -172,24 +175,128 @@ describe("buildMonthView", () => {
     expect(mondayIndex("2026-06-30")).toBe(1); // Tuesday
     expect(view.leadingBlanks + view.cells.length).toBe(30); // single month, no overflow.
 
-    // Inlined copy of DeliveryDatePicker.tsx's `toWeeks` (six lines, kept here so the
-    // domain test stays self-contained — exporting it would be a contract change spec 024
-    // explicitly avoids). Last week must contain only Mon 29 + Tue 30, then 5 nulls.
+    // The picker consumes `toWeeks` from @sorrel/domain (spec 030). Last week
+    // must contain only Mon 29 + Tue 30, then 5 nulls.
     type Cell = (typeof view.cells)[number];
-    const flat: (Cell | null)[] = [
-      ...Array.from({ length: view.leadingBlanks }, () => null),
-      ...view.cells,
-    ];
-    const weeks: (Cell | null)[][] = [];
-    for (let i = 0; i < flat.length; i += 7) {
-      const week = flat.slice(i, i + 7);
-      while (week.length < 7) week.push(null);
-      weeks.push(week);
+    const weeks = toWeeks<Cell>(view.leadingBlanks, view.cells);
+    const lastWeek = weeks[weeks.length - 1];
+    const days = lastWeek.filter((c): c is Cell => c !== null).map((c) => c.day);
+    expect(days).toEqual([29, 30]);
+    expect(lastWeek.filter((c) => c === null)).toHaveLength(5);
+  });
+});
+
+// --- Spec 030: calendar-domain edge cases (D-01 … D-10) ------------------------
+
+describe("D-01: Feb 2024 leap-month grid", () => {
+  it("computes leadingBlanks=3, 29 cells, last iso=2024-02-29", () => {
+    // 1 Feb 2024 is a Thursday (Monday-index 3).
+    const view = buildMonthView(2024, 2, { earliest: "2024-02-01" });
+    expect(view.leadingBlanks).toBe(3);
+    expect(view.cells).toHaveLength(29);
+    expect(view.cells[view.cells.length - 1]?.iso).toBe("2024-02-29");
+  });
+});
+
+describe("D-02: March 2026 after Feb-common handoff", () => {
+  it("computes leadingBlanks=6, 31 cells, first iso=2026-03-01 (Sunday)", () => {
+    // March 1 2026 is a Sunday (Monday-index 6).
+    const view = buildMonthView(2026, 3, { earliest: "2026-03-01" });
+    expect(view.leadingBlanks).toBe(6);
+    expect(view.cells).toHaveLength(31);
+    expect(view.cells[0]?.iso).toBe("2026-03-01");
+    expect(mondayIndex("2026-03-01")).toBe(6);
+  });
+});
+
+describe("D-03: January 2026 starts Thursday", () => {
+  it("computes leadingBlanks=3 and 31 cells", () => {
+    const view = buildMonthView(2026, 1, { earliest: "2026-01-01" });
+    expect(view.leadingBlanks).toBe(3);
+    expect(view.cells).toHaveLength(31);
+    expect(view.cells[0]?.iso).toBe("2026-01-01");
+  });
+});
+
+describe("D-04: DST spring-forward stays a single ISO day", () => {
+  it("rolls 2026-03-28 → 2026-03-29 without skipping or duplicating", () => {
+    // 29 March 2026 is the European DST spring-forward date. Any local-time
+    // addDays would either skip or duplicate the day; UTC math is stable.
+    expect(addDays("2026-03-28", 1)).toBe("2026-03-29");
+    expect(mondayIndex("2026-03-29")).toBe(6); // Sunday
+  });
+});
+
+describe("D-05: earliestDeliverableDate Thu+4 ⇒ Mon", () => {
+  it("returns 2026-06-15 for today=2026-06-11 (Thursday) with leadDays=4", () => {
+    expect(earliestDeliverableDate("2026-06-11", 4)).toBe("2026-06-15");
+  });
+});
+
+describe("D-06: earliestDeliverableDate Tue→Wed one-step skip", () => {
+  it("rolls Sat+3=Tue (blocked) to Wed", () => {
+    // 2026-06-13 (Sat) + 3 = 2026-06-16 (Tue, blocked) → 2026-06-17 (Wed).
+    expect(earliestDeliverableDate("2026-06-13", 3)).toBe("2026-06-17");
+  });
+});
+
+describe("D-07: moveFocus Sunday + End is a no-op", () => {
+  it("returns the same Sunday ISO with no leak into next week", () => {
+    // 2026-06-21 is a Sunday (mondayIndex 6); End adds 6 - 6 = 0 days.
+    expect(moveFocus("2026-06-21", "End", 2026, 6)).toBe("2026-06-21");
+  });
+});
+
+describe("D-08: IsoDate UTC round-trip under a non-UTC TZ shim", () => {
+  const previousTz = process.env.TZ;
+  beforeAll(() => {
+    process.env.TZ = "America/New_York";
+  });
+  afterAll(() => {
+    if (previousTz === undefined) {
+      delete process.env.TZ;
+    } else {
+      process.env.TZ = previousTz;
+    }
+  });
+
+  it("toIso ∘ parseIso is identity for the Jan-1 year-boundary date", () => {
+    expect(toIso(parseIso("2026-01-01"))).toBe("2026-01-01");
+  });
+
+  it("toIso ∘ parseIso is identity for a mid-year date", () => {
+    expect(toIso(parseIso("2026-06-15"))).toBe("2026-06-15");
+  });
+});
+
+describe("D-09: toWeeks pads the last row to 7", () => {
+  it("for June 2026: last week non-null days are [29, 30], trailing nulls = 5, every row length 7", () => {
+    const view = buildMonthView(2026, 6, { earliest: "2026-06-15" });
+    type Cell = (typeof view.cells)[number];
+    const weeks = toWeeks<Cell>(view.leadingBlanks, view.cells);
+
+    for (const week of weeks) {
+      expect(week).toHaveLength(7);
     }
     const lastWeek = weeks[weeks.length - 1];
     const days = lastWeek.filter((c): c is Cell => c !== null).map((c) => c.day);
     expect(days).toEqual([29, 30]);
     expect(lastWeek.filter((c) => c === null)).toHaveLength(5);
+  });
+});
+
+describe("D-10: earliestDeliverableDate never lands on a blocked weekday over a 365-day sweep", () => {
+  it("holds for every day in 2026", () => {
+    let today = "2026-01-01";
+    let safety = 0;
+    while (today <= "2026-12-31") {
+      const earliest = earliestDeliverableDate(today);
+      expect(isDeliverableWeekday(earliest)).toBe(true);
+      today = addDays(today, 1);
+      safety += 1;
+      if (safety > 366) throw new Error("sweep overran");
+    }
+    expect(safety).toBe(365);
   });
 });
 
