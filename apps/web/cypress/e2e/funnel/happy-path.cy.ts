@@ -30,6 +30,10 @@ describe("Funnel happy path", () => {
     cy.clearLocalStorage();
     cy.window().then((win) => win.sessionStorage.clear());
     cy.clock(new Date("2026-06-12T09:00:00Z"));
+    // Spec 034: pin the SSR `today` (the server-computed value the picker
+    // hydrates against). `cy.clock` only stubs the browser; the cookie is
+    // how the dev-mode page reads a deterministic date for tests.
+    cy.setCookie("sorrel_e2e_today", "2026-06-12");
   });
 
   it("completes CATS → SUMMARY under variant A", () => {

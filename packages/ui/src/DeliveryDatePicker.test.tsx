@@ -723,6 +723,52 @@ describe("DeliveryDatePicker", () => {
     });
   });
 
+  // --- Spec 034: SSR-safe `today` fallback contract ----------------------
+
+  describe("spec 034 — SSR-safety contract for the no-`today` fallback", () => {
+    it("renders the closed card stably without `today` across re-renders", () => {
+      // The fallback `today` is computed via a useState initializer, so the
+      // client-only `new Date()` call runs ONCE per mount. A naive
+      // `today = todayProp ?? toIso(new Date())` at render time would
+      // re-evaluate `new Date()` on every render and (across a tick boundary)
+      // change the closed-card day number.
+      jest.useFakeTimers().setSystemTime(new Date("2026-06-12T09:00:00Z"));
+      try {
+        const { rerender, container } = render(<DeliveryDatePicker />);
+        // earliest deliverable from 2026-06-12 is Mon 2026-06-15 → day "15".
+        expect(within(container).getByText(EARLIEST_DAY)).toBeInTheDocument();
+
+        // Advance the system clock a full day, then rerender. The closed-card
+        // day number must remain "15" — the fallback `today` is sealed at
+        // mount, not re-computed on rerender.
+        jest.setSystemTime(new Date("2026-06-13T09:00:00Z"));
+        rerender(<DeliveryDatePicker />);
+        expect(within(container).getByText(EARLIEST_DAY)).toBeInTheDocument();
+        // Negative: the would-be day if the fallback re-evaluated each render
+        // would be 17 (the next deliverable from 2026-06-13).
+        expect(within(container).queryByText("17")).toBeNull();
+      } finally {
+        jest.useRealTimers();
+      }
+    });
+
+    it("renders the same closed card with or without `today` under a fixed clock", () => {
+      jest.useFakeTimers().setSystemTime(new Date("2026-06-12T09:00:00Z"));
+      try {
+        const withProp = render(<DeliveryDatePicker today={TODAY} />);
+        const withoutProp = render(<DeliveryDatePicker />);
+
+        expect(within(withProp.container).getByText(EARLIEST_DAY)).toBeInTheDocument();
+        expect(within(withoutProp.container).getByText(EARLIEST_DAY)).toBeInTheDocument();
+
+        withProp.unmount();
+        withoutProp.unmount();
+      } finally {
+        jest.useRealTimers();
+      }
+    });
+  });
+
   describe("live-region announcements (spec 025 R3)", () => {
     it("announces the selection when arrowing onto a deliverable day", async () => {
       const user = userEvent.setup();

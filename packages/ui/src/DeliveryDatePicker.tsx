@@ -188,7 +188,13 @@ export function DeliveryDatePicker({
 
   const resolvedLabels: DeliveryLabels = { ...DEFAULT_DELIVERY_LABELS, ...labels };
 
-  const today = todayProp ?? toIso(new Date());
+  // Spec 034: the fallback `today` is computed via a `useState` initializer so
+  // the client-only `new Date()` call runs once per mount. For SSR-safety the
+  // host (the wizard at apps/web/.../wizard/[step]/page.tsx) passes `today`
+  // from a server component; non-wizard consumers (tests, storybook) hit the
+  // initializer, which is non-SSR so cannot drift.
+  const [fallbackToday] = useState<IsoDate>(() => toIso(new Date()));
+  const today = todayProp ?? fallbackToday;
   const earliest = earliestDeliverableDate(today, leadDays);
 
   const isControlled = value !== undefined;
@@ -622,6 +628,11 @@ function Modal(props: ModalProps) {
           gap: 14,
           maxWidth: 420,
           marginInline: "auto",
+          // Spec 034: scroll inside the modal on short viewports (landscape
+          // phone / soft-keyboard) instead of overflowing past the visible
+          // area. The 32 px gutter matches the `left: 16, right: 16` insets.
+          maxHeight: "calc(100dvh - 32px)",
+          overflowY: "auto",
         }}
       >
         {/* R3 (spec 025): visually-hidden polite live region for AT announcements. */}

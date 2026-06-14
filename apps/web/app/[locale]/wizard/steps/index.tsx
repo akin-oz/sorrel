@@ -79,7 +79,7 @@ export function RecipesStep({ recipes }: { recipes: RecipeBlok[] }) {
   );
 }
 
-function DeliveryStep() {
+function DeliveryStep({ today }: StepProps = {}) {
   const { state, dispatch } = useFunnel();
   const appLocale = useLocale();
   const tp = useTranslations("Picker");
@@ -99,6 +99,7 @@ function DeliveryStep() {
     <StepShell step="DELIVERY">
       <AppStack direction="row" justifyContent="center">
         <DeliveryDatePicker
+          today={today}
           theme={sorrelTheme}
           locale={locale}
           labels={labels}
@@ -139,7 +140,13 @@ function RecipesPlaceholder() {
   return <StepShell step="RECIPES" />;
 }
 
-const STEP_SCREENS: Record<FunnelStep, ComponentType> = {
+/** Spec 034: `today` flows from the server page so DeliveryStep can pass an
+ *  SSR-stable seed to the picker. Other steps accept (and ignore) the prop. */
+interface StepProps {
+  today?: string;
+}
+
+const STEP_SCREENS: Record<FunnelStep, ComponentType<StepProps>> = {
   CATS: CatsStep,
   PROFILE: ProfileStep,
   RECIPES: RecipesPlaceholder,
@@ -149,7 +156,7 @@ const STEP_SCREENS: Record<FunnelStep, ComponentType> = {
   SUMMARY: SummaryStep,
 };
 
-export function StepScreen({ step }: { step: FunnelStep }) {
+export function StepScreen({ step, today }: { step: FunnelStep; today?: string }) {
   const Screen = STEP_SCREENS[step];
-  return <Screen />;
+  return <Screen today={today} />;
 }

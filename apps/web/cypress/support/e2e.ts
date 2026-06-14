@@ -9,22 +9,11 @@ import "cypress-axe";
 import "./commands";
 
 // Cypress 15+ fails any test where the application throws an uncaught error.
-// React 19 raises a hydration-mismatch error and *recovers* on the client when
-// SSR output differs from the first client render (e.g. the picker computing
-// `today` from `new Date()`, locale/timezone drift in dev). The recovery path
-// is correct app behaviour, not a test failure, so we let it through here and
-// keep every other uncaught error fatal.
-Cypress.on("uncaught:exception", (err) => {
-  const msg = err?.message ?? "";
-  if (
-    msg.includes("Hydration failed") ||
-    msg.includes("hydrating") ||
-    msg.includes("There was an error while hydrating") ||
-    msg.includes("Minified React error #418") ||
-    msg.includes("Minified React error #423") ||
-    msg.includes("Minified React error #425")
-  ) {
-    return false;
-  }
+// The handler scaffold is kept so future justified suppressions have one
+// reviewable place to live with a comment explaining each one.
+// No suppressions; spec 034 removed the hydration band-aid after fixing the
+// picker's SSR/CSR drift at the source (server-computed `today` threaded
+// through the wizard page → StepScreen → DeliveryStep).
+Cypress.on("uncaught:exception", () => {
   return undefined;
 });

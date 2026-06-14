@@ -8,6 +8,7 @@ describe("DeliveryDatePicker — a11y in a real browser", () => {
   beforeEach(() => {
     cy.clearLocalStorage();
     cy.clock(new Date("2026-06-12T09:00:00Z"));
+    cy.setCookie("sorrel_e2e_today", "2026-06-12"); // spec 034: pin SSR today
   });
 
   it("C-01 — Tab focus-trap never escapes the dialog", () => {

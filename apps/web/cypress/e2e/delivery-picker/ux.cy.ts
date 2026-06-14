@@ -14,6 +14,7 @@ describe("DeliveryDatePicker — UX in a real browser", () => {
   beforeEach(() => {
     cy.clearLocalStorage();
     cy.clock(new Date("2026-06-12T09:00:00Z"));
+    cy.setCookie("sorrel_e2e_today", "2026-06-12"); // spec 034: pin SSR today
   });
 
   it("C-11 — scrim background-color resolves to an alpha < 1 (translucent)", () => {
@@ -108,14 +109,10 @@ describe("DeliveryDatePicker — UX in a real browser", () => {
     });
   });
 
-  // C-22 is a REAL picker gap, not a test bug: at 667×375 the modal renders
-  // ~401 px tall and overflows the 375 px viewport because the modal container
-  // has no `max-height: 100dvh - 32px` / `overflow-y: auto`. The UX-juror
-  // audit flagged this. Fixing it touches the picker centerpiece and so needs
-  // its own approved spec; skipping the assertion until that lands keeps the
-  // catalog row visible (`pending` in Cypress output) without silently
-  // dropping the requirement.
-  it.skip("C-22 — modal does not clip on a 667 × 375 short viewport (picker bug, needs spec)", () => {
+  // Spec 034 added `max-height: calc(100dvh - 32px); overflow-y: auto` on the
+  // modal so it scrolls inside its container instead of clipping below the
+  // viewport at landscape phone / soft-keyboard sizes.
+  it("C-22 — modal does not clip on a 667 × 375 short viewport", () => {
     cy.viewport(667, 375);
     cy.openDeliveryPicker();
     cy.window().then((win) => {
