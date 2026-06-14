@@ -37,9 +37,10 @@ A URL-segmented wizard (`/wizard/[step]`) — deep-linkable, correct back-button
 behaviour, each step its own analytics unit.
 
 1. **Quantity of cats** — how many cats to feed.
-2. **Cat profile** — name, age, neutered, weight, fussiness, allergies. _The conversion
-   lever:_ free-text (variant A) vs. searchable autocomplete with smart defaults
-   (variant B), behind a flag. This is the 39→65 fix, made demoable.
+2. **Cat profile** — name, age, weight (a lean slice of the schema's richer cat — see
+   [Decisions](#decisions)). _The conversion lever:_ toggle pills (variant A) vs. searchable
+   autocomplete with smart defaults (variant B), behind a flag. This is the 39→65 fix, made
+   demoable.
 3. **Recipe selection** — cards with dietary filters.
 4. **Delivery date** — the [date-picker centerpiece](#the-delivery-date-picker).
 5. **Plan & price** — optimistic price preview while the mutation is in flight.
@@ -69,6 +70,14 @@ measured**. The instrument is the typed analytics contract, not opinion.
   → measured by resume rate after `funnel_abandoned`.
 - **Exit-intent recovery modal** (desktop) → intercept the abandonment gesture with a reason
   to stay → measured by recovery rate (`exit_intent_recovered ÷ exit_intent_shown`).
+- **A lean funnel over the full schema** → the wizard asks only what drives a credible plan
+  (name, an age/weight bucket, recipes, cadence, email). `schema.graphql` models the _whole_
+  domain — `neutered`, `fussiness`, `allergies`, and clinical dietary programs behind a
+  veterinary-confirmation gate — and the web→GraphQL boundary
+  ([`draft-input.ts`](apps/web/app/%5Blocale%5D/wizard/draft-input.ts)) fills the unasked
+  fields with documented defaults that never change the shown price (the plan depends only on
+  weight + age + cadence). Fewer fields, higher completion — the conversion thesis applied to
+  the form itself; the schema stays the full contract for when onboarding deepens.
 
 _(Live: [sorrel.akinoztorun.dev](https://sorrel.akinoztorun.dev/). Measured mobile Lighthouse
 — landing **93 / 95 / 100 / 92** (perf / a11y / best-practices / SEO), budgeted in CI:
