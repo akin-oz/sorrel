@@ -90,9 +90,12 @@ describe("Funnel happy path", () => {
     cy.contains(/saved|check your inbox/i, { timeout: 8000 }).should("be.visible");
     clickContinue();
 
-    // 7 — SUMMARY
+    // 7 — SUMMARY renders the assembled rows from `orderSummaryRows`:
+    // cats-count, recipes, delivery date, frequency, price, email.
+    // The cat name lives in funnel state but never surfaces on SUMMARY,
+    // so we assert what the page actually paints.
     cy.location("pathname").should("include", "/wizard/summary");
-    cy.contains(/whiskers/i).should("exist");
+    cy.contains(/2 cats/i, { timeout: 8000 }).should("exist");
     cy.contains(/test@example\.com/i).should("exist");
 
     // Typed funnel-event assertions — read the in-memory queue exposed by
