@@ -1,7 +1,6 @@
 ---
 spec: 017
 title: SUMMARY step — review the assembled plan + confirm
-status: proposed
 approved: yes
 tier: 1
 owner: apps/web

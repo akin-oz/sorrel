@@ -1,7 +1,6 @@
 ---
 spec: 023
 title: Make /insights read live PostHog funnel data with a static fallback, and finish the pills re-narration
-status: proposed
 approved: yes
 tier: 1 # the 39→65 conversion narrative + its live evidence surface
 owner: apps/web

@@ -1,7 +1,6 @@
 ---
 spec: 012
 title: Landing redesign — the 9-blok marketing landing from the design handoff
-status: proposed
 approved: yes
 tier: 2
 owner: apps/web

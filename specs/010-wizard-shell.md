@@ -1,7 +1,6 @@
 ---
 spec: 010
 title: Wizard shell — URL-segmented funnel frame, typed state, instrumentation, resume
-status: proposed
 approved: yes
 tier: 1
 owner: apps/web

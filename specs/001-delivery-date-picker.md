@@ -1,7 +1,6 @@
 ---
 spec: 001
 title: Delivery date picker (Tier-1 centerpiece)
-status: proposed
 approved: yes
 tier: 1
 owner: packages/ui

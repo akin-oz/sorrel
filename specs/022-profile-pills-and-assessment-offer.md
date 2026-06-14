@@ -1,7 +1,6 @@
 ---
 spec: 022
 title: PROFILE toggle-pill control + exit-intent assessment-preview offer
-status: proposed
 approved: yes
 tier: 1
 owner: apps/web · packages/ui

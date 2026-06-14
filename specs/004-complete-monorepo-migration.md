@@ -1,7 +1,6 @@
 ---
 spec: 004
 title: Complete the monorepo migration (remove the root Next starter)
-status: approved
 approved: yes
 tier: 1
 owner: repo root

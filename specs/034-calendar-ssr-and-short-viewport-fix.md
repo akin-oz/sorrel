@@ -1,7 +1,6 @@
 ---
 spec: 034
 title: Fix the picker's SSR/CSR `today` drift and short-viewport modal clip; drop the Cypress hydration suppression
-status: proposed
 approved: yes
 tier: 1 # centerpiece protection — both bugs live inside the Tier-1 picker
 owner: packages/ui (production), apps/web (Cypress)

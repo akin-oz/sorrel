@@ -1,7 +1,6 @@
 ---
 spec: 015
 title: CI + SEO + Lighthouse — make "wrong is un-mergeable" visible in the PR tab
-status: proposed
 approved: yes
 tier: 2
 owner: .github · apps/web

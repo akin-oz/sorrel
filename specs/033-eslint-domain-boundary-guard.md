@@ -1,7 +1,6 @@
 ---
 spec: 033
 title: ESLint guard — UI/web cannot inline calendar/delivery-date domain logic
-status: proposed
 approved: yes
 tier: 2 # JD coverage / governance hardening — the centerpiece works; this prevents drift
 owner: root eslint.config.mjs · apps/web/eslint.config.mjs · packages/ui · apps/web

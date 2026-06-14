@@ -1,7 +1,6 @@
 ---
 spec: NNN
 title: <short imperative title>
-status: proposed
 approved: no # ONLY a human flips this to yes — implementation is gated on it
 tier: 1 # 1 credible core · 2 JD coverage · 3 closers
 owner: <area, e.g. apps/web · packages/ui · packages/domain>

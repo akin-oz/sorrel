@@ -1,7 +1,6 @@
 ---
 spec: 006
 title: Brand logo assets + themeable BrandLogo component
-status: proposed
 approved: yes
 tier: 1
 owner: packages/ui · apps/web

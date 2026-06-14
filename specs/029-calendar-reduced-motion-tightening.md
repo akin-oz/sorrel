@@ -1,7 +1,6 @@
 ---
 spec: 029
 title: Tighten the delivery picker reduced-motion fallback (backdrop + near-zero duration)
-status: proposed
 approved: yes
 tier: 2
 owner: packages/ui

@@ -1,7 +1,6 @@
 ---
 spec: 016
 title: CATS step — cat-count selector + typed state
-status: proposed
 approved: yes
 tier: 1
 owner: apps/web

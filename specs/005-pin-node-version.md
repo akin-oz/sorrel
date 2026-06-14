@@ -1,7 +1,6 @@
 ---
 spec: 005
 title: Pin the Node version (remove the --ignore-engines workaround)
-status: approved
 approved: yes
 tier: 1
 owner: repo root

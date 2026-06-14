@@ -1,7 +1,6 @@
 ---
 spec: 032
 title: Bootstrap Cypress in apps/web with a funnel happy path + DeliveryDatePicker real-browser catalog, gated in CI
-status: proposed
 approved: yes
 tier: 1 # the e2e gate the centerpiece needs; specs 025/028/029 have nowhere to land without it
 owner: apps/web

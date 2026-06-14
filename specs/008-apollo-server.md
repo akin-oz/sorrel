@@ -1,7 +1,6 @@
 ---
 spec: 008
 title: Apollo Server — resolver types, schema mock, codegen wired
-status: proposed
 approved: yes
 tier: 1
 owner: services/api · codegen.ts

@@ -1,7 +1,6 @@
 ---
 spec: 025
 title: Close the screen-reader story on the DeliveryDatePicker dialog (background inertness, live region, focused-element selection state, focusable-selector hygiene)
-status: proposed
 approved: yes
 tier: 1 # compliance gap on the centrepiece
 owner: packages/ui

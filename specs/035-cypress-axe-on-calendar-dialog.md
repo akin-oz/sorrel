@@ -1,7 +1,6 @@
 ---
 spec: 035
 title: Cypress-axe real-browser rules on the delivery calendar dialog
-status: proposed
 approved: yes
 tier: 3
 owner: apps/web

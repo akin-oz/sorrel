@@ -193,6 +193,14 @@ The picker also documents three intentional numbering gaps in the spec sequence
 front-matter); **026** and **027** were burned during the calendar-batch reorganisation
 that shipped specs 024 / 025 / 028 / 029.
 
+One historical commit (`25adc13`, spec 031) carries `(spec 031)` only in the subject
+without the canonical `Spec: 031` trailer line. The spec-gate workflow regex
+(`Spec:[[:space:]]*[0-9]{3}`) would not match it; mitigation is documentation, not
+history rewriting (force-pushing `main` is forbidden by the operational rules). The
+commit is on `main` via direct push; spec-gate runs on `pull_request:` only, so the
+flag never bit at push time. Acknowledged here once so future roadmap audits stop
+re-flagging it.
+
 ---
 
 ## Roadmap

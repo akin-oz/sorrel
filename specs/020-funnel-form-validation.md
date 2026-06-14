@@ -1,7 +1,6 @@
 ---
 spec: 020
 title: Funnel form validation — per-step rules, inline errors, gated Continue
-status: proposed
 approved: yes
 tier: 1
 owner: apps/web · packages/domain

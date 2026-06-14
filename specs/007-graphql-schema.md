@@ -1,7 +1,6 @@
 ---
 spec: 007
 title: GraphQL schema — the contract (schema-first, per-consumer codegen, drift guard)
-status: proposed
 approved: yes
 tier: 1
 owner: schema.graphql

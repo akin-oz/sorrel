@@ -1,7 +1,6 @@
 ---
 spec: 018
 title: App UI adaptive layer — App* components in packages/ui, no inline styles in apps/web
-status: proposed
 approved: yes
 tier: 2
 owner: packages/ui · apps/web

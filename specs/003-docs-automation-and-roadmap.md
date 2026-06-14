@@ -1,7 +1,6 @@
 ---
 spec: 003
 title: Product README + docs-drift hook + roadmap status command
-status: approved
 approved: yes
 tier: 1
 owner: .claude · README.md

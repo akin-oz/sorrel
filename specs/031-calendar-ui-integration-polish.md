@@ -1,7 +1,6 @@
 ---
 spec: 031
 title: Extend the DeliveryDatePicker Jest + RTL pack with 22 net-new UI-integration invariants (correctness, focus-wrap, UX state machine, theming parity)
-status: proposed
 approved: yes
 tier: 1 # centerpiece protection on the Tier-1 Delivery Date Picker
 owner: packages/ui

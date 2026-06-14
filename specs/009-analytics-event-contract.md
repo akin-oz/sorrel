@@ -1,7 +1,6 @@
 ---
 spec: 009
 title: Analytics event contract — typed funnel events (the conversion firewall)
-status: proposed
 approved: yes
 tier: 1
 owner: packages/analytics · packages/shared

@@ -1,7 +1,6 @@
 ---
 spec: 011
 title: Storyblok CMS + i18n — modular landing + recipes, visual editing, revalidation, en/de
-status: proposed
 approved: yes
 tier: 2
 owner: apps/web · packages/ui · packages/domain

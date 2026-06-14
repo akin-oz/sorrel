@@ -1,7 +1,6 @@
 ---
 spec: 014
 title: Funnel evidence — A/B variant end-to-end, seed script, insights page
-status: proposed
 approved: yes
 tier: 1
 owner: apps/web · packages/analytics

@@ -1,7 +1,6 @@
 ---
 spec: 019
 title: Funnel desktop layout + nav parity with the design handoff
-status: proposed
 approved: yes
 tier: 1
 owner: apps/web

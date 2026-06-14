@@ -1,7 +1,6 @@
 ---
 spec: 013
 title: Web Apollo write-path — pricing in the domain, FunnelDraft.plan, optimistic mutations
-status: proposed
 approved: yes
 tier: 1
 owner: apps/web · services/api · packages/domain · schema.graphql · .claude

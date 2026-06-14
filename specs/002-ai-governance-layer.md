@@ -1,7 +1,6 @@
 ---
 spec: 002
 title: AI governance & execution layer (.claude hooks, agents, commands)
-status: approved
 approved: yes
 tier: 1
 owner: .claude

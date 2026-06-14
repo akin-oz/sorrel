@@ -1,7 +1,6 @@
 ---
 spec: 030
 title: Pin calendar-domain edge cases (DST, leap, year-boundary, toWeeks padding, IsoDate UTC round-trip)
-status: proposed
 approved: yes
 tier: 1 # 1 credible core · 2 JD coverage · 3 closers
 owner: packages/domain
