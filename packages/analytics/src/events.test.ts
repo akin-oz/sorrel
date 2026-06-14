@@ -21,6 +21,12 @@ function summarize(event: FunnelEvent): string {
       return `exit-intent shown on ${event.step}`;
     case "exit_intent_recovered":
       return `exit-intent recovered on ${event.step}`;
+    case "payment_intent_created":
+      return `payment intent created for ${event.amount_minor} ${event.currency}`;
+    case "payment_succeeded":
+      return `payment succeeded for ${event.intent_id}`;
+    case "payment_failed":
+      return `payment failed (${event.code}) for ${event.intent_id ?? "unknown intent"}`;
   }
 }
 
@@ -69,5 +75,24 @@ describe("summarize (exhaustiveness)", () => {
   it("handles every event variant", () => {
     expect(summarize({ name: "funnel_step_viewed", step: "CATS" })).toContain("viewed");
     expect(summarize({ name: "exit_intent_recovered", step: "RECIPES" })).toContain("recovered");
+    expect(
+      summarize({
+        name: "payment_intent_created",
+        step: "CHECKOUT",
+        amount_minor: 4200,
+        currency: "GBP",
+      }),
+    ).toContain("payment intent created");
+    expect(
+      summarize({ name: "payment_succeeded", step: "CHECKOUT", intent_id: "pi_test" }),
+    ).toContain("succeeded");
+    expect(
+      summarize({
+        name: "payment_failed",
+        step: "CHECKOUT",
+        intent_id: null,
+        code: "card_declined",
+      }),
+    ).toContain("failed");
   });
 });

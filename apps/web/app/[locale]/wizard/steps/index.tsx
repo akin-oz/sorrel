@@ -16,6 +16,7 @@ import {
 
 import type { RecipeBlok } from "../../../../types/storyblok.gen";
 import { CatsForm } from "../CatsForm";
+import { CheckoutForm } from "../CheckoutForm";
 import { EmailForm } from "../EmailForm";
 import { useFunnel } from "../FunnelProvider";
 import { PlanForm } from "../PlanForm";
@@ -135,6 +136,14 @@ function SummaryStep() {
   );
 }
 
+function CheckoutStep() {
+  return (
+    <StepShell step="CHECKOUT">
+      <CheckoutForm />
+    </StepShell>
+  );
+}
+
 /** Registry fallback — RECIPES is normally rendered data-driven by the step page. */
 function RecipesPlaceholder() {
   return <StepShell step="RECIPES" />;
@@ -154,6 +163,7 @@ const STEP_SCREENS: Record<FunnelStep, ComponentType<StepProps>> = {
   PLAN: PlanStep,
   EMAIL: EmailStep,
   SUMMARY: SummaryStep,
+  CHECKOUT: CheckoutStep,
 };
 
 export function StepScreen({ step, today }: { step: FunnelStep; today?: string }) {

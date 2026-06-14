@@ -8,7 +8,7 @@
  * mutually binding so neither can silently drift from the other.
  */
 
-/** The seven wizard steps, in funnel order. The index drives progress. */
+/** The eight wizard steps, in funnel order. CHECKOUT follows SUMMARY (spec 039 Decision A). */
 export const FUNNEL_STEPS = [
   "CATS",
   "PROFILE",
@@ -17,6 +17,7 @@ export const FUNNEL_STEPS = [
   "PLAN",
   "EMAIL",
   "SUMMARY",
+  "CHECKOUT",
 ] as const;
 
 /** The app-side step union, derived from the ordered tuple. */

@@ -38,9 +38,10 @@ export type DietaryProgram =
   | 'PLANT_BASED'
   | 'RENAL_SUPPORT';
 
-/** The seven wizard steps, in funnel order. */
+/** The eight wizard steps, in funnel order. CHECKOUT follows SUMMARY (Decision A in spec 039) so the user reviews then commits. */
 export type FunnelStep =
   | 'CATS'
+  | 'CHECKOUT'
   | 'DELIVERY'
   | 'EMAIL'
   | 'PLAN'

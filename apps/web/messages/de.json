@@ -46,6 +46,10 @@
     "SUMMARY": {
       "title": "Deine erste Box",
       "description": "Prüfe alles und starte dann dein Abo."
+    },
+    "CHECKOUT": {
+      "title": "Bezahle deine erste Box",
+      "description": "Testmodus — verwende Karte 4242 4242 4242 4242, beliebiges Ablaufdatum, beliebige CVC."
     }
   },
   "Cats": {
@@ -153,7 +157,18 @@
       "DELIVERY": "Lieferung",
       "PLAN": "Plan",
       "EMAIL": "E-Mail",
-      "SUMMARY": "Zusammenfassung"
+      "SUMMARY": "Zusammenfassung",
+      "CHECKOUT": "Bezahlung"
+    }
+  },
+  "Checkout": {
+    "submit": "Jetzt bezahlen",
+    "submitting": "Verarbeitung…",
+    "preparing": "Checkout wird vorbereitet…",
+    "error": {
+      "notConfigured": "Stripe-Testmodus ist in dieser Umgebung nicht konfiguriert.",
+      "boot": "Checkout konnte nicht vorbereitet werden. Bitte versuche es erneut.",
+      "unknown": "Zahlung fehlgeschlagen. Bitte versuche es erneut."
     }
   }
 }

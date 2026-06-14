@@ -40,7 +40,8 @@ describe("isFunnelStep", () => {
   });
 
   it("rejects unknown segments", () => {
-    expect(isFunnelStep("checkout")).toBe(false);
+    expect(isFunnelStep("welcome")).toBe(false);
+    expect(isFunnelStep("checkout")).toBe(false); // case-sensitive: lowercase miss vs the CHECKOUT enum
     expect(isFunnelStep("cats")).toBe(false); // case-sensitive: enum values are upper-case
   });
 });

@@ -188,6 +188,24 @@ dev-mode app deterministic. All three are no-ops in production builds.
   in-memory `memorySink`. Set in `apps/web/app/[locale]/wizard/analytics.ts`. Cypress
   asserts the typed funnel events fired end-to-end against this queue.
 
+### Stripe test mode (spec 039)
+
+The CHECKOUT step uses Stripe's PaymentElement against **test keys only**. Set
+these in `apps/web/.env` or the Vercel dashboard; switching to live mode is a
+separate, future spec.
+
+- `STRIPE_SECRET_KEY=sk_test_…` — server-only. Consumed by
+  `/api/checkout/intent` and `/api/checkout/webhook`. **Never** prefix with
+  `NEXT_PUBLIC_`. Acceptance: `grep -r sk_test apps/web/.next` against a prod
+  build returns nothing.
+- `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_…` — the only client-side
+  Stripe surface. Read by `CheckoutForm.tsx` via `loadStripe(...)`.
+- `STRIPE_WEBHOOK_SECRET=whsec_…` — HMAC-verifies the webhook payload. Use
+  Stripe CLI's `stripe listen --forward-to localhost:3000/api/checkout/webhook`
+  in dev.
+
+Test card: `4242 4242 4242 4242`, any future expiry, any CVC, any postal.
+
 The picker also documents three intentional numbering gaps in the spec sequence
 — **021** is rejected-and-deleted (see `specs/022-profile-pills-and-assessment-offer.md`
 front-matter); **026** and **027** were burned during the calendar-batch reorganisation
@@ -216,7 +234,8 @@ Tiers ship in order; nothing ships below the Tier-1 line.
   budget — all as PR gates), one Cypress happy path, JSON-LD, sitemap/robots.
 - **Tier 3 — closers:** funnel-insights page from seeded events (spec 023, shipped);
   Storybook on the centerpiece + App\* layer (spec 038, shipped — `yarn workspace
-@sorrel/ui storybook`). **Unstarted, no spec yet:** Stripe test mode.
+@sorrel/ui storybook`); Stripe test-mode CHECKOUT step with PaymentElement
+  (spec 039, shipped — uses test card `4242 4242 4242 4242`).
   _(Real-browser axe rules on the calendar dialog shipped under spec 035.)_
 
 **Landed:** the monorepo + AI-governance layer (`.claude/` + `specs/`), the delivery-date

@@ -62,8 +62,12 @@ export function WizardChrome({ children }: { children: ReactNode }) {
     router.push(`/wizard/${segmentForStep(prevStep(currentStep))}`);
   }, [currentStep, router]);
 
-  // On SUMMARY, the confirm button gives way to the success state once pressed.
-  const showCta = currentStep ? !(isLastStep(currentStep) && confirmed) : false;
+  // Spec 039: CHECKOUT drives its own submit through the Stripe PaymentElement,
+  // so the chrome's Continue is hidden there. On any other last step, the
+  // confirm button gives way to the success state once pressed.
+  const showCta = currentStep
+    ? currentStep !== "CHECKOUT" && !(isLastStep(currentStep) && confirmed)
+    : false;
   const showBack = currentStep ? !isFirstStep(currentStep) : false;
   const progressLabel = t("stepProgress", { current: stepNumber, total });
 

@@ -53,13 +53,42 @@ export interface ExitIntentRecovered {
   step: FunnelStep;
 }
 
+/** Spec 039: the server returned a Stripe PaymentIntent `client_secret`. */
+export interface PaymentIntentCreated {
+  name: "payment_intent_created";
+  step: "CHECKOUT";
+  /** Amount in minor units (cents/pence) — mirrors `packages/domain`'s Money type. */
+  amount_minor: number;
+  currency: string;
+}
+
+/** Spec 039: `stripe.confirmPayment` resolved with `status: "succeeded"`. */
+export interface PaymentSucceeded {
+  name: "payment_succeeded";
+  step: "CHECKOUT";
+  intent_id: string;
+}
+
+/** Spec 039: `stripe.confirmPayment` resolved with an error or a non-`succeeded` status. */
+export interface PaymentFailed {
+  name: "payment_failed";
+  step: "CHECKOUT";
+  /** Null when the SDK reported an error before the intent surfaced. */
+  intent_id: string | null;
+  /** Stripe error `code` (e.g. `card_declined`) or `"unknown"`. */
+  code: string;
+}
+
 export type FunnelEvent =
   | FunnelStepViewed
   | StepCompleted
   | FieldError
   | FunnelAbandoned
   | ExitIntentShown
-  | ExitIntentRecovered;
+  | ExitIntentRecovered
+  | PaymentIntentCreated
+  | PaymentSucceeded
+  | PaymentFailed;
 
 /** The set of valid event names, derived from the union. */
 export type FunnelEventName = FunnelEvent["name"];

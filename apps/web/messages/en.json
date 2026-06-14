@@ -46,6 +46,10 @@
     "SUMMARY": {
       "title": "Your first box",
       "description": "Review everything, then start your subscription."
+    },
+    "CHECKOUT": {
+      "title": "Pay for your first box",
+      "description": "Test mode — use card 4242 4242 4242 4242, any future expiry, any CVC."
     }
   },
   "Cats": {
@@ -153,7 +157,18 @@
       "DELIVERY": "Delivery",
       "PLAN": "Plan",
       "EMAIL": "Email",
-      "SUMMARY": "Summary"
+      "SUMMARY": "Summary",
+      "CHECKOUT": "Checkout"
+    }
+  },
+  "Checkout": {
+    "submit": "Pay now",
+    "submitting": "Processing…",
+    "preparing": "Preparing checkout…",
+    "error": {
+      "notConfigured": "Stripe test mode is not configured for this environment.",
+      "boot": "Couldn't prepare checkout. Please try again.",
+      "unknown": "Payment failed. Please try again."
     }
   }
 }

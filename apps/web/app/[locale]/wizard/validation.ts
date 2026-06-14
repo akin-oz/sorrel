@@ -52,5 +52,13 @@ export function stepValidity(step: FunnelStep, state: FunnelState): StepValidity
       const valid = priorSteps.every((s) => stepValidity(s, state).valid);
       return { valid, errors: {} };
     }
+    case "CHECKOUT": {
+      // Spec 039: CHECKOUT is only reachable once SUMMARY is valid. The
+      // payment itself is governed by Stripe's PaymentElement; the chrome
+      // Continue stays enabled so the user can submit.
+      const priorSteps = FUNNEL_STEPS.slice(0, FUNNEL_STEPS.indexOf("CHECKOUT"));
+      const valid = priorSteps.every((s) => stepValidity(s, state).valid);
+      return { valid, errors: {} };
+    }
   }
 }

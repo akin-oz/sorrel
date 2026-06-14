@@ -117,18 +117,21 @@ describe("navigation helpers", () => {
     expect(nextStep("CATS")).toBe("PROFILE");
     expect(prevStep("PROFILE")).toBe("CATS");
     expect(prevStep("CATS")).toBe("CATS"); // clamp at start
-    expect(nextStep("SUMMARY")).toBe("SUMMARY"); // clamp at end
+    expect(nextStep("SUMMARY")).toBe("CHECKOUT"); // SUMMARY → CHECKOUT (spec 039 Decision A)
+    expect(nextStep("CHECKOUT")).toBe("CHECKOUT"); // clamp at end
   });
 
   it("isFirstStep / isLastStep mark the boundaries", () => {
     expect(isFirstStep("CATS")).toBe(true);
-    expect(isLastStep("SUMMARY")).toBe(true);
+    expect(isLastStep("CHECKOUT")).toBe(true); // CHECKOUT is the last step (spec 039 Decision A)
+    expect(isLastStep("SUMMARY")).toBe(false); // SUMMARY is no longer the last step
     expect(isFirstStep("DELIVERY")).toBe(false);
   });
 
   it("stepFromSegment resolves valid segments and rejects unknown ones", () => {
     expect(stepFromSegment("delivery")).toBe("DELIVERY");
     expect(stepFromSegment("DELIVERY")).toBe("DELIVERY");
-    expect(stepFromSegment("checkout")).toBeNull();
+    expect(stepFromSegment("checkout")).toBe("CHECKOUT"); // spec 039 added CHECKOUT
+    expect(stepFromSegment("payment")).toBeNull();
   });
 });

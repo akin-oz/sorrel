@@ -57,7 +57,7 @@ type DietaryProgramInfo {
   description: String!
 }
 
-"The seven wizard steps, in funnel order."
+"The eight wizard steps, in funnel order. CHECKOUT follows SUMMARY (Decision A in spec 039) so the user reviews then commits."
 enum FunnelStep {
   CATS
   PROFILE
@@ -66,6 +66,7 @@ enum FunnelStep {
   PLAN
   EMAIL
   SUMMARY
+  CHECKOUT
 }
 
 type Cat {

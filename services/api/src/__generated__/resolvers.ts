@@ -111,9 +111,10 @@ export type FunnelDraft = {
   updatedAt: Scalars['DateTime']['output'];
 };
 
-/** The seven wizard steps, in funnel order. */
+/** The eight wizard steps, in funnel order. CHECKOUT follows SUMMARY (Decision A in spec 039) so the user reviews then commits. */
 export enum FunnelStep {
   Cats = 'CATS',
+  Checkout = 'CHECKOUT',
   Delivery = 'DELIVERY',
   Email = 'EMAIL',
   Plan = 'PLAN',
