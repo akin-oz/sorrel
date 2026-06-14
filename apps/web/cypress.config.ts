@@ -8,10 +8,12 @@ import { defineConfig } from "cypress";
  * than depending on wall time, so the earliest-deliverable arithmetic in the
  * picker is deterministic regardless of when CI runs.
  *
- * TZ-env strategy: the config mirrors `process.env.TZ` into `Cypress.env`
- * so the C-24 TZ-matrix row can be invoked as
- *   TZ=America/Los_Angeles yarn cypress:run --spec ...correctness/tz.cy.ts
- *   TZ=Asia/Tokyo          yarn cypress:run --spec ...correctness/tz.cy.ts
+ * TZ-matrix strategy: the host shell sets `TZ=...` before invoking
+ *   TZ=America/Los_Angeles yarn cypress:run --spec ...correctness.cy.ts
+ *   TZ=Asia/Tokyo          yarn cypress:run --spec ...correctness.cy.ts
+ * The Node process inherits TZ from the shell, which is what drives the
+ * SSR `today` arithmetic. No `Cypress.env` mirroring is needed (Cypress 15
+ * deprecates `allowCypressEnv`-gated browser reads of `Cypress.env`).
  */
 export default defineConfig({
   e2e: {
@@ -22,9 +24,9 @@ export default defineConfig({
     viewportHeight: 800,
     video: false,
     screenshotOnRunFailure: true,
-    setupNodeEvents(_on, config) {
-      config.env = { ...config.env, TZ: process.env.TZ ?? "UTC" };
-      return config;
-    },
+    // Cypress 15 deprecation: opt out of browser-side reads of `Cypress.env`.
+    // C-24 in correctness.cy.ts no longer reads it; the TZ matrix is driven
+    // by the host shell's `TZ=…` invocation as documented above.
+    allowCypressEnv: false,
   },
 });

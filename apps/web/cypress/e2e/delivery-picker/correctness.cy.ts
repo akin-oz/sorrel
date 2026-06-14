@@ -25,17 +25,15 @@ describe("DeliveryDatePicker — correctness in a real browser", () => {
     cy.contains("17").should("be.visible");
   });
 
-  it("C-24 — TZ matrix: TZ from process.env yields the same earliest deliverable", () => {
-    // The host TZ is exposed via Cypress.env('TZ') by cypress.config.ts. The
-    // picker uses UTC-only arithmetic, so the closed-card day must be 15
-    // (the design's earliest deliverable from today = 2026-06-12) under both
-    // TZ=America/Los_Angeles and TZ=Asia/Tokyo. Invoke this spec twice from
-    // CI:
+  it("C-24 — TZ matrix: host TZ yields the same earliest deliverable", () => {
+    // The picker uses UTC-only arithmetic, so the closed-card day must be 15
+    // (the design's earliest deliverable from today = 2026-06-12) regardless
+    // of host TZ. Invoke this spec under different TZ values from the host
+    // shell (Cypress 15 deprecated `allowCypressEnv`-gated Cypress.env reads
+    // from browser code, so the TZ is driven via the Node process env):
     //   TZ=America/Los_Angeles yarn cypress:run --spec ...correctness.cy.ts
     //   TZ=Asia/Tokyo          yarn cypress:run --spec ...correctness.cy.ts
-    const tz = Cypress.env("TZ") ?? "UTC";
     cy.visit("/en/wizard/delivery");
     cy.contains("15", { matchCase: false }).should("be.visible");
-    cy.log(`TZ exercised: ${tz}`);
   });
 });
