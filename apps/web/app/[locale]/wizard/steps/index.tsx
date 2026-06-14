@@ -39,7 +39,7 @@ function StepShell({ step, children }: { step: FunnelStep; children?: ReactNode 
       {/* On desktop the heading lives in the left rail (WizardRail); here it shows
           on mobile only, where there is no rail. */}
       <AppStack display={{ xs: "flex", md: "none" }} gap={1}>
-        <AppText variant="overline" color={sorrelTheme.mono} lineHeight={1.4}>
+        <AppText variant="overline" color={sorrelTheme.inkMuted} lineHeight={1.4}>
           {tWizard("stepProgress", { current: stepNumber, total: FUNNEL_STEPS.length })}
         </AppText>
         <AppHeading level={3} fontSize="1.625rem" lineHeight={1.2}>

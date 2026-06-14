@@ -492,7 +492,7 @@ function ClosedCard({
             fontFamily: FONT_MONO,
             fontSize: 10,
             letterSpacing: "0.12em",
-            color: theme.mono,
+            color: theme.inkMuted,
             textTransform: "uppercase",
           }}
         >
@@ -665,7 +665,7 @@ function Modal(props: ModalProps) {
               fontFamily: FONT_MONO,
               fontSize: 11,
               letterSpacing: "0.12em",
-              color: theme.mono,
+              color: theme.inkMuted,
             }}
           >
             {monthLabel.toUpperCase()}
@@ -690,7 +690,7 @@ function Modal(props: ModalProps) {
                   justifyContent: "center",
                   fontFamily: FONT_MONO,
                   fontSize: 11,
-                  color: theme.mono,
+                  color: theme.inkMuted,
                 }}
               >
                 {label}
@@ -754,7 +754,7 @@ function Modal(props: ModalProps) {
               minHeight: 48,
               borderRadius: theme.radiusCta,
               background: theme.accent,
-              color: theme.onAccent,
+              color: theme.accentInk,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -805,7 +805,7 @@ function DayCell({ theme, locale, labels, cell, isActive, cellRefs, onSelect }: 
     skin = {
       background: theme.accent,
       border: `1px solid ${theme.accent}`,
-      color: theme.onAccent,
+      color: theme.accentInk,
       fontWeight: 700,
     };
   } else if (cell.blocked) {

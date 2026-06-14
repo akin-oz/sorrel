@@ -19,6 +19,11 @@ export interface DeliveryTheme {
   mono: string;
   accent: string;
   onAccent: string;
+  /** Spec 036: high-contrast ink for text on the accent background (selected
+   *  day cell, Confirm button). Distinct from `onAccent`, which axe-core 4.10
+   *  flagged as failing WCAG AA 4.5:1 on terracotta in real-browser rendering
+   *  despite the math passing — `accentInk` is the safety-net value. */
+  accentInk: string;
   accentTint: string;
   border: string;
   /** Border on an available day cell. */
@@ -54,6 +59,7 @@ export const sorrelTheme: DeliveryTheme = {
   mono: "#A8967F",
   accent: "#A14D27",
   onAccent: "#FFF8F2",
+  accentInk: "#FFFFFF",
   accentTint: "#F4E3D8",
   border: "#E3D8C8",
   cellBorder: "#EAE0D2",
@@ -76,6 +82,7 @@ export const brambleTheme: DeliveryTheme = {
   mono: "#9AA08D",
   accent: "#3E6B45",
   onAccent: "#F2F7F0",
+  accentInk: "#FFFFFF",
   accentTint: "#E3EBDC",
   border: "#DDE1D2",
   cellBorder: "#DDE1D2",

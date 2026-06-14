@@ -79,14 +79,6 @@ describe("DeliveryDatePicker — a11y in a real browser", () => {
       rules: {
         region: { enabled: false }, // spec 035 — picker is a fragment, not a page region.
         "page-has-heading-one": { enabled: false }, // spec 035 — page-level concern, out of scope here.
-        // spec 035 — wizard layout lacks <main>; production fix tracked for a
-        // follow-on spec (wizard-chrome landmarks), not in scope here.
-        "landmark-one-main": { enabled: false },
-        // spec 035 — accent on accent in the selected-cell + the wizard-chrome
-        // Typography tokens fail WCAG AA 4.5:1 in real-browser computation
-        // (jest-axe could not see it). Fix is a design-token change; tracked
-        // for a follow-on spec, not in scope here.
-        "color-contrast": { enabled: false },
       },
     };
 
@@ -99,12 +91,18 @@ describe("DeliveryDatePicker — a11y in a real browser", () => {
 
     it("A-02 — open-dialog axe pass (real focus ring + inert)", () => {
       cy.openDeliveryPicker();
+      // The picker's `sdp-modal-in` keyframe (180 ms) animates opacity 0→1;
+      // axe runs at frame 0 by default and reads the blended mid-animation
+      // colours (white + accent → tan). Wait for the modal to settle at
+      // opacity 1 before axe inspects computed contrast.
+      cy.get(".sdp-modal").should("have.css", "opacity", "1");
       cy.injectAxe();
       cy.checkA11y('[role="dialog"]', axeConfig);
     });
 
     it("A-03 — focused-cell axe pass (double-ring box-shadow + contrast)", () => {
       cy.openDeliveryPicker();
+      cy.get(".sdp-modal").should("have.css", "opacity", "1");
       cy.get('[role="gridcell"][aria-selected="true"]').focus();
       cy.injectAxe();
       cy.checkA11y('[role="gridcell"][aria-selected="true"]', axeConfig);

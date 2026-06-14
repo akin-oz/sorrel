@@ -138,7 +138,7 @@ export function WizardChrome({ children }: { children: ReactNode }) {
               gap={1.75}
               display={{ xs: "none", md: "flex" }}
             >
-              <AppText variant="overline" color={sorrelTheme.mono} lineHeight={1}>
+              <AppText variant="overline" color={sorrelTheme.inkMuted} lineHeight={1}>
                 {progressLabel}
               </AppText>
               <AppProgressBar value={stepNumber} max={total} label={progressLabel} width={196} />
@@ -174,6 +174,7 @@ export function WizardChrome({ children }: { children: ReactNode }) {
           </AppCard>
 
           <AppCard
+            component="main"
             tone="paper"
             border={false}
             radius={0}

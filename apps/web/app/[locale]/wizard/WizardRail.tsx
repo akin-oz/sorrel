@@ -50,7 +50,7 @@ export function WizardRail() {
     const rows = orderSummaryRows(state, plan, labels);
     return (
       <RailColumn>
-        <AppText variant="overline" color={sorrelTheme.mono} lineHeight={1.4}>
+        <AppText variant="overline" color={sorrelTheme.inkMuted} lineHeight={1.4}>
           {tRail("summaryHeading")}
         </AppText>
         <AppStack component="dl" m={0} gap={1.25}>
@@ -106,7 +106,7 @@ function RailColumn({ children }: { children: React.ReactNode }) {
 function Reassurance({ text }: { text: string }) {
   return (
     <AppBox mt="auto" pt={1}>
-      <AppText variant="body2" color={sorrelTheme.mono}>
+      <AppText variant="body2" color={sorrelTheme.inkMuted}>
         {text}
       </AppText>
     </AppBox>

@@ -1,7 +1,7 @@
 ---
 spec: 036
 title: Resolve the two deferred axe findings — wizard `<main>` landmark and selected-cell contrast
-approved: no # ONLY a human flips this to yes — implementation is gated on it
+approved: yes # Akın approved + selected Option B via AskUserQuestion in this session.
 tier: 1 # centerpiece protection: contrast lives inside the picker; landmark lives in the wizard chrome that hosts it
 owner: apps/web (wizard layout) · packages/ui (theme tokens + picker) · apps/web/cypress (axe-config edits)
 ---
