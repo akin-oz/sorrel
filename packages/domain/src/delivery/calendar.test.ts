@@ -89,6 +89,13 @@ describe("earliestDeliverableDate", () => {
   it("respects a custom lead time", () => {
     expect(earliestDeliverableDate("2026-06-12", 0)).toBe("2026-06-14"); // Sun 14
   });
+
+  it("crosses a year boundary when needed", () => {
+    // Wed 30 Dec 2026 + 3 lead = Sat 2 Jan 2027 (blocked) -> Sun 3 Jan 2027 (deliverable).
+    const result = earliestDeliverableDate("2026-12-30");
+    expect(result).toBe("2027-01-03");
+    expect(result.slice(0, 4)).toBe("2027");
+  });
 });
 
 describe("formatLongDate", () => {
@@ -155,6 +162,34 @@ describe("buildMonthView", () => {
     expect(byDay(8)?.blockedReason).toEqual({ code: "BEFORE_EARLIEST", earliest: "2026-06-15" });
 
     expect(byDay(17)?.blocked).toBe(false); // Wed, after earliest
+  });
+
+  it("emits all 30 days of June so the inlined toWeeks math yields a partial trailing row", () => {
+    // June 2026 ends on Tuesday 30 (mondayIndex 1, non-Sunday).
+    const view = buildMonthView(2026, 6, { earliest });
+
+    expect(view.cells[view.cells.length - 1]?.iso).toBe("2026-06-30");
+    expect(mondayIndex("2026-06-30")).toBe(1); // Tuesday
+    expect(view.leadingBlanks + view.cells.length).toBe(30); // single month, no overflow.
+
+    // Inlined copy of DeliveryDatePicker.tsx's `toWeeks` (six lines, kept here so the
+    // domain test stays self-contained — exporting it would be a contract change spec 024
+    // explicitly avoids). Last week must contain only Mon 29 + Tue 30, then 5 nulls.
+    type Cell = (typeof view.cells)[number];
+    const flat: (Cell | null)[] = [
+      ...Array.from({ length: view.leadingBlanks }, () => null),
+      ...view.cells,
+    ];
+    const weeks: (Cell | null)[][] = [];
+    for (let i = 0; i < flat.length; i += 7) {
+      const week = flat.slice(i, i + 7);
+      while (week.length < 7) week.push(null);
+      weeks.push(week);
+    }
+    const lastWeek = weeks[weeks.length - 1];
+    const days = lastWeek.filter((c): c is Cell => c !== null).map((c) => c.day);
+    expect(days).toEqual([29, 30]);
+    expect(lastWeek.filter((c) => c === null)).toHaveLength(5);
   });
 });
 
