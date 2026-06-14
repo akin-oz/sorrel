@@ -24,7 +24,10 @@ interface IntentRequest {
 function getStripe(): Stripe | null {
   const key = process.env.STRIPE_SECRET_KEY;
   if (!key) return null;
-  return new Stripe(key);
+  // Pin the request API version explicitly (Stripe best-practice). The literal
+  // is the value of `Stripe.LatestApiVersion` in the installed SDK; bumping
+  // the SDK is the only way to bump this string, which is the intended gate.
+  return new Stripe(key, { apiVersion: "2026-05-27.dahlia" });
 }
 
 export async function POST(request: Request): Promise<Response> {

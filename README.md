@@ -190,21 +190,33 @@ dev-mode app deterministic. All three are no-ops in production builds.
 
 ### Stripe test mode (spec 039)
 
-The CHECKOUT step uses Stripe's PaymentElement against **test keys only**. Set
-these in `apps/web/.env` or the Vercel dashboard; switching to live mode is a
-separate, future spec.
+The CHECKOUT step uses Stripe's PaymentElement against **test mode only**. The
+route handlers pin `apiVersion: "2026-05-27.dahlia"` (the SDK's current
+`Stripe.LatestApiVersion`) and rely on `automatic_payment_methods` instead of
+the deprecated `payment_method_types` field, per the Stripe MCP best-practice
+brief.
 
-- `STRIPE_SECRET_KEY=sk_test_…` — server-only. Consumed by
+**Getting test keys.** If you do not have a Stripe account, install the Stripe
+CLI (`npm i -g @stripe/cli`) and run `stripe sandbox create` for a working test
+keyset with no registration. Otherwise grab the test keys from the Stripe
+Dashboard (test mode toggle, top-right). Set them in `apps/web/.env` or in the
+Vercel dashboard:
+
+- **`STRIPE_SECRET_KEY=rk_test_…`** — server-only. Stripe recommends a
+  **Restricted API Key (`rk_test_`)** over a secret key (`sk_test_`) so the
+  blast radius is limited to PaymentIntent + Webhook scopes. Consumed by
   `/api/checkout/intent` and `/api/checkout/webhook`. **Never** prefix with
-  `NEXT_PUBLIC_`. Acceptance: `grep -r sk_test apps/web/.next` against a prod
+  `NEXT_PUBLIC_`. Acceptance: `grep -r rk_test apps/web/.next` against a prod
   build returns nothing.
-- `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_…` — the only client-side
+- **`NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_…`** — the only client-side
   Stripe surface. Read by `CheckoutForm.tsx` via `loadStripe(...)`.
-- `STRIPE_WEBHOOK_SECRET=whsec_…` — HMAC-verifies the webhook payload. Use
+- **`STRIPE_WEBHOOK_SECRET=whsec_…`** — HMAC-verifies the webhook payload. Use
   Stripe CLI's `stripe listen --forward-to localhost:3000/api/checkout/webhook`
-  in dev.
+  in dev to mint a secret and forward live test events.
 
-Test card: `4242 4242 4242 4242`, any future expiry, any CVC, any postal.
+**Test cards:** `4242 4242 4242 4242` (always succeeds), `4000 0000 0000 9995`
+(decline), any future expiry, any CVC, any postal. Full list:
+`stripe:test-cards` skill in this repo's plugin set.
 
 The picker also documents three intentional numbering gaps in the spec sequence
 — **021** is rejected-and-deleted (see `specs/022-profile-pills-and-assessment-offer.md`
