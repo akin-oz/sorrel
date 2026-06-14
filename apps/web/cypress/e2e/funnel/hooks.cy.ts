@@ -18,7 +18,8 @@
 
 interface QueuedEvent {
   name: string;
-  props: Record<string, unknown>;
+  step?: string;
+  variant?: string;
 }
 
 interface SorrelWindow {
@@ -43,10 +44,12 @@ describe("Dev-only window hooks (spec 032)", () => {
       .its("__sorrelVariant" as keyof Window)
       .should("equal", "A");
 
-    // The PROFILE control branch (variant A) renders three or more clickable
-    // pill buttons — the simplest behavioural proof that the override flowed
-    // through `useVariant` rather than the test only mutating window state.
-    cy.contains(/adult|kitten|senior/i, { timeout: 8000 }).should("be.visible");
+    // The PROFILE control branch (variant A) renders pill <button>s with
+    // the en bundle's i18n age labels ("Under 1 year" / "1–3 years" /
+    // "3–7 years" / "7+ years"). Variant B renders a <select> instead, so a
+    // pill button with a "year(s)" label is the simplest behavioural proof
+    // that the override flowed through `useVariant`, not just window state.
+    cy.contains("button", /\byears?\b/i, { timeout: 8000 }).should("be.visible");
   });
 
   it("exposes a window.__sorrelAnalyticsQueue array under NODE_ENV !== production", () => {
@@ -68,7 +71,9 @@ describe("Dev-only window hooks (spec 032)", () => {
       const queue = (win as unknown as SorrelWindow).__sorrelAnalyticsQueue ?? [];
       const names = queue.map((e) => e.name);
       expect(names, "funnel_step_viewed fires on CATS view").to.include("funnel_step_viewed");
-      const cats = queue.find((e) => e.name === "funnel_step_viewed" && e.props.step === "cats");
+      // Per `@sorrel/analytics`, FunnelStep values are UPPERCASE and `step` is
+      // a top-level prop on each event (no `.props` wrapper).
+      const cats = queue.find((e) => e.name === "funnel_step_viewed" && e.step === "CATS");
       expect(cats, "CATS step viewed event").to.not.equal(undefined);
     });
   });

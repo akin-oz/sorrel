@@ -14,11 +14,15 @@
  *    override in `useVariant` honours it under NODE_ENV !== "production".
  */
 
-const STEPS = ["cats", "profile", "recipes", "delivery", "plan", "email", "summary"];
+// Steps match the FunnelStep enum in @sorrel/shared (uppercase).
+const STEPS = ["CATS", "PROFILE", "RECIPES", "DELIVERY", "PLAN", "EMAIL", "SUMMARY"];
 
 interface QueuedEvent {
   name: string;
-  props: Record<string, unknown>;
+  step?: string;
+  variant?: string;
+  field?: string;
+  error?: string;
 }
 
 describe("Funnel happy path", () => {
@@ -77,9 +81,13 @@ describe("Funnel happy path", () => {
     cy.location("pathname").should("include", "/wizard/plan");
     clickContinue();
 
-    // 6 — EMAIL (server action).
+    // 6 — EMAIL (server action). The form's own "Save my plan" submit
+    // commits the email to wizard state; only THEN does the chrome's
+    // Continue ungate to advance to SUMMARY.
     cy.location("pathname").should("include", "/wizard/email");
     cy.get('input[type="email"]').type("test@example.com");
+    cy.contains("button", "Save my plan").click();
+    cy.contains(/saved|check your inbox/i, { timeout: 8000 }).should("be.visible");
     clickContinue();
 
     // 7 — SUMMARY
@@ -89,24 +97,25 @@ describe("Funnel happy path", () => {
 
     // Typed funnel-event assertions — read the in-memory queue exposed by
     // `apps/web/app/[locale]/wizard/analytics.ts` (NODE_ENV !== "production").
+    // Per `@sorrel/analytics`, each FunnelEvent has `step` as a top-level
+    // discriminated-union prop, not nested under `.props`.
     cy.window().then((win) => {
       const queue =
         (win as unknown as { __sorrelAnalyticsQueue?: QueuedEvent[] }).__sorrelAnalyticsQueue ?? [];
 
-      const viewed = queue
-        .filter((e) => e.name === "funnel_step_viewed")
-        .map((e) => e.props.step as string);
-      const completed = queue
-        .filter((e) => e.name === "step_completed")
-        .map((e) => e.props.step as string);
+      const viewed = queue.filter((e) => e.name === "funnel_step_viewed").map((e) => e.step);
+      const completed = queue.filter((e) => e.name === "step_completed").map((e) => e.step);
 
       expect(viewed, "funnel_step_viewed per step").to.deep.equal(STEPS);
-      expect(completed, "step_completed per step").to.deep.equal(STEPS);
+      // SUMMARY is the final step — the test stops at reading SUMMARY copy
+      // without clicking "Confirm plan", so step_completed fires for the
+      // first six only.
+      expect(completed, "step_completed for CATS…EMAIL").to.deep.equal(STEPS.slice(0, 6));
 
       const profileCompleted = queue.find(
-        (e) => e.name === "step_completed" && e.props.step === "profile",
+        (e) => e.name === "step_completed" && e.step === "PROFILE",
       );
-      expect(profileCompleted?.props.variant, "PROFILE step carries variant: A").to.equal("A");
+      expect(profileCompleted?.variant, "PROFILE step carries variant: A").to.equal("A");
 
       expect(
         queue.filter((e) => e.name === "field_error"),
