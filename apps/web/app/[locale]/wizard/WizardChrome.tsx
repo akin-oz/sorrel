@@ -146,18 +146,6 @@ export function WizardChrome({ children }: { children: ReactNode }) {
           ) : null}
 
           <AppStack direction="row" alignItems="center" justifyContent="flex-end" gap={1.5}>
-            <AppBox display={{ xs: "none", md: "block" }}>
-              <AppText
-                component={Link}
-                href="/"
-                variant="body2"
-                fontWeight={600}
-                color="text.secondary"
-                textDecoration="none"
-              >
-                {t("saveExit")}
-              </AppText>
-            </AppBox>
             <LocaleSwitcher />
           </AppStack>
         </AppCard>
@@ -242,7 +230,7 @@ export function WizardChrome({ children }: { children: ReactNode }) {
 
 /** Arms the desktop exit-intent trigger and shows the recovery dialog once per session. */
 function ExitIntentController() {
-  const { currentStep, track } = useFunnel();
+  const { currentStep, track, state } = useFunnel();
   const [open, setOpen] = useState(false);
 
   const handleTrigger = useCallback(() => {
@@ -261,5 +249,12 @@ function ExitIntentController() {
     setOpen(false);
   }, [currentStep, track]);
 
-  return <ExitIntentModal open={open} onRecover={handleRecover} onLeave={() => setOpen(false)} />;
+  return (
+    <ExitIntentModal
+      open={open}
+      onRecover={handleRecover}
+      onLeave={() => setOpen(false)}
+      catName={state.cats[0]?.name}
+    />
+  );
 }

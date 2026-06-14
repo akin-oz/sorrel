@@ -11,12 +11,13 @@
     "incomplete": "Complete this step to continue",
     "stepProgress": "Step {current} of {total}",
     "resume": "Resume",
-    "resumeBanner": "Welcome back — we saved where you left off.",
-    "saveExit": "Save & exit"
+    "resumeBanner": "Welcome back — we saved where you left off."
   },
   "ExitIntent": {
     "title": "Leaving so soon?",
-    "body": "We've saved your progress — pick up right where you left off whenever you're ready.",
+    "offer": "Finish now and {name} gets a free nutrition assessment — vet-formulated, no commitment.",
+    "reassurance": "Your progress is saved, so you can pick up right where you left off.",
+    "fallbackName": "your cat",
     "keepGoing": "Keep going",
     "leave": "Leave for now"
   },
@@ -57,8 +58,6 @@
     "namePlaceholder": "Your cat's name",
     "age": "Age",
     "weight": "Weight",
-    "agePlaceholder": "e.g. 3 years",
-    "weightPlaceholder": "e.g. 4.2 kg",
     "required": "Please fill this in",
     "ageOptions": {
       "kitten": "Under 1 year",

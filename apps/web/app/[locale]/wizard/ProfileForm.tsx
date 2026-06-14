@@ -4,7 +4,14 @@ import { useEffect, useState } from "react";
 
 import { useTranslations } from "next-intl";
 
-import { AppField, AppSkeleton, AppStack } from "@sorrel/ui";
+import {
+  AppField,
+  AppSkeleton,
+  AppStack,
+  AppText,
+  AppToggleGroup,
+  AppToggleOption,
+} from "@sorrel/ui";
 
 import { useFunnel } from "./FunnelProvider";
 import { stepValidity } from "./validation";
@@ -14,15 +21,53 @@ const WEIGHT_OPTIONS = ["s", "m", "l", "xl"] as const;
 const DEFAULT_AGE = "young";
 const DEFAULT_WEIGHT = "m";
 
-type ProfileField = "name" | "age" | "weight";
+/** Labelled single-select pill group (variant A's age/weight). Starts unselected so
+ *  the choice is explicit; the group's accessible name is its visible label. */
+function PillField({
+  label,
+  value,
+  options,
+  labelFor,
+  onSelect,
+}: {
+  label: string;
+  value: string | undefined;
+  options: readonly string[];
+  labelFor: (key: string) => string;
+  onSelect: (value: string) => void;
+}) {
+  return (
+    <AppStack gap={1}>
+      <AppText variant="body2" fontWeight={600} color="text.secondary">
+        {label}
+      </AppText>
+      <AppToggleGroup
+        layout="pills"
+        value={value ?? null}
+        onChange={(_e, next) => {
+          if (typeof next === "string") onSelect(next);
+        }}
+        aria-label={label}
+      >
+        {options.map((key) => (
+          <AppToggleOption key={key} value={key}>
+            {labelFor(key)}
+          </AppToggleOption>
+        ))}
+      </AppToggleGroup>
+    </AppStack>
+  );
+}
 
 /**
- * The PROFILE A/B form (spec 014) — the 39→65 lever, with validation (spec 020).
+ * The PROFILE A/B form (spec 014, control reworked by spec 022) — the 39→65 lever,
+ * with validation (spec 020).
  *
- *   Variant A (control): free-text inputs; empty required fields show an inline
- *     error on blur and fire `field_error` — the friction the autocomplete removes.
+ *   Variant A (control): name is free-text; age + weight are single-select pill
+ *     groups (every option visible) that start unselected, so the A/B is a genuine
+ *     UX question — all-options-visible vs dropdown-with-defaults.
  *   Variant B (test): selects pre-set to sensible defaults, seeded into state so
- *     the plan + validation reflect what's on screen (no free-text stalls).
+ *     the plan + validation reflect what's on screen (no choice needed).
  *
  * The variant comes from PostHog (via the provider) and resolves async, so this
  * renders a stable skeleton until it is known — identical on the server and the
@@ -32,7 +77,7 @@ export function ProfileForm() {
   const t = useTranslations("Profile");
   const { variant, state, dispatch, track } = useFunnel();
   const cat = state.cats[0];
-  const [touched, setTouched] = useState<Record<string, boolean>>({});
+  const [nameTouched, setNameTouched] = useState(false);
 
   // Variant B's selects display defaults; commit them to state so validation and
   // the plan reflect the on-screen values (the smart-default that removes friction).
@@ -54,13 +99,17 @@ export function ProfileForm() {
     );
   }
 
+  // Only `name` is free-text, so it is the only field with a blur-based error
+  // (the pills can't be left half-typed; the Continue gate, spec 020, covers
+  // an unselected age/weight). `name`'s field_error is unchanged in both arms.
   const { errors } = stepValidity("PROFILE", state);
-  function blur(field: ProfileField, value: string | undefined) {
-    setTouched((prev) => ({ ...prev, [field]: true }));
-    if (!value?.trim()) track({ name: "field_error", step: "PROFILE", field, error: "required" });
+  const nameError = nameTouched && Boolean(errors.name);
+  function blurName(value: string | undefined) {
+    setNameTouched(true);
+    if (!value?.trim()) {
+      track({ name: "field_error", step: "PROFILE", field: "name", error: "required" });
+    }
   }
-  const showError = (field: ProfileField) => Boolean(touched[field] && errors[field]);
-  const helperText = (field: ProfileField) => (showError(field) ? t("required") : undefined);
 
   return (
     <AppStack gap={2}>
@@ -69,33 +118,27 @@ export function ProfileForm() {
         placeholder={t("namePlaceholder")}
         value={cat?.name ?? ""}
         onChange={(e) => dispatch({ type: "SET_CAT", cat: { name: e.target.value } })}
-        onBlur={(e) => blur("name", e.target.value)}
-        error={showError("name")}
-        helperText={helperText("name")}
+        onBlur={(e) => blurName(e.target.value)}
+        error={nameError}
+        helperText={nameError ? t("required") : undefined}
         fullWidth
       />
 
       {variant === "A" ? (
         <>
-          <AppField
+          <PillField
             label={t("age")}
-            placeholder={t("agePlaceholder")}
-            value={cat?.age ?? ""}
-            onChange={(e) => dispatch({ type: "SET_CAT", cat: { age: e.target.value } })}
-            onBlur={(e) => blur("age", e.target.value)}
-            error={showError("age")}
-            helperText={helperText("age")}
-            fullWidth
+            value={cat?.age}
+            options={AGE_OPTIONS}
+            labelFor={(key) => t(`ageOptions.${key}`)}
+            onSelect={(age) => dispatch({ type: "SET_CAT", cat: { age } })}
           />
-          <AppField
+          <PillField
             label={t("weight")}
-            placeholder={t("weightPlaceholder")}
-            value={cat?.weight ?? ""}
-            onChange={(e) => dispatch({ type: "SET_CAT", cat: { weight: e.target.value } })}
-            onBlur={(e) => blur("weight", e.target.value)}
-            error={showError("weight")}
-            helperText={helperText("weight")}
-            fullWidth
+            value={cat?.weight}
+            options={WEIGHT_OPTIONS}
+            labelFor={(key) => t(`weightOptions.${key}`)}
+            onSelect={(weight) => dispatch({ type: "SET_CAT", cat: { weight } })}
           />
         </>
       ) : (

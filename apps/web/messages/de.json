@@ -11,12 +11,13 @@
     "incomplete": "Schließe diesen Schritt ab, um fortzufahren",
     "stepProgress": "Schritt {current} von {total}",
     "resume": "Fortsetzen",
-    "resumeBanner": "Willkommen zurück — wir haben gespeichert, wo du aufgehört hast.",
-    "saveExit": "Speichern & verlassen"
+    "resumeBanner": "Willkommen zurück — wir haben gespeichert, wo du aufgehört hast."
   },
   "ExitIntent": {
     "title": "Schon dabei zu gehen?",
-    "body": "Wir haben deinen Fortschritt gespeichert — mach einfach weiter, wann immer du bereit bist.",
+    "offer": "Schließe jetzt ab und {name} bekommt eine kostenlose Ernährungsbewertung — tierärztlich entwickelt, unverbindlich.",
+    "reassurance": "Dein Fortschritt ist gespeichert — du kannst jederzeit genau dort weitermachen, wo du aufgehört hast.",
+    "fallbackName": "deine Katze",
     "keepGoing": "Weitermachen",
     "leave": "Vorerst verlassen"
   },
@@ -57,8 +58,6 @@
     "namePlaceholder": "Der Name deiner Katze",
     "age": "Alter",
     "weight": "Gewicht",
-    "agePlaceholder": "z. B. 3 Jahre",
-    "weightPlaceholder": "z. B. 4,2 kg",
     "required": "Bitte ausfüllen",
     "ageOptions": {
       "kitten": "Unter 1 Jahr",

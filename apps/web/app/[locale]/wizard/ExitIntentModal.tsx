@@ -10,22 +10,27 @@ interface ExitIntentModalProps {
   onRecover: () => void;
   /** User chose to leave (button, Escape, or backdrop). */
   onLeave: () => void;
+  /** The cat's name from PROFILE, when known — personalises the offer. */
+  catName?: string;
 }
 
 /**
- * Exit-intent recovery modal (spec 010) via AppDialog: focus trap, Escape/backdrop
- * close, and transitions come from the dialog. The global prefers-reduced-motion
- * rule (globals.css) collapses the transition. Copy is brand-safe and invents
- * nothing — keyed to the local-resume already built.
+ * Exit-intent recovery modal (spec 010; reframed by spec 022) via AppDialog: focus
+ * trap, Escape/backdrop close, and transitions come from the dialog. The global
+ * prefers-reduced-motion rule (globals.css) collapses the transition. The copy
+ * leads with the value on offer — finishing earns a free, no-commitment nutrition
+ * assessment / plan preview — then keeps the progress-saved reassurance, and
+ * personalises with the cat's name when known (neutral fallback otherwise).
  */
-export function ExitIntentModal({ open, onRecover, onLeave }: ExitIntentModalProps) {
+export function ExitIntentModal({ open, onRecover, onLeave, catName }: ExitIntentModalProps) {
   const t = useTranslations("ExitIntent");
+  const name = catName?.trim() || t("fallbackName");
   return (
     <AppDialog
       open={open}
       onClose={onLeave}
       title={t("title")}
-      body={t("body")}
+      body={`${t("offer", { name })} ${t("reassurance")}`}
       actions={
         <>
           <AppButton onClick={onRecover} variant="contained" size="large" fullWidth>

@@ -167,43 +167,70 @@ export function AppField({ options, children, ...props }: AppFieldProps) {
 
 export type AppToggleGroupProps = Omit<ToggleButtonGroupProps, "sx"> & {
   /** `segmented` = equal-width connected bar (frequency); `cards` = a grid of
-   *  standalone selectable cards (cat count). */
-  layout?: "segmented" | "cards";
+   *  standalone selectable cards (cat count); `pills` = wrapping rounded pills
+   *  sized to their content (PROFILE age/weight). */
+  layout?: "segmented" | "cards" | "pills";
   /** For `cards`: responsive `grid-template-columns`. */
   columns?: Responsive<string>;
 };
-/** Single-select control — segmented bar or a card grid. */
+/** Single-select control — segmented bar, card grid, or wrapping pills. */
 export function AppToggleGroup({ layout = "segmented", columns, ...props }: AppToggleGroupProps) {
-  const sx =
-    layout === "cards"
-      ? {
-          display: "grid",
-          gridTemplateColumns: columns ?? "repeat(2, 1fr)",
-          gap: { xs: "12px", md: "14px" },
-          // Reset the connected-group treatment so each option is a standalone card.
-          "& .MuiToggleButtonGroup-grouped": {
-            m: 0,
-            minWidth: 0,
-            flexDirection: "column",
-            gap: "2px",
-            textTransform: "none",
-            height: { xs: 96, md: 104 },
-            borderRadius: `${appTokens.radius.surface}px`,
-            border: "1.5px solid",
-            borderColor: "divider",
-            bgcolor: "background.paper",
-            "&.Mui-selected": {
-              bgcolor: sorrelTheme.accentTint,
-              borderWidth: 2,
-              borderColor: "primary.main",
-              "&:hover": { bgcolor: sorrelTheme.accentTint },
-            },
-          },
-        }
-      : {
-          alignSelf: "stretch",
-          "& .MuiToggleButton-root": { flex: 1, py: appTokens.control.togglePaddingY },
-        };
+  const cardsSx = {
+    display: "grid",
+    gridTemplateColumns: columns ?? "repeat(2, 1fr)",
+    gap: { xs: "12px", md: "14px" },
+    // Reset the connected-group treatment so each option is a standalone card.
+    "& .MuiToggleButtonGroup-grouped": {
+      m: 0,
+      minWidth: 0,
+      flexDirection: "column",
+      gap: "2px",
+      textTransform: "none",
+      height: { xs: 96, md: 104 },
+      borderRadius: `${appTokens.radius.surface}px`,
+      border: "1.5px solid",
+      borderColor: "divider",
+      bgcolor: "background.paper",
+      "&.Mui-selected": {
+        bgcolor: sorrelTheme.accentTint,
+        borderWidth: 2,
+        borderColor: "primary.main",
+        "&:hover": { bgcolor: sorrelTheme.accentTint },
+      },
+    },
+  };
+  // Standalone rounded pills that wrap and size to content — each its own bordered
+  // control (the connected-group treatment is reset, like `cards`).
+  const pillsSx = {
+    display: "flex",
+    flexWrap: "wrap",
+    gap: "10px",
+    "& .MuiToggleButtonGroup-grouped": {
+      m: 0,
+      minWidth: 0,
+      textTransform: "none",
+      px: 2,
+      py: 1,
+      fontWeight: 600,
+      color: "text.primary",
+      borderRadius: "999px",
+      border: "1.5px solid",
+      borderColor: "divider",
+      bgcolor: "background.paper",
+      "&.Mui-selected": {
+        bgcolor: sorrelTheme.accentTint,
+        borderWidth: 2,
+        borderColor: "primary.main",
+        color: "primary.main",
+        "&:hover": { bgcolor: sorrelTheme.accentTint },
+      },
+    },
+  };
+  const segmentedSx = {
+    alignSelf: "stretch",
+    "& .MuiToggleButton-root": { flex: 1, py: appTokens.control.togglePaddingY },
+  };
+  const sx = layout === "cards" ? cardsSx : layout === "pills" ? pillsSx : segmentedSx;
   return <ToggleButtonGroup exclusive color="primary" sx={sx} {...props} />;
 }
 
