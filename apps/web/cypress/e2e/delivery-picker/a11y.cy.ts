@@ -67,7 +67,6 @@ Cypress.Commands.add("realPressOrTab" as never, () => {
 });
 
 declare global {
-  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Cypress {
     interface Chainable {
       realPressOrTab(): Chainable<void>;

@@ -7,7 +7,6 @@
  */
 
 declare global {
-  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Cypress {
     interface Chainable {
       /** Visit /en/wizard/delivery, click Change, wait for the open dialog. */

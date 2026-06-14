@@ -83,6 +83,16 @@ const eslintConfig = defineConfig([
       ],
     },
   },
+  // Spec 032 — Cypress files extend the global `Cypress.Chainable` interface
+  // via `declare global { namespace Cypress { ... } }`, which is the pattern
+  // Cypress itself documents. Allow the namespace declaration here only, so
+  // the override files do not need per-line eslint-disable comments.
+  {
+    files: ["cypress/**/*.ts"],
+    rules: {
+      "@typescript-eslint/no-namespace": ["error", { allowDeclarations: true }],
+    },
+  },
 ]);
 
 export default eslintConfig;
