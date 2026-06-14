@@ -21,7 +21,7 @@ export default defineConfig({
     viewportWidth: 1280,
     viewportHeight: 800,
     video: false,
-    screenshotOnRunFailure: false,
+    screenshotOnRunFailure: true,
     setupNodeEvents(_on, config) {
       config.env = { ...config.env, TZ: process.env.TZ ?? "UTC" };
       return config;

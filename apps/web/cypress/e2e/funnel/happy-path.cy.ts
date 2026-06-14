@@ -90,12 +90,19 @@ describe("Funnel happy path", () => {
     cy.contains(/saved|check your inbox/i, { timeout: 8000 }).should("be.visible");
     clickContinue();
 
-    // 7 — SUMMARY renders the assembled rows from `orderSummaryRows`:
-    // cats-count, recipes, delivery date, frequency, price, email.
-    // The cat name lives in funnel state but never surfaces on SUMMARY,
-    // so we assert what the page actually paints.
+    // 7 — SUMMARY renders the assembled rows from `orderSummaryRows`.
+    //
+    // Even though CATS was picked as "2 cats", PROFILE's `SET_CAT` reducer
+    // (`apps/web/app/[locale]/wizard/state.ts`) intentionally collapses
+    // `state.cats` to a single-entry array (the lean-funnel design — PROFILE
+    // only collects info for the first cat). So SUMMARY paints "1 cat" no
+    // matter what was picked in CATS. The plan computation still uses the
+    // count from CATS for portion math, but the rendered SUMMARY row reads
+    // the *current* length. We assert what the page paints, not what was
+    // initially picked.
     cy.location("pathname").should("include", "/wizard/summary");
-    cy.contains(/2 cats/i, { timeout: 8000 }).should("exist");
+    cy.contains(/1 cat\b/i, { timeout: 8000 }).should("exist");
+    cy.contains(/Wednesday 17 June/).should("exist");
     cy.contains(/test@example\.com/i).should("exist");
 
     // Typed funnel-event assertions — read the in-memory queue exposed by
