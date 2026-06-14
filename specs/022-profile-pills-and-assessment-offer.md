@@ -19,7 +19,7 @@ requested by the owner. Today's implementations are credible-but-weak in two pla
    (control) = free-text inputs** (`ProfileForm.tsx` renders age/weight as free-text
    `AppField`s) vs **variant B (test) = autocomplete selects with smart defaults**. Free-text
    age/weight is an obvious loser — it inflates the lift and makes the test un-credible. The
-   owner wants the control to be a *real* alternative: **inline toggle pills** showing every
+   owner wants the control to be a _real_ alternative: **inline toggle pills** showing every
    option, so the A/B measures a genuine UX question (all-options-visible vs
    dropdown-with-defaults) rather than friction-vs-no-friction.
 
@@ -49,7 +49,7 @@ extends spec 010's modal copy. No schema, no domain, no event-contract change.
   were both considered and **rejected** — t-shirt sizes read as vague for a cat, and the only
   body-condition art on hand is traced from a real brand's chart (the no-real-brand-assets rule).
   Selecting a pill dispatches the same `SET_CAT` action already used (`{ type: "SET_CAT",
-  cat: { age } }` / `{ weight }`), so funnel state, `stepValidity("PROFILE", …)` (spec 020),
+cat: { age } }` / `{ weight }`), so funnel state, `stepValidity("PROFILE", …)` (spec 020),
   and the plan all see identical values to today.
 - **Variant B (autocomplete selects + `DEFAULT_AGE`/`DEFAULT_WEIGHT` seeding via the existing
   `useEffect`) is UNCHANGED.** The A/B now contrasts pills (all options visible) vs
@@ -84,9 +84,9 @@ valid (`error: "required"`). `name`'s blur-based `field_error` is unchanged in b
 
 **Pre-selection — DECISION FOR REVIEWER (the single biggest call).** Should variant A's pills
 **pre-select a default** (mirroring B's `DEFAULT_AGE`/`DEFAULT_WEIGHT`, making PROFILE valid on
-entry — so the A/B is purely a pills-vs-dropdown *UI* test), or **start unselected** (forcing an
+entry — so the A/B is purely a pills-vs-dropdown _UI_ test), or **start unselected** (forcing an
 explicit choice — testing active engagement and preserving a meaningful contrast with B's
-*passive* defaults)? **Recommendation: start unselected** — active choice is the pills'
+_passive_ defaults)? **Recommendation: start unselected** — active choice is the pills'
 distinctive value, and it keeps A and B genuinely different. The reviewer confirms.
 
 ## Change 2 — Exit-intent assessment-preview offer
@@ -177,5 +177,5 @@ No new event types. `field_error` (`step:"PROFILE"`, `field`, `error:"required"`
 reviewer-chosen trigger for the pill groups, and unchanged on `name` blur in both arms.
 `funnel_step_viewed` / `step_completed` (with `variant`) and the exit-intent
 `exit_intent_shown` / `exit_intent_recovered` (with `step`) are unchanged — the modal reframing
-strengthens recovery *copy*, not its instrumentation. All emission stays on the spec-009 typed
+strengthens recovery _copy_, not its instrumentation. All emission stays on the spec-009 typed
 `createTracker`; zero ad-hoc events.
