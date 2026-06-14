@@ -5,6 +5,11 @@ import userEvent from "@testing-library/user-event";
 import { axe } from "jest-axe";
 
 import { DEFAULT_DELIVERY_LABELS, DeliveryDatePicker } from "./DeliveryDatePicker";
+import {
+  DELIVERY_THEME_STRUCTURAL_CHECK_BRAMBLE,
+  DELIVERY_THEME_STRUCTURAL_CHECK_SORREL,
+} from "./theme/__type-checks__/DeliveryTheme.types";
+import { brambleTheme, sorrelTheme } from "./theme/tokens";
 
 // Fixed clock mirrors packages/domain/src/delivery/calendar.test.ts (the
 // "today = 2026-06-12" design case). With DEFAULT_LEAD_DAYS = 3 this yields
@@ -34,6 +39,23 @@ async function openDialog(user: ReturnType<typeof userEvent.setup>) {
 function finishCloseAnimation(dialog: HTMLElement) {
   act(() => {
     fireEvent.animationEnd(dialog);
+  });
+}
+
+// JSDOM does not compute layout, so `el.offsetParent` is `null` for elements
+// the picker's `getFocusable` filter would otherwise include. Mocking it on
+// every interactive node inside the dialog lets the focus-trap wrap logic
+// (which depends on the FULL focusable list, not just the active element) run
+// as it does in a real browser. Scoped per-test so it does not bleed.
+function unblockFocusableInJsdom(dialog: HTMLElement) {
+  const nodes = dialog.querySelectorAll<HTMLElement>('button, [tabindex]:not([tabindex="-1"])');
+  nodes.forEach((el) => {
+    Object.defineProperty(el, "offsetParent", {
+      configurable: true,
+      get() {
+        return dialog;
+      },
+    });
   });
 }
 
@@ -367,6 +389,337 @@ describe("DeliveryDatePicker", () => {
 
       await user.keyboard("{Escape}");
       finishCloseAnimation(dialog);
+    });
+  });
+
+  // --- Spec 031: UI integration polish (U-01 … U-29) ---------------------
+
+  describe("spec 031 — correctness (U-01 … U-07)", () => {
+    it("U-01: opens on the EARLIEST month, not today's month", async () => {
+      // today = 2026-06-29 (Mon) → earliest = 2026-07-02 (Thu). The dialog's
+      // view-month must follow `committed`, which seeds from `earliest`.
+      const user = userEvent.setup();
+      renderPicker({ today: "2026-06-29" });
+      const dialog = await openDialog(user);
+      expect(within(dialog).getByText(/JULY 2026/i)).toBeInTheDocument();
+      expect(within(dialog).queryByText(/JUNE 2026/i)).toBeNull();
+      await user.keyboard("{Escape}");
+      finishCloseAnimation(dialog);
+    });
+
+    it("U-02: re-opening after confirm shows the new committed month", async () => {
+      // Confirm a July day, re-open, header must stay July.
+      const user = userEvent.setup();
+      renderPicker({ today: "2026-06-29" });
+      const dialog = await openDialog(user);
+      // earliest is 2026-07-02 (Thu). Pick that as the deliverable day.
+      await user.click(screen.getByRole("button", { name: DEFAULT_DELIVERY_LABELS.confirm }));
+      finishCloseAnimation(dialog);
+
+      const reopened = await openDialog(user);
+      expect(within(reopened).getByText(/JULY 2026/i)).toBeInTheDocument();
+      await user.keyboard("{Escape}");
+      finishCloseAnimation(reopened);
+    });
+
+    it("U-03: single-select invariant — clicking a deliverable day yields exactly one selected gridcell", async () => {
+      const user = userEvent.setup();
+      renderPicker();
+      const dialog = await openDialog(user);
+
+      // Wed 17 is the next deliverable day after the earliest (Mon 15).
+      await user.click(within(dialog).getByRole("gridcell", { name: /^17/ }));
+      const selected = within(dialog).getAllByRole("gridcell", { selected: true });
+      expect(selected).toHaveLength(1);
+      expect(selected[0].textContent).toContain(NEXT_DELIVERABLE_DAY);
+
+      await user.keyboard("{Escape}");
+      finishCloseAnimation(dialog);
+    });
+
+    it("U-04: caption flips back to Earliest delivery after re-confirming the earliest day", async () => {
+      const user = userEvent.setup();
+      renderPicker();
+
+      // First: open, pick Wed 17, Confirm → caption swaps to "Delivery date".
+      const firstDialog = await openDialog(user);
+      await user.keyboard("{ArrowRight}{ArrowRight}{Enter}");
+      await user.click(screen.getByRole("button", { name: DEFAULT_DELIVERY_LABELS.confirm }));
+      finishCloseAnimation(firstDialog);
+      expect(screen.getByText(DEFAULT_DELIVERY_LABELS.deliveryDate)).toBeInTheDocument();
+
+      // Second: re-open, navigate back to Mon 15 (earliest), Confirm → caption
+      // flips BACK to "Earliest delivery".
+      const secondDialog = await openDialog(user);
+      await user.keyboard("{ArrowLeft}{ArrowLeft}{Enter}");
+      await user.click(screen.getByRole("button", { name: DEFAULT_DELIVERY_LABELS.confirm }));
+      finishCloseAnimation(secondDialog);
+
+      expect(screen.getByText(DEFAULT_DELIVERY_LABELS.earliestDelivery)).toBeInTheDocument();
+      expect(screen.queryByText(DEFAULT_DELIVERY_LABELS.deliveryDate)).toBeNull();
+    });
+
+    it("U-05: modal is genuinely absent from DOM after close (no .sdp-modal or .sdp-backdrop nodes)", async () => {
+      const user = userEvent.setup();
+      const { container } = renderPicker();
+      const dialog = await openDialog(user);
+      await user.keyboard("{Escape}");
+      finishCloseAnimation(dialog);
+
+      expect(container.querySelectorAll(".sdp-modal, .sdp-backdrop")).toHaveLength(0);
+    });
+
+    it("U-06: controlled `value` is never shadowed by internal commit", async () => {
+      // With `value` controlled, picking + confirming a different day must NOT
+      // change the closed-card display until the parent updates `value`.
+      const user = userEvent.setup();
+      renderPicker({ value: "2026-06-15" });
+      expect(screen.getByText(EARLIEST_DAY)).toBeInTheDocument();
+
+      const dialog = await openDialog(user);
+      await user.keyboard("{ArrowRight}{ArrowRight}{Enter}");
+      await user.click(screen.getByRole("button", { name: DEFAULT_DELIVERY_LABELS.confirm }));
+      finishCloseAnimation(dialog);
+
+      // Closed card still reads 15 — the controlled prop is the only source.
+      expect(screen.getByText(EARLIEST_DAY)).toBeInTheDocument();
+      expect(screen.queryByText(NEXT_DELIVERABLE_DAY)).toBeNull();
+    });
+
+    it("U-07: `defaultValue` is honoured as the initial committed value (current contract)", () => {
+      // Documents and locks the current contract: `defaultValue ?? earliest`
+      // accepts the value as-is, with no blocked-day coercion. Flipping the
+      // contract (clamp blocked defaults up to earliest) requires its own spec.
+      renderPicker({ defaultValue: "2026-06-22" });
+      expect(screen.getByText("22")).toBeInTheDocument();
+    });
+  });
+
+  describe("spec 031 — focus wrap + Home/End (U-16 … U-19)", () => {
+    it("U-16: Tab from the last focusable wraps to the first", async () => {
+      const user = userEvent.setup();
+      renderPicker();
+      const dialog = await openDialog(user);
+      unblockFocusableInJsdom(dialog);
+
+      const confirm = screen.getByRole("button", { name: DEFAULT_DELIVERY_LABELS.confirm });
+      confirm.focus();
+      expect(confirm).toHaveFocus();
+      await user.keyboard("{Tab}");
+      // First focusable in the dialog is the currently-active gridcell button.
+      const firstFocusable = within(dialog).getByRole("gridcell", { selected: true });
+      expect(firstFocusable).toHaveFocus();
+
+      await user.keyboard("{Escape}");
+      finishCloseAnimation(dialog);
+    });
+
+    it("U-17: Shift+Tab from the first focusable wraps to the last", async () => {
+      const user = userEvent.setup();
+      renderPicker();
+      const dialog = await openDialog(user);
+      unblockFocusableInJsdom(dialog);
+
+      const firstFocusable = within(dialog).getByRole("gridcell", { selected: true });
+      firstFocusable.focus();
+      expect(firstFocusable).toHaveFocus();
+      await user.keyboard("{Shift>}{Tab}{/Shift}");
+      const confirm = screen.getByRole("button", { name: DEFAULT_DELIVERY_LABELS.confirm });
+      expect(confirm).toHaveFocus();
+
+      await user.keyboard("{Escape}");
+      finishCloseAnimation(dialog);
+    });
+
+    it("U-18: ESC threads through requestClose(false) and calls onOpenChange(false)", async () => {
+      const onOpenChange = jest.fn();
+      const user = userEvent.setup();
+      renderPicker({ onOpenChange });
+      const dialog = await openDialog(user);
+      expect(onOpenChange).toHaveBeenLastCalledWith(true);
+
+      await user.keyboard("{Escape}");
+      expect(onOpenChange).toHaveBeenLastCalledWith(false);
+
+      finishCloseAnimation(dialog);
+    });
+
+    it("U-19: Home moves the active cell to Monday of the row, End to Sunday", async () => {
+      const user = userEvent.setup();
+      renderPicker();
+      const dialog = await openDialog(user);
+
+      // earliest (active on open) = Mon 15. ArrowRight×2 → Wed 17.
+      await user.keyboard("{ArrowRight}{ArrowRight}");
+      // Home → row-start = Mon 15.
+      await user.keyboard("{Home}");
+      expect(document.activeElement?.textContent).toContain(EARLIEST_DAY);
+      // End → row-end = Sun 21.
+      await user.keyboard("{End}");
+      expect(document.activeElement?.textContent).toContain("21");
+
+      await user.keyboard("{Escape}");
+      finishCloseAnimation(dialog);
+    });
+  });
+
+  describe("spec 031 — UX state machine (U-20 … U-22, U-24 … U-26)", () => {
+    it("U-20: data-state transitions open → closing → closed in order", async () => {
+      const user = userEvent.setup();
+      renderPicker();
+      const dialog = await openDialog(user);
+      expect(dialog.dataset.state).toBe("open");
+
+      await user.keyboard("{Escape}");
+      // After requestClose(false), still mounted and now `closing`.
+      expect(screen.queryByRole("dialog")?.dataset.state).toBe("closing");
+
+      finishCloseAnimation(dialog);
+      expect(screen.queryByRole("dialog")).toBeNull();
+    });
+
+    it("U-21: backdrop carries data-state='closing' alongside the modal during exit", async () => {
+      const user = userEvent.setup();
+      const { container } = renderPicker();
+      const dialog = await openDialog(user);
+
+      await user.keyboard("{Escape}");
+      const backdrop = container.querySelector(".sdp-backdrop") as HTMLElement;
+      expect(backdrop).toBeTruthy();
+      expect(backdrop.dataset.state).toBe("closing");
+      expect(dialog.dataset.state).toBe("closing");
+
+      finishCloseAnimation(dialog);
+    });
+
+    it("U-22: safety-net 320 ms timer unmounts the modal when animationend never fires", () => {
+      jest.useFakeTimers();
+      try {
+        renderPicker();
+        act(() => {
+          fireEvent.click(screen.getByRole("button", { name: DEFAULT_DELIVERY_LABELS.change }));
+        });
+        const dialog = screen.getByRole("dialog");
+        expect(dialog).toBeInTheDocument();
+
+        act(() => {
+          fireEvent.click(screen.getByRole("button", { name: DEFAULT_DELIVERY_LABELS.cancel }));
+        });
+        // "closing" — modal still mounted while the (un-fired) animation drains.
+        expect(screen.queryByRole("dialog")).toBeInTheDocument();
+        expect(screen.queryByRole("dialog")?.dataset.state).toBe("closing");
+
+        act(() => {
+          jest.advanceTimersByTime(320);
+        });
+        expect(screen.queryByRole("dialog")).toBeNull();
+      } finally {
+        jest.useRealTimers();
+      }
+    });
+
+    it("U-24: Confirm fires onConfirm with the DRAFT, not the previously committed value", async () => {
+      const onConfirm = jest.fn();
+      const user = userEvent.setup();
+      renderPicker({ onConfirm });
+      const dialog = await openDialog(user);
+
+      // Move draft to Wed 17 (not the committed 15) and Confirm.
+      await user.keyboard("{ArrowRight}{ArrowRight}{Enter}");
+      await user.click(screen.getByRole("button", { name: DEFAULT_DELIVERY_LABELS.confirm }));
+      finishCloseAnimation(dialog);
+
+      expect(onConfirm).toHaveBeenCalledTimes(1);
+      expect(onConfirm).toHaveBeenCalledWith(NEXT_DELIVERABLE_ISO);
+      // Importantly NOT the committed 2026-06-15.
+      expect(onConfirm).not.toHaveBeenCalledWith("2026-06-15");
+    });
+
+    it("U-25: closed-card day number flips to the new committed day after Confirm", async () => {
+      const user = userEvent.setup();
+      renderPicker();
+      const dialog = await openDialog(user);
+
+      await user.keyboard("{ArrowRight}{ArrowRight}{Enter}");
+      await user.click(screen.getByRole("button", { name: DEFAULT_DELIVERY_LABELS.confirm }));
+      finishCloseAnimation(dialog);
+
+      expect(screen.getByText(NEXT_DELIVERABLE_DAY)).toBeInTheDocument();
+      expect(screen.queryByText(EARLIEST_DAY)).toBeNull();
+    });
+
+    it("U-26: caption swaps from 'Earliest delivery' to 'Delivery date' on Confirming a later day", async () => {
+      const user = userEvent.setup();
+      renderPicker();
+      // Pre-condition: caption reads "Earliest delivery".
+      expect(screen.getByText(DEFAULT_DELIVERY_LABELS.earliestDelivery)).toBeInTheDocument();
+
+      const dialog = await openDialog(user);
+      await user.keyboard("{ArrowRight}{ArrowRight}{Enter}");
+      await user.click(screen.getByRole("button", { name: DEFAULT_DELIVERY_LABELS.confirm }));
+      finishCloseAnimation(dialog);
+
+      expect(screen.getByText(DEFAULT_DELIVERY_LABELS.deliveryDate)).toBeInTheDocument();
+      expect(screen.queryByText(DEFAULT_DELIVERY_LABELS.earliestDelivery)).toBeNull();
+    });
+  });
+
+  describe("spec 031 — theming parity (U-27 … U-29)", () => {
+    function gridcellsByTheme(theme: typeof sorrelTheme) {
+      const { container, unmount } = render(<DeliveryDatePicker today={TODAY} theme={theme} />);
+      const change = within(container).getByRole("button", {
+        name: DEFAULT_DELIVERY_LABELS.change,
+      });
+      fireEvent.click(change);
+      const dialog = within(container).getByRole("dialog");
+      const cells = within(dialog).getAllByRole("gridcell");
+      const blocked = cells
+        .filter((c) => c.getAttribute("aria-disabled") === "true")
+        .map((c) => c.textContent ?? "");
+      const selected = cells
+        .filter((c) => c.getAttribute("aria-selected") === "true")
+        .map((c) => c.textContent ?? "");
+      const totalCells = cells.length;
+      return { blocked, selected, totalCells, unmount, dialog, container };
+    }
+
+    it("U-27: both themes render the same DOM + ARIA structure under identical inputs", () => {
+      const sorrel = gridcellsByTheme(sorrelTheme);
+      const bramble = gridcellsByTheme(brambleTheme);
+
+      expect(sorrel.totalCells).toBe(bramble.totalCells);
+      expect(sorrel.selected).toEqual(bramble.selected);
+      expect(sorrel.selected).toHaveLength(1);
+
+      sorrel.unmount();
+      bramble.unmount();
+    });
+
+    it("U-28: blocked gridcell set is identical under both themes", () => {
+      const sorrel = gridcellsByTheme(sorrelTheme);
+      const bramble = gridcellsByTheme(brambleTheme);
+
+      expect(sorrel.blocked).toEqual(bramble.blocked);
+      // Sanity: 2026-06 has blocked Tue/Fri/Sat after the earliest plus the
+      // before-earliest days. The exact count is not the contract here; the
+      // contract is "the same set under both themes".
+      expect(sorrel.blocked.length).toBeGreaterThan(0);
+
+      sorrel.unmount();
+      bramble.unmount();
+    });
+
+    it("U-29: both theme objects satisfy DeliveryTheme without `as` (compile-checked)", () => {
+      // The structural compile-check module at
+      // ./theme/__type-checks__/DeliveryTheme.types.ts asserts both themes are
+      // assignable to DeliveryTheme without widening. If a token key is added
+      // to DeliveryTheme but missing from either theme object, `yarn type-check`
+      // fails before this test runs. The runtime assertion confirms the
+      // type-check file is loaded and its exports are the theme objects — a
+      // delete of the file (which would silently defeat the type-check) would
+      // fail to compile here.
+      expect(DELIVERY_THEME_STRUCTURAL_CHECK_SORREL).toBe(sorrelTheme);
+      expect(DELIVERY_THEME_STRUCTURAL_CHECK_BRAMBLE).toBe(brambleTheme);
     });
   });
 

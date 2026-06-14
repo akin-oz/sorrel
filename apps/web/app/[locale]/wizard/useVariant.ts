@@ -19,6 +19,19 @@ export type Variant = "A" | "B";
 const FLAG = "profile-input";
 const SESSION_KEY = "sorrel.variant";
 
+declare global {
+  interface Window {
+    /** Spec 032 — Cypress forces a variant for the happy-path test. Dev-only. */
+    __sorrelVariant?: Variant;
+  }
+}
+
+function readDevOverride(): Variant | null {
+  if (process.env.NODE_ENV === "production") return null;
+  if (typeof window === "undefined") return null;
+  return window.__sorrelVariant ?? null;
+}
+
 function localBucket(): Variant {
   const stored = window.sessionStorage.getItem(SESSION_KEY);
   if (stored === "A" || stored === "B") return stored;
@@ -38,6 +51,21 @@ export function useVariant(): Variant | null {
 
   useEffect(() => {
     let active = true;
+
+    // Spec 032 dev hook: a Cypress-set window override wins over PostHog so
+    // the happy-path test pins variant A deterministically. Stripped in prod.
+    // The resolution is deferred to a microtask to match the existing async
+    // settle pattern below (React 19's set-state-in-effect rule wants it).
+    const override = readDevOverride();
+    if (override) {
+      void Promise.resolve().then(() => {
+        if (active) setVariant(override);
+      });
+      return () => {
+        active = false;
+      };
+    }
+
     void getPostHog().then((posthog) => {
       if (!active) return;
       if (!posthog) {
