@@ -17,7 +17,14 @@ const eslintConfig = defineConfig([
   ]),
   // Spec 018 — the App* layer is the seam: apps/web composes `@sorrel/ui` App*
   // components and never reaches for raw MUI or inline `sx`. Wrong is un-mergeable.
+  //
+  // Spec 033 — calendar / delivery-date domain logic lives in @sorrel/domain.
+  // apps/web never inlines blocked-weekday math, month-grid construction, or
+  // raw setUTC* date arithmetic; it imports from @sorrel/domain. Tests are
+  // exempt so they can exercise the public funnel API.
   {
+    files: ["**/*.{ts,tsx}"],
+    ignores: ["**/*.test.{ts,tsx}"],
     rules: {
       "no-restricted-syntax": [
         "error",
@@ -25,6 +32,41 @@ const eslintConfig = defineConfig([
           selector: "JSXAttribute[name.name='sx']",
           message:
             "No inline `sx` in apps/web — compose the App* components from @sorrel/ui (spec 018).",
+        },
+        ...[
+          "BLOCKED_WEEKDAY_INDEXES",
+          "blockedInfo",
+          "earliestDeliverableDate",
+          "buildMonthView",
+          "mondayIndex",
+          "isDeliverableWeekday",
+          "moveFocus",
+        ].flatMap((name) => [
+          {
+            selector: `VariableDeclarator[id.name='${name}']`,
+            message:
+              "Calendar / delivery-date logic lives in @sorrel/domain. Import it; do not inline.",
+          },
+          {
+            selector: `FunctionDeclaration[id.name='${name}']`,
+            message:
+              "Calendar / delivery-date logic lives in @sorrel/domain. Import it; do not inline.",
+          },
+        ]),
+        {
+          selector: "MemberExpression[property.name='setUTCDate']",
+          message:
+            "Calendar / delivery-date logic lives in @sorrel/domain. Import it; do not inline.",
+        },
+        {
+          selector: "MemberExpression[property.name='setUTCMonth']",
+          message:
+            "Calendar / delivery-date logic lives in @sorrel/domain. Import it; do not inline.",
+        },
+        {
+          selector: "MemberExpression[property.name='setUTCFullYear']",
+          message:
+            "Calendar / delivery-date logic lives in @sorrel/domain. Import it; do not inline.",
         },
       ],
       "no-restricted-imports": [
