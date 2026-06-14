@@ -1,0 +1,47 @@
+name: Cypress
+
+# Spec 032 — real-browser gate for the funnel happy path + the DeliveryDatePicker
+# real-browser catalog. Runs on every PR; required check (branch protection set
+# in the repo admin UI). Pattern mirrors .github/workflows/ci.yml: Node 24 via
+# .nvmrc, yarn cache, frozen-lockfile install, concurrency cancel-in-progress.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: cypress-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  e2e:
+    name: E2E (Chrome)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: yarn
+
+      - name: Install
+        run: yarn install --frozen-lockfile
+
+      - name: Cache Cypress binary
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/Cypress
+          key: cypress-${{ runner.os }}-${{ hashFiles('apps/web/package.json') }}
+
+      - name: Install Cypress binary
+        run: yarn workspace @sorrel/frontend cypress install
+
+      - name: Build
+        run: yarn workspace @sorrel/frontend build
+
+      - name: Run Cypress
+        run: yarn workspace @sorrel/frontend e2e
