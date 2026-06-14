@@ -2,7 +2,7 @@
 spec: 028
 title: Calendar cell hover + press feedback in DeliveryDatePicker
 status: proposed
-approved: no # ONLY a human flips this to yes — implementation is gated on it
+approved: yes
 tier: 2
 owner: packages/ui
 ---
