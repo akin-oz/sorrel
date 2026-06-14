@@ -22,18 +22,27 @@ interface BaseProps extends LayoutProps {
   "aria-label"?: string;
   "aria-live"?: "polite" | "off" | "assertive";
   "aria-hidden"?: boolean;
+  /** `storyblokEditable()` spread for the Visual Editor (CMS bloks). */
+  editable?: Record<string, unknown>;
   children?: ReactNode;
 }
 
 function box(props: BaseProps, base: Record<string, unknown>) {
-  const { component = "div", id, role, children } = props;
+  const { component = "div", id, role, children, editable } = props;
   const aria = {
     "aria-label": props["aria-label"],
     "aria-live": props["aria-live"],
     "aria-hidden": props["aria-hidden"],
   };
   return (
-    <Box component={component} id={id} role={role} sx={layoutSx(props, base)} {...aria}>
+    <Box
+      component={component}
+      id={id}
+      role={role}
+      sx={layoutSx(props, base)}
+      {...aria}
+      {...editable}
+    >
       {children}
     </Box>
   );

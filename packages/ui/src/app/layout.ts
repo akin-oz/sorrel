@@ -18,11 +18,15 @@ export interface LayoutProps {
   py?: Responsive<number>;
   pt?: Responsive<number>;
   pb?: Responsive<number>;
+  pr?: Responsive<number>;
+  pl?: Responsive<number>;
   m?: Responsive<number | "auto">;
   mt?: Responsive<number | "auto">;
   mb?: Responsive<number | "auto">;
   mx?: Responsive<number | "auto">;
+  my?: Responsive<number | "auto">;
   gap?: Responsive<number>;
+  flexShrink?: Responsive<number>;
   width?: Responsive<number | string>;
   maxWidth?: Responsive<number | string>;
   minHeight?: Responsive<number | string>;
@@ -40,11 +44,15 @@ const LAYOUT_KEYS: readonly (keyof LayoutProps)[] = [
   "py",
   "pt",
   "pb",
+  "pr",
+  "pl",
   "m",
   "mt",
   "mb",
   "mx",
+  "my",
   "gap",
+  "flexShrink",
   "width",
   "maxWidth",
   "minHeight",

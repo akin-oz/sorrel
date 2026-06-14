@@ -45,13 +45,15 @@ function mapResponsive<T, R>(value: Responsive<T>, fn: (v: T) => R): Responsive<
 interface TypeTuning {
   /** Override font size — number (px) or responsive object. Tokenised, not freeform CSS. */
   fontSize?: Responsive<number | string>;
-  lineHeight?: number | string;
+  lineHeight?: Responsive<number | string>;
   /** A palette path ("text.secondary") or a token hex from the design. */
   color?: string;
   align?: TypographyProps["align"];
   maxWidth?: number | string;
   /** Underline control — `none` for wordmark/nav links. */
   textDecoration?: "none" | "underline";
+  /** `text-wrap` for headings/quotes (`pretty` avoids orphans). */
+  textWrap?: "pretty" | "balance";
 }
 
 type AppHeadingProps = TypeTuning & {
@@ -72,13 +74,14 @@ export function AppHeading({
   align,
   maxWidth,
   textDecoration,
+  textWrap,
   ...rest
 }: AppHeadingProps) {
   return (
     <Typography
       variant={`h${level}`}
       align={align}
-      sx={{ fontSize, fontWeight, lineHeight, color, maxWidth, textDecoration }}
+      sx={{ fontSize, fontWeight, lineHeight, color, maxWidth, textDecoration, textWrap }}
       {...rest}
     />
   );
@@ -91,6 +94,8 @@ type AppTextProps = TypeTuning & {
   href?: string;
   id?: string;
   "aria-live"?: "polite" | "off" | "assertive";
+  /** `storyblokEditable()` spread for the Visual Editor (CMS copy). */
+  editable?: Record<string, unknown>;
   children: ReactNode;
 };
 
@@ -104,24 +109,89 @@ export function AppText({
   align,
   maxWidth,
   textDecoration,
+  textWrap,
+  editable,
   ...rest
 }: AppTextProps) {
   return (
     <Typography
       variant={variant}
       align={align}
-      sx={{ fontSize, fontWeight, lineHeight, color, maxWidth, textDecoration }}
+      sx={{ fontSize, fontWeight, lineHeight, color, maxWidth, textDecoration, textWrap }}
       {...rest}
+      {...editable}
     />
   );
 }
 
 // ─── Actions / inputs (thin, theme-styled) ───────────────────────────────────
 
-export type AppButtonProps = Omit<ButtonProps, "sx">;
+export type AppButtonProps = Omit<ButtonProps, "sx"> & {
+  /** Inverted palette for a CTA sitting on the accent band (white fill, accent text). */
+  inverted?: boolean;
+};
 /** CTA / text button — styling from the theme's MuiButton overrides. */
-export function AppButton(props: AppButtonProps) {
-  return <Button {...props} />;
+export function AppButton({ inverted, ...props }: AppButtonProps) {
+  const sx = inverted
+    ? {
+        bgcolor: sorrelTheme.onAccent,
+        color: "primary.main",
+        "&:hover": { bgcolor: sorrelTheme.accentTint },
+      }
+    : undefined;
+  return <Button sx={sx} {...props} />;
+}
+
+export interface AppLinkProps extends LayoutProps {
+  href: string;
+  /** Routing Link component (next-intl); defaults to a plain anchor. */
+  component?: ElementType;
+  /** Colour (palette path or token); inherits by default. */
+  color?: string;
+  /** Underline: `false`/omitted = none (wordmarks, nav); `true` = always;
+   *  `"hover"` = underline on hover only (footer links), offset 3px. */
+  underline?: boolean | "hover";
+  "aria-label"?: string;
+  "aria-current"?: "true" | "page";
+  /** `storyblokEditable()` spread for the Visual Editor (CMS links). */
+  editable?: Record<string, unknown>;
+  children: ReactNode;
+}
+/** Styled link (wordmark, nav, footer) — colour + no underline, composes layout props. */
+export function AppLink({
+  href,
+  component,
+  color,
+  underline,
+  editable,
+  children,
+  ...rest
+}: AppLinkProps) {
+  const { "aria-label": ariaLabel, "aria-current": ariaCurrent, ...layout } = rest;
+  return (
+    <Box
+      component={component ?? "a"}
+      href={href}
+      aria-label={ariaLabel}
+      aria-current={ariaCurrent}
+      sx={layoutSx(
+        layout,
+        underline === "hover"
+          ? {
+              color: color ?? "inherit",
+              textDecoration: "none",
+              "&:hover": { textDecoration: "underline", textUnderlineOffset: "3px" },
+            }
+          : {
+              color: color ?? "inherit",
+              textDecoration: underline ? "underline" : "none",
+            },
+      )}
+      {...editable}
+    >
+      {children}
+    </Box>
+  );
 }
 
 export type AppIconButtonProps = Omit<IconButtonProps, "sx">;
@@ -246,6 +316,8 @@ const TONE_BG = {
   page: sorrelTheme.page,
   surface: sorrelTheme.surface,
   accentTint: sorrelTheme.accentTint,
+  accent: "primary.main",
+  ink: "text.primary",
   transparent: "transparent",
 } as const;
 
@@ -261,6 +333,8 @@ interface AppCardProps extends LayoutProps {
   border?: Responsive<boolean>;
   /** 1px border on the right only (the rail divider). */
   borderRight?: boolean;
+  /** 1px border on the top (responsive — list-row rules). */
+  borderTop?: Responsive<boolean>;
   /** 1px border on the bottom (responsive — the desktop top-bar divider). */
   borderBottom?: Responsive<boolean>;
   overflow?: "hidden" | "visible";
@@ -274,6 +348,8 @@ interface AppCardProps extends LayoutProps {
   id?: string;
   role?: string;
   "aria-live"?: "polite" | "off" | "assertive";
+  /** `storyblokEditable()` spread for the Visual Editor (CMS cards). */
+  editable?: Record<string, unknown>;
   children: ReactNode;
 }
 
@@ -285,6 +361,7 @@ export function AppCard({
   shadow,
   border = true,
   borderRight,
+  borderTop,
   borderBottom,
   overflow,
   direction,
@@ -293,6 +370,7 @@ export function AppCard({
   component = "div",
   id,
   role,
+  editable,
   children,
   ...layout
 }: AppCardProps) {
@@ -316,6 +394,11 @@ export function AppCard({
     base.borderRightColor = "divider";
     base.borderRightWidth = "1px";
   }
+  if (borderTop !== undefined) {
+    base.borderTopStyle = "solid";
+    base.borderTopColor = "divider";
+    base.borderTopWidth = mapResponsive(borderTop, (b) => (b ? "1px" : "0px"));
+  }
   if (borderBottom !== undefined) {
     base.borderBottomStyle = "solid";
     base.borderBottomColor = "divider";
@@ -334,9 +417,88 @@ export function AppCard({
   }
   const ariaLive = (layout as { "aria-live"?: AppCardProps["aria-live"] })["aria-live"];
   return (
-    <Box component={component} id={id} role={role} aria-live={ariaLive} sx={layoutSx(layout, base)}>
+    <Box
+      component={component}
+      id={id}
+      role={role}
+      aria-live={ariaLive}
+      sx={layoutSx(layout, base)}
+      {...editable}
+    >
       {children}
     </Box>
+  );
+}
+
+// ─── Band / Image ────────────────────────────────────────────────────────────
+
+export interface AppBandProps {
+  /** Band background tone (default none → transparent). */
+  tone?: keyof typeof TONE_BG;
+  /** Inner column max width in px (design: 1120 default, 720 for FAQ/CTA). */
+  maxWidth?: number;
+  /** Semantic element — section (default), header, footer. */
+  component?: ElementType;
+  /** Hairline divider on the band's bottom edge (the nav). */
+  borderBottom?: boolean;
+  id?: string;
+  /** `storyblokEditable()` spread for the Visual Editor. */
+  editable?: Record<string, unknown>;
+  children: ReactNode;
+}
+
+/** Full-bleed tonal section + a centered max-width column. Compose the inner
+ *  layout with AppStack/AppGrid as the child (spec 012/018). */
+export function AppBand({
+  tone,
+  maxWidth = appTokens.layout.pageMaxWidth,
+  component = "section",
+  borderBottom,
+  id,
+  editable,
+  children,
+}: AppBandProps) {
+  const outer: Record<string, unknown> = { width: "100%", px: { xs: 2.5, md: 5 } };
+  if (tone) outer.bgcolor = TONE_BG[tone];
+  if (borderBottom) {
+    outer.borderBottomStyle = "solid";
+    outer.borderBottomColor = "divider";
+    outer.borderBottomWidth = "1px";
+  }
+  return (
+    <Box component={component} id={id} {...editable} sx={outer}>
+      <Box sx={{ width: "100%", maxWidth: `${maxWidth}px`, mx: "auto" }}>{children}</Box>
+    </Box>
+  );
+}
+
+export interface AppImageProps {
+  src?: string;
+  alt: string;
+  height?: Responsive<number | string>;
+  radius?: Responsive<number | string>;
+  /** Decorative CSS background shown when `src` is absent (placeholder art). */
+  fallbackBackground?: string;
+}
+
+/** Cover image with tokenized height/radius; renders a decorative placeholder
+ *  band when `src` is unset (spec 012's striped stand-in). */
+export function AppImage({ src, alt, height, radius, fallbackBackground }: AppImageProps) {
+  if (!src) {
+    return (
+      <Box
+        aria-hidden
+        sx={{ width: "100%", height, borderRadius: radius, background: fallbackBackground }}
+      />
+    );
+  }
+  return (
+    <Box
+      component="img"
+      src={src}
+      alt={alt}
+      sx={{ width: "100%", height, objectFit: "cover", borderRadius: radius, display: "block" }}
+    />
   );
 }
 
@@ -376,6 +538,26 @@ export function AppProgressBar({ value, max, label, decorative, width }: AppProg
           }}
         />
       ))}
+    </Box>
+  );
+}
+
+interface AppMeterProps {
+  /** Fill fraction (0..1). */
+  value: number;
+  /** Fill colour — palette path ("primary.main") or token hex. */
+  color: string;
+  /** Bar height in px. */
+  height?: number;
+  /** Track (unfilled) colour. */
+  trackColor?: string;
+}
+/** Horizontal proportion bar — a funnel step's fill against its track. */
+export function AppMeter({ value, color, height = 22, trackColor = "#ECE4D9" }: AppMeterProps) {
+  const pct = `${Math.max(0, Math.min(1, value)) * 100}%`;
+  return (
+    <Box sx={{ flex: 1, height, borderRadius: "6px", bgcolor: trackColor, overflow: "hidden" }}>
+      <Box sx={{ width: pct, height: "100%", bgcolor: color }} />
     </Box>
   );
 }
