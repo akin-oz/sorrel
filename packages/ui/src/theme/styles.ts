@@ -31,9 +31,29 @@ export const DELIVERY_PICKER_CSS = `
   box-shadow: 0 0 0 2px var(--sdp-surface), 0 0 0 5px var(--sdp-accent);
 }
 
+/*
+ * Pointer feedback for deliverable cells. DayCell sets background/border/color
+ * inline, so these states paint with an inset outline (a rendered "border swap")
+ * derived from --sdp-accent rather than a background or border the inline style
+ * would win against. outline — not box-shadow — keeps the :focus-visible ring
+ * above intact. Blocked cells carry aria-disabled="true" and are excluded; the
+ * selected cell's inline background: theme.accent is untouched.
+ */
+.sdp-cell:not([aria-disabled="true"]):hover {
+  outline: 2px solid color-mix(in srgb, var(--sdp-accent) 45%, transparent);
+  outline-offset: -2px;
+}
+.sdp-cell:not([aria-disabled="true"]):active {
+  outline: 2px solid var(--sdp-accent);
+  outline-offset: -2px;
+  transform: translateY(1px);
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .sdp-modal { animation: sdp-fade-in 120ms ease-out; }
-  .sdp-modal[data-state="closing"] { animation: sdp-fade-out 120ms ease-in; }
+  .sdp-backdrop { animation: sdp-fade-in 1ms ease-out; }
+  .sdp-backdrop[data-state="closing"] { animation: sdp-fade-out 1ms ease-in; }
+  .sdp-modal { animation: sdp-fade-in 1ms ease-out; }
+  .sdp-modal[data-state="closing"] { animation: sdp-fade-out 1ms ease-in; }
 }
 `;
 
