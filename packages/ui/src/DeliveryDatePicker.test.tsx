@@ -75,6 +75,88 @@ describe("DeliveryDatePicker", () => {
     });
   });
 
+  // Spec 029 drops the reduced-motion modal AND backdrop animations to 1ms
+  // (deliberately not 0s / `animation: none`) so the animationend event still
+  // dispatches and drives finishClose. JSDOM does not evaluate the CSS media
+  // query, but mocking matchMedia → matches:true documents the reduced-motion
+  // environment and locks the regression spec 029 guards against: the
+  // closing → closed chain must still unmount, and Confirm must still commit
+  // the chosen ISO date, exactly as under default motion.
+  describe("reduced-motion close chain (spec 029 — automated mirror of §2.1)", () => {
+    let restoreMatchMedia: () => void;
+
+    beforeEach(() => {
+      const original = Object.getOwnPropertyDescriptor(window, "matchMedia");
+      restoreMatchMedia = () => {
+        if (original) {
+          Object.defineProperty(window, "matchMedia", original);
+        } else {
+          Reflect.deleteProperty(window, "matchMedia");
+        }
+      };
+      Object.defineProperty(window, "matchMedia", {
+        configurable: true,
+        writable: true,
+        value: jest.fn((query: string) => ({
+          matches: query.includes("prefers-reduced-motion"),
+          media: query,
+          onchange: null,
+          addEventListener: jest.fn(),
+          removeEventListener: jest.fn(),
+          dispatchEvent: jest.fn(),
+        })),
+      });
+    });
+
+    afterEach(() => {
+      restoreMatchMedia();
+    });
+
+    it("still fires the modal animationend and commits onConfirm under reduced motion", async () => {
+      const onConfirm = jest.fn();
+      const user = userEvent.setup();
+      renderPicker({ onConfirm });
+      const dialog = await openDialog(user);
+
+      // 15 → 16 (Tue, blocked) → 17 (Wed, deliverable); Enter commits the draft.
+      await user.keyboard("{ArrowRight}{ArrowRight}{Enter}");
+      await user.click(screen.getByRole("button", { name: DEFAULT_DELIVERY_LABELS.confirm }));
+      // Still mounted while the (now 1 ms) exit animation is in flight.
+      expect(screen.queryByRole("dialog")).toBeInTheDocument();
+
+      finishCloseAnimation(dialog);
+
+      expect(onConfirm).toHaveBeenCalledTimes(1);
+      expect(onConfirm).toHaveBeenCalledWith(NEXT_DELIVERABLE_ISO);
+      expect(screen.queryByRole("dialog")).toBeNull();
+    });
+
+    it("still unmounts via Cancel, ESC, and backdrop click under reduced motion", async () => {
+      const onConfirm = jest.fn();
+      const user = userEvent.setup();
+      const { container } = renderPicker({ onConfirm });
+
+      const cancelDialog = await openDialog(user);
+      await user.click(screen.getByRole("button", { name: DEFAULT_DELIVERY_LABELS.cancel }));
+      finishCloseAnimation(cancelDialog);
+      expect(screen.queryByRole("dialog")).toBeNull();
+
+      const escDialog = await openDialog(user);
+      await user.keyboard("{Escape}");
+      finishCloseAnimation(escDialog);
+      expect(screen.queryByRole("dialog")).toBeNull();
+
+      const backdropDialog = await openDialog(user);
+      const backdrop = container.querySelector(".sdp-backdrop");
+      expect(backdrop).toBeTruthy();
+      await user.click(backdrop as HTMLElement);
+      finishCloseAnimation(backdropDialog);
+      expect(screen.queryByRole("dialog")).toBeNull();
+
+      expect(onConfirm).not.toHaveBeenCalled();
+    });
+  });
+
   describe("confirm vs discard (spec §2.2)", () => {
     async function moveToNextDeliverable(user: ReturnType<typeof userEvent.setup>) {
       // active starts on earliest (Mon 15). →16 (Tue, blocked) →17 (Wed, deliverable).
