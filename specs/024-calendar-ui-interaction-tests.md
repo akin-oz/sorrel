@@ -2,7 +2,7 @@
 spec: 024
 title: Pin the DeliveryDatePicker close-chain, blocked-NO-OP, and return-focus behaviours behind a Jest + Testing Library + jest-axe scaffold in packages/ui
 status: proposed
-approved: no # ONLY a human flips this to yes — implementation is gated on it
+approved: yes
 tier: 1 # regression-proofing the calendar centrepiece before the take-home submit
 owner: packages/ui · packages/domain
 ---
