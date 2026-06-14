@@ -2,7 +2,6 @@
   "env": {
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
   },
-  "teammateMode": "tmux",
   "permissions": {
     "allow": [
       "Bash(yarn type-check:*)",
@@ -93,5 +92,9 @@
         ]
       }
     ]
+  },
+  "teammateMode": "tmux",
+  "enabledPlugins": {
+    "stripe@claude-plugins-official": true
   }
 }
