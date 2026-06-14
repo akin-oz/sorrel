@@ -40,7 +40,7 @@ anything checked and found sound. All tasks are **read-only**.
   and the rules. Answer concretely: can a change with no approved spec, a missing `Spec:`
   trailer, or domain math snuck into an unwatched file actually merge? Then judge the
   **AI-workflow story on its own merits**: is the spec-gated governance coherent and
-  *demo-ready* — specs ↔ commits ↔ hooks ↔ CI mirror (`spec-gate.yml`) telling one legible
+  _demo-ready_ — specs ↔ commits ↔ hooks ↔ CI mirror (`spec-gate.yml`) telling one legible
   narrative a senior reviewer would trust — or is it theatre with gaps? _Deliverable:_ each
   enforcement gap as a P0/P1 with the exact bypass; plus a one-line verdict on whether the
   governance story demos cleanly, with the lines that prove it.
@@ -105,7 +105,7 @@ anything checked and found sound. All tasks are **read-only**.
   drifts between skins.
 
 - **D2 · Wizard shell vs handoff — EXACT match (spec 019).** Pixel fidelity is a core
-  project standard, so judge against an *exact* design match, not "close enough": mobile =
+  project standard, so judge against an _exact_ design match, not "close enough": mobile =
   one 420 card, desktop = 1120 two-pane `420px 1fr` with flush panes
   divided by the rail border (no gutter), square inner panes so only the wrapper rounds, step
   heading in the rail (desktop) / form (mobile), and `Save & exit` as a muted secondary link
@@ -119,7 +119,7 @@ anything checked and found sound. All tasks are **read-only**.
   SUMMARY: control heights, card radii, selected/hover/focus/disabled states, and the
   serif/sans/mono type roles. _Deliverable:_ per-step fidelity notes with file:line.
 
-- **D4 · Delivery calendar craft (`DeliveryDatePicker.tsx`).** Judge the *visual* craft only:
+- **D4 · Delivery calendar craft (`DeliveryDatePicker.tsx`).** Judge the _visual_ craft only:
   Monday-first grid cell sizing, blocked-day muting, the free-delivery pill, the scrim,
   `radiusControl`/`radiusCta`/`radiusPill`, and the two-skin token swap holding (logic shell
   unchanged between skins). _Deliverable:_ visual findings; a11y mechanics → hand off.
@@ -140,9 +140,9 @@ anything checked and found sound. All tasks are **read-only**.
 ## Conversion analyst — `review-conversion-analyst`
 
 - **C1 · Step→event coverage matrix.** From the emit sites (`FunnelProvider.tsx` view/abandon,
-  `WizardChrome.tsx` step_completed/exit-intent, `ProfileForm.tsx` + `EmailForm.tsx`
+  `WizardChrome.tsx` step*completed/exit-intent, `ProfileForm.tsx` + `EmailForm.tsx`
   field_error) build the CATS→SUMMARY matrix: which of the six events fires on each step with
-  which props. _Deliverable:_ the filled matrix + every gap as P0 (unmeasured step/path).
+  which props. \_Deliverable:* the filled matrix + every gap as P0 (unmeasured step/path).
 
 - **C2 · Prop completeness & no-dupes.** Verify `variant` rides every event where the split
   matters (PROFILE `funnel_step_viewed` **and** `step_completed`, ideally through SUMMARY),
@@ -191,10 +191,10 @@ anything checked and found sound. All tasks are **read-only**.
   any test that merely executes code flagged P2.
 
 - **Q2 · The missing e2e (Tier-2 gap) — prove it, then spec it.** Prove there is **no**
-  Cypress/Playwright e2e: `grep -ri "cypress\|playwright"` (minus node_modules) returns
+  Cypress/Playwright e2e: `grep -ri "cypress\|playwright"` (minus node*modules) returns
   nothing, no `cypress/` dir, no e2e job in `.github/workflows/ci.yml`. State plainly that the
   funnel is never verified to complete in a browser — the single highest-value missing test
-  for a conversion demo held to the project's quality bar. _Deliverable:_ the minimal
+  for a conversion demo held to the project's quality bar. \_Deliverable:* the minimal
   CATS→SUMMARY happy-path e2e spec (steps, assertions, where it lives, the CI job to add) as a P0.
 
 - **Q3 · The missing component-render tier.** Prove `@testing-library/react` is absent
@@ -226,5 +226,5 @@ anything checked and found sound. All tasks are **read-only**.
   coverage) — does this suite meet the bar, and where is it materially short? Note
   specifically that **no test asserts the A/B instrumentation** (`variant` riding
   `funnel_step_viewed`/`step_completed`, the same-step view-refire guard) — flag the missing
-  test and hand the event *semantics* to `review-conversion-analyst`. _Deliverable:_ the
+  test and hand the event _semantics_ to `review-conversion-analyst`. _Deliverable:_ the
   coverage map + a one-line "meets bar / below bar" verdict with the gap that decides it.

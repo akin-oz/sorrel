@@ -42,10 +42,10 @@ and the specs' explicit measurements. Note when you're inferring vs. measuring.
   (`FONT_SERIF` Source Serif 4 / `FONT_SANS` Public Sans / `FONT_MONO` IBM Plex Mono), and
   the radii (`radiusControl`, `radiusCta` — pill `999` for Sorrel, soft for Bramble,
   `radiusPill`). Two skins, one logic shell — the picker's structure must not leak skin.
-- **App* structural tokens** — `packages/ui/src/app/tokens.ts`: `radius.surface 16` /
+- **App\* structural tokens** — `packages/ui/src/app/tokens.ts`: `radius.surface 16` /
   `radius.shell 24`, `shadow.card`, `layout.pageMaxWidth 1120` / `cardMaxWidth 420` /
   `funnelColumns "420px minmax(0,1fr)"`, `control.minHeight 44` / `minHeightLarge 52`.
-- **The rule:** every spacing/radius/colour in `apps/web` flows from these via the App*
+- **The rule:** every spacing/radius/colour in `apps/web` flows from these via the App\*
   components (spec 018). A literal hex, px radius, or off-scale gap re-typed at a call site
   is a fidelity **and** a token-drift finding — flag both.
 
@@ -68,7 +68,7 @@ and the specs' explicit measurements. Note when you're inferring vs. measuring.
    a terracotta button (recent spec-018 fix — verify it didn't regress).
 3. **Delivery calendar** (`packages/ui/src/DeliveryDatePicker.tsx`) — Monday-first grid,
    blocked weekdays shown not hidden, pre-selected earliest date, animated modal over an
-   overlay, three-state exit animation with reduced-motion fallback. Judge the *visual* craft
+   overlay, three-state exit animation with reduced-motion fallback. Judge the _visual_ craft
    (a11y mechanics belong to other lenses): cell sizing, the pill, the scrim, the radii, the
    two-skin token swap holding.
 4. **Landing + CMS bloks** (`apps/web/app/_cms/*`: Hero, FeatureItem/FeatureGrid, HowItWorks,
@@ -81,7 +81,7 @@ and the specs' explicit measurements. Note when you're inferring vs. measuring.
 
 - **Token drift** — any colour/spacing/radius not sourced from the token layer; the same
   surface defined two ways across files (the exact problem spec 018 exists to kill — ~166
-  `sx` call sites collapsed into App*; residual literals are regressions).
+  `sx` call sites collapsed into App\*; residual literals are regressions).
 - **Spacing & rhythm** — gaps/padding off the spacing scale; inconsistent band padding;
   vertical rhythm between steps that doesn't match the handoff.
 - **Type** — wrong family/weight/size/line-height per role; serif used for body or sans for a

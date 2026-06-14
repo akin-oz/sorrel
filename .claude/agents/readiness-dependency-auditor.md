@@ -28,6 +28,7 @@ findings here.
 ## The headline compatibility surface
 
 Pin the actual installed versions from `yarn.lock` (don't trust the `package.json` range alone):
+
 - `next` 16.2.9, `react` / `react-dom` 19.2.4 (exact pins in `apps/web/package.json`),
   `eslint-config-next` 16.2.9, `@next/eslint-plugin-next ^16.2.9`.
 - `@mui/material` + `@mui/material-nextjs` `^9.1.1` and `@emotion/react`/`@emotion/styled`
@@ -77,10 +78,10 @@ Pin the actual installed versions from `yarn.lock` (don't trust the `package.jso
    `eslint-config-next 16.2.9`. Flag any ESLint major mismatch that could make `apps/web lint`
    and root `lint` disagree, or a `typescript-eslint`/`@typescript-eslint` parser that doesn't
    support the installed TS major.
-7. **@sorrel/* workspace ranges.** Internal deps use a mix of `"*"` (e.g. analytics→shared,
-   apps/web→@sorrel/*) and pinned `"1.0.0"` (`@sorrel/ui`→`@sorrel/domain`, `packages/ui`→react).
-   Confirm `"*"` always resolves to the local workspace (it does under yarn workspaces) and that
-   no pinned `1.0.0` range will fail to match if a package version bumps. Flag inconsistency as a
+7. **@sorrel/\* workspace ranges.** Internal deps use a mix of `"*"` (e.g. analytics→shared,
+   apps/web→@sorrel/_) and pinned `"1.0.0"` (`@sorrel/ui`→`@sorrel/domain`, `packages/ui`→react).
+   Confirm `"_"`always resolves to the local workspace (it does under yarn workspaces) and that
+no pinned`1.0.0` range will fail to match if a package version bumps. Flag inconsistency as a
    maintainability risk, not a blocker.
 8. **Deprecations & abandonment.** Note any installed package flagged deprecated by its
    registry (e.g. transitive `glob`/`rimraf`/`inflight` chains), and any first-party dep that's

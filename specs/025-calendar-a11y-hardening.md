@@ -78,7 +78,7 @@ attribute. No schema, no domain, no analytics, no new dependencies.
   attaches and detaches alongside the dialog's open/closed transitions.
 - The dialog `<div role="dialog" aria-modal="true" aria-labelledby={labelId}>`
   at line 508-516 — receives a new visually-hidden `role="status"
-  aria-live="polite"` child.
+aria-live="polite"` child.
 - The `DayCell` component (lines 655-720) — the `<div role="gridcell">` /
   `<button>` pair is restructured or annotated to carry selection state on the
   focused element.
@@ -91,7 +91,7 @@ content outside the dialog subtree. Remove it on close (including during the
 `"closing"` state's exit animation — see decision below).
 
 - **DOM target:** the recommended target is the dialog overlay's
-  *previousElementSibling* / *nextElementSibling* chain on `document.body` —
+  _previousElementSibling_ / _nextElementSibling_ chain on `document.body` —
   i.e. mark every body child that is **not** the overlay as `inert`. This
   avoids requiring the host app to expose a specific `<main>` ID and is robust
   to the picker being rendered in any host layout. Alternative: require the
@@ -124,7 +124,7 @@ path:
   `selectionAnnouncement: (date: string) => string` defaulting to
   `Delivery set to ${date}`. The date is formatted via the existing
   `formatDate` helper (line 64) with `{ weekday: "long", day: "numeric",
-  month: "long" }` (or the format chosen below).
+month: "long" }` (or the format chosen below).
 - **Blocked day attempt** (click or Enter/Space on a cell whose
   `cell.blocked === true`). The existing `blockedReasonText` (line 68)
   already produces the localised reason (weekday name or
@@ -145,7 +145,7 @@ Pick one of two shapes — **decision below**:
   (the parent `<div role="row">` at line 584 uses `display: grid` with
   `gridTemplateColumns: "repeat(7,1fr)"` and each child is the gridcell).
   Empty cells at line 588 keep their wrapper `<div role="gridcell"
-  aria-hidden>` because they have no button.
+aria-hidden>` because they have no button.
 - **(b) Annotate.** Keep the wrapper and add `aria-pressed={cell.isSelected}`
   to the `<button>`. Cheaper diff, but `aria-pressed` is the wrong role
   semantically for a calendar grid cell and risks confusing AT users about

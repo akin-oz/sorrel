@@ -17,6 +17,7 @@ all. On iOS, tapping a cell produces no press feedback before the draft
 selection commits, which reads as unresponsive.
 
 No existing approved spec covers cell pointer states:
+
 - Spec 001 (`Delivery date picker`) ships the keyboard / a11y / animation shell
   but does not define `:hover` or `:active`.
 - Spec 018 (`App* UI layer`) is about the MUI-replacement primitive layer in

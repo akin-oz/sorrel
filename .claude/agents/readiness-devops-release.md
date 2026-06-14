@@ -26,21 +26,22 @@ machine" deploy is a release-quality failure. Your job is to find those before t
 ## What "green AND meaningful" means here
 
 The repo's gate is three workflows under `.github/workflows/`:
+
 - `ci.yml` — `yarn install --frozen-lockfile` → `yarn codegen:check` → `yarn type-check`
   → `yarn lint` → `yarn format:check` → the per-workspace unit-test matrix (`@sorrel/domain`,
   `@sorrel/shared`, `@sorrel/analytics`, `@sorrel/api`, `@sorrel/frontend`) → `yarn workspace
-  @sorrel/frontend build`.
+@sorrel/frontend build`.
 - `spec-gate.yml` — every non-merge commit in the PR must carry a `Spec: NNN` trailer that
   resolves to a `specs/NNN-*.md` with `approved: no`.
 - `lighthouse.yml` — builds, then `yarn lighthouse` (LHCI, `lighthouserc.json`).
 
-A green gate is not enough — confirm it would actually *catch* a regression. "Meaningful"
+A green gate is not enough — confirm it would actually _catch_ a regression. "Meaningful"
 failures you should probe for:
 
 ## Check for
 
 1. **Fresh-clone reproducibility.** Would `yarn install --frozen-lockfile && yarn type-check
-   && yarn lint && yarn build` pass on a clean checkout with Node 24? Walk the chain. The
+&& yarn lint && yarn build` pass on a clean checkout with Node 24? Walk the chain. The
    `engines` in root `package.json` is `^20.19.0 || ^22.13.0 || >=24`, but the documented +
    pinned dev runtime is Node 24 (`.nvmrc` = `24`, which `setup-node` reads via
    `node-version-file`). Known gotcha: a contributor's shell may default to Node 18, where
@@ -52,16 +53,16 @@ failures you should probe for:
    depends on `@mui/material ^9` — flag the transitive-hoist fragility to the dependency
    auditor, but from a release lens confirm the build doesn't rely on a hoist that
    `--frozen-lockfile` could break.
-3. **Codegen / build ordering.** `ci.yml` runs `yarn codegen:check` *before* type-check —
+3. **Codegen / build ordering.** `ci.yml` runs `yarn codegen:check` _before_ type-check —
    good, because `apps/web/lib/gql/*` is generated from `schema.graphql` and stale codegen
    would fail type-check. Confirm `codegen:check` actually guards drift: it runs
    `scripts/codegen-check.mjs` (schema validity) **then** `graphql-codegen --config codegen.ts
-   --check`. Verify the `--check` half is present and not silently skipped — a build that
+--check`. Verify the `--check` half is present and not silently skipped — a build that
    regenerates types at `next build` time but never checks them in CI is a latent red.
 4. **Vercel deploy config & build command.** There is **no `vercel.json`** and **no root
    `next.config` override for the monorepo build command** — Vercel infers it. Confirm the
    project's Root Directory / build command on Vercel matches `yarn workspace @sorrel/frontend
-   build` (the only build that ships the app). `next.config.ts` sets `outputFileTracingRoot`
+build` (the only build that ships the app). `next.config.ts` sets `outputFileTracingRoot`
    to the monorepo root and `outputFileTracingIncludes` so `/api/graphql` ships `schema.graphql`
    into its serverless bundle — verify nothing else read at runtime (e.g. `lib/insights-data.json`,
    message catalogs) is missing from the trace, or it 500s only in prod.
@@ -75,10 +76,10 @@ failures you should probe for:
      analytics/A-B/CMS silently no-op. Flag any that are set only at runtime scope.
    - **Runtime, server-only** — `STORYBLOK_PREVIEW_SECRET`, `STORYBLOK_WEBHOOK_SECRET`,
      `STORYBLOK_PERSONAL_ACCESS_TOKEN`, and the proposed `POSTHOG_PERSONAL_API_KEY` (spec 023).
-   Confirm the keys the demo actually needs to *light up* (PostHog + Mixpanel + Storyblok
-   public token) are present in the Vercel **Production** environment, and that
-   `NEXT_PUBLIC_SITE_URL` is set so canonical/OG/sitemap (`lib/site.ts`) point at the real
-   origin instead of the hard-coded fallback.
+     Confirm the keys the demo actually needs to _light up_ (PostHog + Mixpanel + Storyblok
+     public token) are present in the Vercel **Production** environment, and that
+     `NEXT_PUBLIC_SITE_URL` is set so canonical/OG/sitemap (`lib/site.ts`) point at the real
+     origin instead of the hard-coded fallback.
 6. **Preview ↔ prod parity.** Vercel preview deploys get a different `VERCEL_URL`; confirm
    anything that branches on env (analytics enabled, Storyblok draft preview, the A/B flag)
    behaves predictably on a preview URL — the demo may run from a preview link. Flag if

@@ -28,7 +28,7 @@ when it crosses a line.
 
 The demo must run flawlessly from a clean clone — a fresh checkout must build and the
 funnel must work first try. The project's **deterministic-verification standard expects a green,
-meaningful suite the maintainer can run and extend**: the tests must be green and *meaningful*
+meaningful suite the maintainer can run and extend**: the tests must be green and _meaningful_
 (assert behaviour, cover edge cases), and the maintainer must be able to **run and extend them**
 without fumbling. The biggest gap today is that the **Cypress happy-path e2e through the funnel
 is still missing** — there is no e2e layer at all. That is your headline finding.
@@ -36,6 +36,7 @@ is still missing** — there is no e2e layer at all. That is your headline findi
 ## The suite as it stands
 
 Jest, per-workspace, wired into `ci.yml` as a five-job matrix:
+
 - `@sorrel/domain` — `packages/domain/src/pricing/plan.test.ts` (88 ln),
   `packages/domain/src/delivery/calendar.test.ts` (192 ln).
 - `@sorrel/shared` — `packages/shared/src/funnel.test.ts` (46 ln) — funnel-step schema sync.
@@ -54,11 +55,11 @@ missing happy-path e2e the top gap. The funnel order is fixed in `packages/share
 
 1. **Suite-green audit.** Walk each workspace's `jest` run and confirm it would exit 0 on a
    fresh checkout — the same matrix `ci.yml` runs (`yarn workspace @sorrel/{domain,shared,
-   analytics,api,frontend} test`). You may run the tests read-only (jest mutates nothing); if a
+analytics,api,frontend} test`). You may run the tests read-only (jest mutates nothing); if a
    suite is red, that is an automatic blocker — name the failing test and why. If you can't run
    them, reason from the source and say so.
-2. **Meaningful, not theatre.** For each test file, judge whether it asserts *behaviour* and
-   covers *edge cases*, or just smoke-checks a happy value. Strong signals to confirm:
+2. **Meaningful, not theatre.** For each test file, judge whether it asserts _behaviour_ and
+   covers _edge cases_, or just smoke-checks a happy value. Strong signals to confirm:
    `calendar.test.ts` (192 ln) should exercise cutoffs / blackout / weekend / lead-time edges;
    `resolvers.test.ts` (180 ln) should cover plan **recompute** on `updateFunnelPlan` and
    invalid inputs; `state.test.ts` (134 ln) should cover the wizard reducer's transitions +
@@ -118,7 +119,7 @@ missing happy-path e2e the top gap. The funnel order is fixed in `packages/share
      exists and the preview round-trips).
    - No console errors on any of the above.
 8. **Perf evidence is current, not stale.** The **mobile Lighthouse 95+ screenshot** is a
-   checklist item and pixel fidelity is a core project standard — confirm the perf claim is backed by a *current*
+   checklist item and pixel fidelity is a core project standard — confirm the perf claim is backed by a _current_
    run, not a stale artifact. Check `lighthouserc.json` thresholds and `docs/lighthouse.md`, and
    flag if the README/demo cites a Lighthouse number that the present `lighthouse.yml` run
    wouldn't reproduce (e.g. localhost SEO understatement, a screenshot older than the latest UI

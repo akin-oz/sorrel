@@ -103,9 +103,9 @@ never imported by a client component).
 - `Insights.subtitle` — reframe from friction-vs-no-friction to a **credible UX test**:
   visible-options pills (A) vs autocomplete-with-defaults (B), B still lifting PROFILE→RECIPES.
   Recommended en: `"Live PostHog sessions, split by the PROFILE-input A/B test. Variant A
-  shows every option as inline pills; variant B uses autocomplete with smart defaults. Even
-  against a credible visible-options control, B lifts the PROFILE → RECIPES step — the 39→65
-  lever."` with the matching de translation. (If the reviewer prefers the subtitle to stay
+shows every option as inline pills; variant B uses autocomplete with smart defaults. Even
+against a credible visible-options control, B lifts the PROFILE → RECIPES step — the 39→65
+lever."` with the matching de translation. (If the reviewer prefers the subtitle to stay
   source-agnostic so the static-fallback build reads truthfully, keep "Synthetic sessions"
   wording — see decisions.) No other `Insights` keys change.
 

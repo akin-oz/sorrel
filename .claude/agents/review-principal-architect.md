@@ -31,7 +31,7 @@ duplicating it. Read-only: never edit, never run mutating commands.
 A yarn-workspaces monorepo; **not** pnpm/Turborepo despite any stale prose. Layout:
 
 - `apps/web` — Next 16 App Router, React 19, strict TS. **Zero `sx`, zero direct
-  `@mui/*`** after spec 018 — it composes the App* layer instead.
+  `@mui/*`** after spec 018 — it composes the App\* layer instead.
 - `services/api` — Apollo Server (recipes, pricing, plans, mutations).
 - `packages/domain` — pricing/portion/plan invariants, **exclusively** (`src/pricing/plan.ts`,
   `money.ts`, `delivery/calendar.ts`), unit-tested.
@@ -53,15 +53,15 @@ A yarn-workspaces monorepo; **not** pnpm/Turborepo despite any stale prose. Layo
 2. **`packages/domain` owns the maths, exclusively.** Portion-from-weight
    (`GRAMS_PER_KG_PER_DAY`), `MEALS_PER_BOX`, `PRICE_MINOR_PER_GRAM`, `FIRST_BOX_DISCOUNT`,
    and `computePlan` live only in `packages/domain/src/pricing/plan.ts`. The rule's own
-   history notes these **once drifted into `services/api`** — so check *both* framework
+   history notes these **once drifted into `services/api`** — so check _both_ framework
    layers: grep `services/api/src/**` and `apps/web/**` for money arithmetic on
    `amountMinor`, meals-per-box, portion math, or a re-derived price. Both layers may only
    import from `@sorrel/domain` and map onto the GraphQL enums at their boundary
    (e.g. `apps/web/app/[locale]/wizard/draft-input.ts`, `order-summary.ts`).
-   The domain owning its own string-union enums (so codegen flows *toward* it, never the
+   The domain owning its own string-union enums (so codegen flows _toward_ it, never the
    reverse) is correct — confirm that direction is preserved.
 
-## App* layering (spec 018 — read `specs/018-app-ui-layer.md`)
+## App\* layering (spec 018 — read `specs/018-app-ui-layer.md`)
 
 - The layer lives in `packages/ui/src/app` (`primitives.tsx`, `components.tsx`,
   `AppThemeProvider.tsx`, `tokens.ts`, `theme.ts`, `index.ts`). Tokens (`tokens.ts`) are
@@ -71,9 +71,9 @@ A yarn-workspaces monorepo; **not** pnpm/Turborepo despite any stale prose. Layo
   Verify the ESLint bans (`no-restricted-syntax` for `sx`, `no-restricted-imports` for
   `@mui/*`) exist and run in CI, and whether the migration is actually complete (specs-tasks
   show phases 3–5 — CMS bloks, insights/pages, the lint-ban + dep-drop — may be unfinished;
-  partial migration is a *known* state, judge whether it's left the tree broken or merely
+  partial migration is a _known_ state, judge whether it's left the tree broken or merely
   incomplete).
-- **The `DeliveryDatePicker` must stay MUI-free and untouched** — flag any App*/MUI bleed
+- **The `DeliveryDatePicker` must stay MUI-free and untouched** — flag any App\*/MUI bleed
   into it.
 
 ## Governance soundness (`.claude/`)

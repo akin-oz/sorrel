@@ -28,7 +28,7 @@ inside a Client Component, ships to every visitor.**
 ## Check for
 
 1. **The PostHog personal-key trap (highest-value check).** Spec 023 introduces a NEW
-   **server-only** `POSTHOG_PERSONAL_API_KEY` (+ `POSTHOG_PROJECT_ID`) to *query* PostHog for
+   **server-only** `POSTHOG_PERSONAL_API_KEY` (+ `POSTHOG_PROJECT_ID`) to _query_ PostHog for
    the live `/insights` read. This key can read/write the whole project — it must NEVER:
    - be named `NEXT_PUBLIC_POSTHOG_PERSONAL_API_KEY` (grep for it);
    - be read in a file that is, or is imported by, a `"use client"` module;
@@ -36,10 +36,10 @@ inside a Client Component, ships to every visitor.**
      in the client bundle;
    - appear in `apps/web/.env` without a comment marking it server-only, or be committed with a
      real value.
-   Contrast with the legitimately-public **ingestion** key `NEXT_PUBLIC_POSTHOG_KEY` (a `phc_`
-   project key, safe to inline — it's write-only event capture). Confirm the personal key is
-   only ever read in a Server Component / Route Handler / server action. If spec 023 isn't
-   implemented yet, state that and pre-flag the trap as a guardrail for when it lands.
+     Contrast with the legitimately-public **ingestion** key `NEXT_PUBLIC_POSTHOG_KEY` (a `phc_`
+     project key, safe to inline — it's write-only event capture). Confirm the personal key is
+     only ever read in a Server Component / Route Handler / server action. If spec 023 isn't
+     implemented yet, state that and pre-flag the trap as a guardrail for when it lands.
 2. **Audit every `NEXT_PUBLIC_*`.** Enumerate them (grep `NEXT_PUBLIC_` across `apps/web`,
    `apps/web/.env`, scripts). For each, confirm it is genuinely non-sensitive: the PostHog
    `phc_` ingestion key (public by design), the Mixpanel project token (public by design),
@@ -68,7 +68,7 @@ inside a Client Component, ships to every visitor.**
 6. **Preview-secret & webhook-HMAC handling.** `app/api/draft/route.ts` gates `draftMode()`
    behind a constant-compared `STORYBLOK_PREVIEW_SECRET` and only allows same-site relative
    redirects (`/` but not `//host`) — confirm that open-redirect guard holds. `app/api/storyblok/
-   revalidate/route.ts` verifies an HMAC-SHA1 signature with `timingSafeEqual` and a length
+revalidate/route.ts` verifies an HMAC-SHA1 signature with `timingSafeEqual` and a length
    guard — confirm the comparison is constant-time and 500s when the secret is unset (it does).
    Check `app/api/draft/disable/route.ts` doesn't let an attacker toggle draft mode for other
    users. Flag any missing secret check or non-constant-time compare.

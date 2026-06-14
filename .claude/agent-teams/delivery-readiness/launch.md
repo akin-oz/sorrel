@@ -11,24 +11,24 @@ The demo must run flawlessly from a clean clone — a fresh checkout must build 
 funnel must run first try. The project's **deterministic-verification standard expects a green,
 meaningful suite the maintainer can run and extend**, so the suite must be green, meaningful, and
 runnable + extensible from a clean clone. **Pixel fidelity is a core project standard** and the
-**mobile Lighthouse 95+ screenshot** is a release check — the perf evidence must be *current*, not
+**mobile Lighthouse 95+ screenshot** is a release check — the perf evidence must be _current_, not
 stale. Storyblok hands-on (CMS / draft preview / revalidate) is a differentiator that has to
 actually work in the demo.
 
 This is the safety net before the demo: nothing here mutates code. Each investigator only
 reads, greps, globs, and runs read-only shell checks, then returns a prioritized gap list with
 **severity + concrete fix + file/evidence**. The point is to catch the red CI badge, the leaked
-key, the broken hoist, and the empty dashboard *before* a reviewer does.
+key, the broken hoist, and the empty dashboard _before_ a reviewer does.
 
 ## Members (subagent definitions in `.claude/agents/`)
 
-| Investigator | Subagent type | Area | Model |
-|---|---|---|---|
-| Release engineer | `readiness-devops-release` | CI gates green + meaningful, Vercel deploy config, env-var wiring (build vs runtime; `apps/web/.env` vs Vercel), Node 24 pin + fresh-clone reproducibility, lockfile integrity, preview↔prod parity, codegen/build order | sonnet |
-| Security reviewer | `readiness-security-reviewer` | Secret exposure (audit every `NEXT_PUBLIC_*`; prove `POSTHOG_PERSONAL_API_KEY` never goes client-side), input validation (EMAIL action, GraphQL inputs), security headers/CSP, draftMode + preview-secret + webhook-HMAC, no-real-brand governance | **opus** |
-| Dependency auditor | `readiness-dependency-auditor` | MUI v9 / React 19 / Next 16 compatibility, peer-dep warnings, deprecations, duplicate/hoisted copies (the prettier `.bin` gotcha), lockfile drift, `@sorrel/*` ranges, the transitively-hoisted `@mui` after spec 018 | sonnet |
-| Telemetry/conversion PM | `readiness-telemetry-conversion` | Funnel events firing end-to-end to PostHog + Mixpanel (not just `memorySink`), seed→insights pipeline, A/B flag resolves in prod, dashboards exist + populated, attribution sound, story survives a sceptical walkthrough | sonnet |
-| Release-QA engineer | `readiness-qa-engineer` | Every workspace's tests green AND meaningful (assert behaviour, cover edges), determinism/flake risk, the **missing Cypress happy-path e2e** (CATS→SUMMARY) as the headline gap, a manual pre-delivery smoke checklist (each wizard step, calendar, locale en/de, landing, /insights, draft preview), and whether the maintainer can run/extend the suite from a clean clone | sonnet |
+| Investigator            | Subagent type                    | Area                                                                                                                                                                                                                                                                                                                                                                         | Model    |
+| ----------------------- | -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
+| Release engineer        | `readiness-devops-release`       | CI gates green + meaningful, Vercel deploy config, env-var wiring (build vs runtime; `apps/web/.env` vs Vercel), Node 24 pin + fresh-clone reproducibility, lockfile integrity, preview↔prod parity, codegen/build order                                                                                                                                                     | sonnet   |
+| Security reviewer       | `readiness-security-reviewer`    | Secret exposure (audit every `NEXT_PUBLIC_*`; prove `POSTHOG_PERSONAL_API_KEY` never goes client-side), input validation (EMAIL action, GraphQL inputs), security headers/CSP, draftMode + preview-secret + webhook-HMAC, no-real-brand governance                                                                                                                           | **opus** |
+| Dependency auditor      | `readiness-dependency-auditor`   | MUI v9 / React 19 / Next 16 compatibility, peer-dep warnings, deprecations, duplicate/hoisted copies (the prettier `.bin` gotcha), lockfile drift, `@sorrel/*` ranges, the transitively-hoisted `@mui` after spec 018                                                                                                                                                        | sonnet   |
+| Telemetry/conversion PM | `readiness-telemetry-conversion` | Funnel events firing end-to-end to PostHog + Mixpanel (not just `memorySink`), seed→insights pipeline, A/B flag resolves in prod, dashboards exist + populated, attribution sound, story survives a sceptical walkthrough                                                                                                                                                    | sonnet   |
+| Release-QA engineer     | `readiness-qa-engineer`          | Every workspace's tests green AND meaningful (assert behaviour, cover edges), determinism/flake risk, the **missing Cypress happy-path e2e** (CATS→SUMMARY) as the headline gap, a manual pre-delivery smoke checklist (each wizard step, calendar, locale en/de, landing, /insights, draft preview), and whether the maintainer can run/extend the suite from a clean clone | sonnet   |
 
 All five are `tools: Read, Glob, Grep, Bash` (read-only). Seed tasks per member live in
 `tasks.md`.
@@ -58,7 +58,7 @@ Paste this to the lead (the main session) to launch all five in parallel:
 >
 > 1. **Release engineer** — subagent `readiness-devops-release`. Area: CI gates (`.github/workflows/`)
 >    green AND meaningful, Vercel deploy config (note: no `vercel.json`), env-var wiring
->    (`apps/web/.env` symlink vs Vercel dashboard; which `NEXT_PUBLIC_*` are needed at *build*
+>    (`apps/web/.env` symlink vs Vercel dashboard; which `NEXT_PUBLIC_*` are needed at _build_
 >    time), Node 24 pin + fresh-clone reproducibility, lockfile integrity, preview↔prod parity,
 >    and the codegen→type-check→build order.
 > 2. **Security reviewer** — subagent `readiness-security-reviewer`. Area: audit every
@@ -78,7 +78,7 @@ Paste this to the lead (the main session) to launch all five in parallel:
 >    exist and are populated, attribution is sound, and the live-vs-seeded story survives a
 >    sceptical walkthrough (note `/insights` reads static JSON today; spec 023 proposes the live read).
 > 5. **Release-QA engineer** — subagent `readiness-qa-engineer`. Area: confirm every workspace's
->    jest suite is green AND *meaningful* (the five-job `ci.yml` matrix: `@sorrel/domain`,
+>    jest suite is green AND _meaningful_ (the five-job `ci.yml` matrix: `@sorrel/domain`,
 >    `@sorrel/shared`, `@sorrel/analytics`, `@sorrel/api`, `@sorrel/frontend` — asserts behaviour,
 >    covers edge cases), determinism / flake risk (real `Date`/TZ/`Math.random`), the **missing
 >    Cypress happy-path e2e** through the funnel (**CATS→PROFILE→RECIPES→DELIVERY→PLAN→EMAIL→
@@ -113,4 +113,4 @@ Paste this to the lead (the main session) to launch all five in parallel:
 - **Keep the verify-against-live bucket separate** (telemetry's keys-on-Vercel / seed-run /
   dashboard-populated checks the code can't confirm) so the maintainer knows what to check manually.
 - **Honour governance:** any fix that becomes real work needs an approved `specs/NNN-*.md` and a
-  `Spec: NNN` commit trailer — the task force *finds* gaps; it doesn't self-approve the fixes.
+  `Spec: NNN` commit trailer — the task force _finds_ gaps; it doesn't self-approve the fixes.

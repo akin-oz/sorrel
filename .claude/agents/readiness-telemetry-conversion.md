@@ -38,7 +38,7 @@ config gap and hand it to the right reviewer.
 3. **A/B resolution** — `useVariant.ts` reads the PostHog feature flag `profile-input`
    (values `A`/`control`, `B`/`test`); offline it falls back to a deterministic per-session
    `sessionStorage` bucket. The 39→65 lever is variant B (PROFILE autocomplete).
-4. **Seed → insights** — `scripts/seed-funnel.ts` emits synthetic sessions through the *same*
+4. **Seed → insights** — `scripts/seed-funnel.ts` emits synthetic sessions through the _same_
    contract into `memorySink`, aggregates, and writes `lib/insights-data.json`. `seed-mixpanel.ts`
    and `seed-posthog.ts` ingest the same canonical curve into the live vendors. `/insights`
    currently reads the **static** `lib/insights-data.json` (import at `insights/page.tsx`).
@@ -54,9 +54,9 @@ config gap and hand it to the right reviewer.
    **nothing reaches PostHog/Mixpanel**, yet the build is green and the local demo "works." This
    is the single most likely "looks fine, proves nothing" gap. State how to verify (a real funnel
    run shows up in the PostHog/Mixpanel live events view) and flag that the keys being
-   build-time-inlined means they must exist *at build time*, not just runtime.
+   build-time-inlined means they must exist _at build time_, not just runtime.
 2. **Is the seed data actually in the live projects?** `seed-posthog.ts` / `seed-mixpanel.ts`
-   must have been *run* against the live project for any dashboard to be populated. Confirm
+   must have been _run_ against the live project for any dashboard to be populated. Confirm
    whether they've been run (the README/specs may say), what identity/`$insert_id` dedup they use
    (seed-posthog is deterministic so re-runs dedup — good), and that the seeded curve matches the
    canonical `RETENTION` table (A drops at PROFILE→RECIPES 0.55, B lifts to 0.78). A dashboard
@@ -65,7 +65,7 @@ config gap and hand it to the right reviewer.
    `lib/insights-data.json`. If `/insights` is presented as "live PostHog," that's a
    credibility gap until spec 023 ships. Either: (a) implement spec 023's live read, or (b)
    present `/insights` honestly as the deterministic seeded fallback. Flag the mismatch and the
-   `approved: no` spec 023 as the closer. If spec 023 *is* implemented, verify the live query
+   `approved: no` spec 023 as the closer. If spec 023 _is_ implemented, verify the live query
    degrades to the static fallback when the API key/PostHog is unavailable (no blank page in the
    demo).
 4. **Does the A/B flag resolve in prod?** The `profile-input` flag must exist in the PostHog
@@ -81,8 +81,8 @@ config gap and hand it to the right reviewer.
    (no double-fire on re-render — React 19 + react-compiler can re-run effects), abandonment is
    captured (`funnel_abandoned` with the step), and exit-intent recovery rate is computable
    (`exit_intent_recovered ÷ exit_intent_shown`). Flag any event that fires inconsistently
-   between the seed model and the real app — the seed is the *claimed* curve; the live app must
-   produce the *same shape* or the narrative is fiction.
+   between the seed model and the real app — the seed is the _claimed_ curve; the live app must
+   produce the _same shape_ or the narrative is fiction.
 6. **Dashboards exist and tell the story.** For the demo, there should be a PostHog (and/or
    Mixpanel) funnel insight + dashboard showing the per-step drop-off split by `variant`, with
    the PROFILE→RECIPES lift visible. Flag if no dashboard is documented/linked, or if the

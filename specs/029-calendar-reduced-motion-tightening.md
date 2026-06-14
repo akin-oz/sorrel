@@ -21,7 +21,7 @@ regardless of the user's preference. Two concrete issues:
    - The default backdrop rules at lines 23-24 declare
      `.sdp-backdrop { animation: sdp-fade-in 180ms ease-out; }` and
      `.sdp-backdrop[data-state="closing"] { animation: sdp-fade-out 180ms ease-in; }`.
-   - The reduced-motion block at lines 34-37 only mentions `.sdp-modal` / 
+   - The reduced-motion block at lines 34-37 only mentions `.sdp-modal` /
      `.sdp-modal[data-state="closing"]`. The backdrop selectors are absent, so a
      user with `prefers-reduced-motion: reduce` set still sees the full 180ms
      fade.
@@ -53,8 +53,8 @@ Two edits to a single constant in a single file. Nothing else moves.
   also target:
   - `.sdp-backdrop`
   - `.sdp-backdrop[data-state="closing"]`
-  in addition to the already-listed `.sdp-modal` and
-  `.sdp-modal[data-state="closing"]`.
+    in addition to the already-listed `.sdp-modal` and
+    `.sdp-modal[data-state="closing"]`.
 - **Change 2 — drop reduced durations to ~1ms for all four selectors:** modal in,
   modal out, backdrop in, backdrop out all run at `1ms` under reduced motion
   (keeping the `ease-out` / `ease-in` timing functions and the existing
@@ -65,6 +65,7 @@ The shipped reduced-motion block, after the change, lists all four selectors
 with `1ms` durations.
 
 Files **not** touched by this spec:
+
 - `packages/ui/src/DeliveryDatePicker.tsx` — no JS edits at all.
 - `packages/ui/src/theme/tokens.ts` — no token edits.
 - Any `apps/web` consumer — they see no API change.

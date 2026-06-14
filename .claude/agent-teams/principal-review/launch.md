@@ -10,10 +10,10 @@ craft, design fidelity, conversion instrumentation, and test engineering, all at
 
 Two project standards set the bar the synthesis should be measured against:
 
-- **Pixel fidelity is a core project standard** — the build ships only when it *looks
-  designed*, and **performance is judged down to paint/layout**: CLS, hydration cost, and
+- **Pixel fidelity is a core project standard** — the build ships only when it _looks
+  designed_, and **performance is judged down to paint/layout**: CLS, hydration cost, and
   layout/paint, not just a Lighthouse score. → the **designer** must judge against an
-  *exact* design match, not "close enough"; the **staff-frontend** must look at
+  _exact_ design match, not "close enough"; the **staff-frontend** must look at
   paint/layout/CLS/hydration cost, not just Lighthouse numbers; the **QA** absence of an
   e2e happy path reads as a demo that can break on a click.
 - **The conversion thesis** is the other pole: the **39→65 funnel conversion** is the
@@ -31,13 +31,13 @@ legible: lead with the highest-severity, highest-blast-radius items first.
 
 ## Members (durable subagent defs in `.claude/agents/`)
 
-| Teammate                       | Subagent type                  | Model  | Lens (whole project)                                                                                          |
-| ------------------------------ | ------------------------------ | ------ | ------------------------------------------------------------------------------------------------------------ |
-| **Architect**                  | `review-principal-architect`   | opus   | Workspace boundaries, `schema.graphql`↔`packages/domain` source-of-truth integrity, GraphQL + codegen, App\* layering (spec 018), spec-gate governance soundness. |
-| **Staff FE**                   | `review-staff-frontend`        | sonnet | React 19 / Next 16 App Router: RSC↔client boundaries, hooks (useActionState/useOptimistic/useEffect), Suspense/streaming, hydration, bundle, App\* component design. |
-| **Designer**                   | `review-senior-designer`       | sonnet | Pixel-perfection vs the design handoff: tokens (spacing/type/radius/colour), wizard shell + 7 steps + delivery calendar, mobile-first responsive, hierarchy, brand. |
-| **Conversion analyst**         | `review-conversion-analyst`    | opus   | The PM/telemetry lens: typed-event coverage, prop completeness/no-dupes, A/B validity, abandonment recovery, `/insights` honesty, the 39→65 thesis.                 |
-| **QA engineer**                | `review-qa-engineer`           | sonnet | Test strategy + coverage across packages/{domain,shared,analytics}, services/api, apps/web; the deterministic-verification protocol; determinism/flake; the missing Cypress e2e (Tier-2 gap); do tests assert behaviour or just render. |
+| Teammate               | Subagent type                | Model  | Lens (whole project)                                                                                                                                                                                                                    |
+| ---------------------- | ---------------------------- | ------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Architect**          | `review-principal-architect` | opus   | Workspace boundaries, `schema.graphql`↔`packages/domain` source-of-truth integrity, GraphQL + codegen, App\* layering (spec 018), spec-gate governance soundness.                                                                       |
+| **Staff FE**           | `review-staff-frontend`      | sonnet | React 19 / Next 16 App Router: RSC↔client boundaries, hooks (useActionState/useOptimistic/useEffect), Suspense/streaming, hydration, bundle, App\* component design.                                                                    |
+| **Designer**           | `review-senior-designer`     | sonnet | Pixel-perfection vs the design handoff: tokens (spacing/type/radius/colour), wizard shell + 7 steps + delivery calendar, mobile-first responsive, hierarchy, brand.                                                                     |
+| **Conversion analyst** | `review-conversion-analyst`  | opus   | The PM/telemetry lens: typed-event coverage, prop completeness/no-dupes, A/B validity, abandonment recovery, `/insights` honesty, the 39→65 thesis.                                                                                     |
+| **QA engineer**        | `review-qa-engineer`         | sonnet | Test strategy + coverage across packages/{domain,shared,analytics}, services/api, apps/web; the deterministic-verification protocol; determinism/flake; the missing Cypress e2e (Tier-2 gap); do tests assert behaviour or just render. |
 
 All five are **read-only** (`tools: Read, Glob, Grep, Bash` — no Edit/Write, no mutating
 commands). They produce findings as `file:line — what — fix` with a P0/P1/P2 severity, and

@@ -27,10 +27,10 @@ All members are **read-only** (`Read, Glob, Grep, Bash`) — they audit and repo
 
 ## The teams
 
-| Team | Folder | Members | Purpose |
-|------|--------|---------|---------|
-| Principal review | [`principal-review/`](principal-review/) | architect · staff-frontend · senior-designer · **conversion-analyst** · _qa-engineer_ | Senior whole-project review — architecture, React/Next, pixel-perfection, conversion instrumentation, test strategy |
-| Delivery readiness | [`delivery-readiness/`](delivery-readiness/) | devops-release · security · dependency-auditor · **telemetry-conversion** · _qa-engineer_ | Pre-release gap hunt — DevOps, security, dependency versions, telemetry, release QA |
+| Team               | Folder                                       | Members                                                                                   | Purpose                                                                                                             |
+| ------------------ | -------------------------------------------- | ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| Principal review   | [`principal-review/`](principal-review/)     | architect · staff-frontend · senior-designer · **conversion-analyst** · _qa-engineer_     | Senior whole-project review — architecture, React/Next, pixel-perfection, conversion instrumentation, test strategy |
+| Delivery readiness | [`delivery-readiness/`](delivery-readiness/) | devops-release · security · dependency-auditor · **telemetry-conversion** · _qa-engineer_ | Pre-release gap hunt — DevOps, security, dependency versions, telemetry, release QA                                 |
 
 Each team is **5 members**: **bold** = the product/telemetry/conversion lens; _italic_ = the QA/test-engineering lens.
 

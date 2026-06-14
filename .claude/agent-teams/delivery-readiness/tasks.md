@@ -12,18 +12,18 @@ installs, no deploys. Investigators should go beyond these seeds wherever the tr
 - **R1. Fresh-clone reproducibility + demo-runs-first-try.** The demo must run flawlessly from a
   clean clone, so a fresh checkout must build and the funnel must run
   flawlessly on the first attempt. Walk `yarn install --frozen-lockfile → codegen:check →
-  type-check → lint → format:check → build` on a clean Node 24 checkout, then the start path a
+type-check → lint → format:check → build` on a clean Node 24 checkout, then the start path a
   fresh deploy would use (`yarn build && start`, or the Vercel deploy). Deliverable: any step that would
   fail on a fresh clone or make the first demo run stumble, with the assumption it depends on
   (e.g. system Node 18 where yarn refuses, a missing build-time `NEXT_PUBLIC_*`). Evidence:
   `package.json` scripts + `.nvmrc`.
-- **R2. CI gate completeness & ordering.** Confirm `ci.yml` runs `codegen:check` *before*
+- **R2. CI gate completeness & ordering.** Confirm `ci.yml` runs `codegen:check` _before_
   type-check and that `codegen:check` actually runs `graphql-codegen --check` (not just schema
   validity in `scripts/codegen-check.mjs`). Deliverable: any gap where a regression would slip
   through green. Evidence: `.github/workflows/ci.yml`, `scripts/codegen-check.mjs`, root `codegen:check`.
 - **R3. Env matrix — build-time vs runtime.** Classify every key the app reads into
   build-time-inlined (`NEXT_PUBLIC_*`) vs runtime server-only, and confirm the demo-critical ones
-  are present in Vercel **Production** at *build* time. Deliverable: per-key table + any key whose
+  are present in Vercel **Production** at _build_ time. Deliverable: per-key table + any key whose
   absence silently no-ops a feature. Evidence: grep `process.env.` under `apps/web`, `apps/web/.env`
   key names, `lib/site.ts`.
 - **R4. Vercel deploy config.** There's no `vercel.json` and no root build override — confirm the
@@ -47,7 +47,7 @@ installs, no deploys. Investigators should go beyond these seeds wherever the tr
   `"use client"` module. Deliverable: explicit all-clear or a blocker. Evidence: grep
   `PERSONAL_API_KEY` / `NEXT_PUBLIC_` across `apps/web`; trace read sites; `specs/023-*.md`.
 - **S2. Audit every `NEXT_PUBLIC_*`.** Confirm each inlined key is genuinely non-sensitive (PostHog
-  `phc_` ingestion key, Mixpanel token, site URL, Storyblok *public/preview* tokens) and that the
+  `phc_` ingestion key, Mixpanel token, site URL, Storyblok _public/preview_ tokens) and that the
   privileged `STORYBLOK_PERSONAL_ACCESS_TOKEN` / `*_WEBHOOK_SECRET` / `*_PREVIEW_SECRET` stay
   un-prefixed. Deliverable: any privileged key at risk of inlining. Evidence: `apps/web/.env`, grep.
 - **S3. Secrets-in-git.** Confirm `.env` is git-ignored and no real token value is committed.
@@ -110,9 +110,9 @@ installs, no deploys. Investigators should go beyond these seeds wherever the tr
   the credibility gap if presented as "live," and spec 023 as the closer (or, if shipped, confirm
   graceful fallback). Evidence: `insights/page.tsx`, `specs/023-*.md`.
 - **T4. A/B flag resolves in prod with `variant` attached.** Confirm the `profile-input` flag exists
-  + is rolled out (else `useVariant` silently uses the local 50/50 bucket), and that
-  `step_completed`/`funnel_step_viewed` carry `variant` so the split is analysable. Deliverable: the
-  unproven-link items + verify steps. Evidence: `useVariant.ts`, emit sites under `wizard/`.
+  - is rolled out (else `useVariant` silently uses the local 50/50 bucket), and that
+    `step_completed`/`funnel_step_viewed` carry `variant` so the split is analysable. Deliverable: the
+    unproven-link items + verify steps. Evidence: `useVariant.ts`, emit sites under `wizard/`.
 - **T5. Attribution & double-fire.** Confirm each step emits exactly one `funnel_step_viewed` (no
   React 19 / react-compiler effect double-fire), abandonment + exit-intent recovery are computable,
   and the live app's curve shape matches the seed's claimed curve. Deliverable: attribution gaps.
@@ -136,7 +136,7 @@ installs, no deploys. Investigators should go beyond these seeds wherever the tr
   the nine test files (`packages/domain/src/{pricing/plan,delivery/calendar}.test.ts`,
   `packages/shared/src/funnel.test.ts`, `packages/analytics/src/events.test.ts`,
   `services/api/src/resolvers.test.ts`, `apps/web/app/[locale]/wizard/{state,validation,
-  email-validation}.test.ts`, `apps/web/lib/dietary.test.ts`), `ci.yml`.
+email-validation}.test.ts`, `apps/web/lib/dietary.test.ts`), `ci.yml`.
 - **Q2. Meaningful, not theatre.** For each test file judge whether it asserts behaviour + edge
   cases or just smoke-checks a happy value. Confirm depth where it should exist
   (`calendar.test.ts` 192 ln — cutoffs/blackout/weekend/lead-time; `resolvers.test.ts` 180 ln —
@@ -180,6 +180,6 @@ installs, no deploys. Investigators should go beyond these seeds wherever the tr
   renders without a blank state; **Storyblok draft preview** (`apps/web/app/api/draft/route.ts`
   enters draft mode + the preview renders, `/api/storyblok/revalidate` round-trips — the Storyblok
   differentiator must work live); no console errors anywhere. Also confirm the **mobile Lighthouse
-  95+** evidence is *current*, not a stale screenshot (`lighthouserc.json`, `docs/lighthouse.md`)
+  95+** evidence is _current_, not a stale screenshot (`lighthouserc.json`, `docs/lighthouse.md`)
   and recommend re-running `yarn lighthouse` right before delivery so the number matches the UI on
   screen.
