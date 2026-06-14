@@ -172,6 +172,27 @@ yarn codegen:check     # fail the build if schema.graphql is invalid
 yarn format:check      # formatting
 ```
 
+### Dev-only test hooks
+
+Three `NODE_ENV !== "production"` gated hooks the Cypress suite uses to make the
+dev-mode app deterministic. All three are no-ops in production builds.
+
+- **`sorrel_e2e_today` cookie** (spec 034) — server-side override of the picker's SSR
+  `today`. Read in `apps/web/app/[locale]/wizard/[step]/page.tsx`. Cypress sets it
+  with `cy.setCookie("sorrel_e2e_today", "YYYY-MM-DD")` so the picker's earliest-
+  deliverable arithmetic is deterministic across runs.
+- **`window.__sorrelVariant`** (spec 032) — pins the PROFILE A/B bucket to `"A"` or
+  `"B"`. Read in `apps/web/app/[locale]/wizard/useVariant.ts`. Cypress sets it in
+  `cy.visit(..., { onBeforeLoad })` so the happy-path test pins the control branch.
+- **`window.__sorrelAnalyticsQueue`** (spec 032) — read-only window mirror of the
+  in-memory `memorySink`. Set in `apps/web/app/[locale]/wizard/analytics.ts`. Cypress
+  asserts the typed funnel events fired end-to-end against this queue.
+
+The picker also documents three intentional numbering gaps in the spec sequence
+— **021** is rejected-and-deleted (see `specs/022-profile-pills-and-assessment-offer.md`
+front-matter); **026** and **027** were burned during the calendar-batch reorganisation
+that shipped specs 024 / 025 / 028 / 029.
+
 ---
 
 ## Roadmap
@@ -185,8 +206,9 @@ Tiers ship in order; nothing ships below the Tier-1 line.
 - **Tier 2 — coverage:** CMS-driven landing/recipe content, i18n (en/de) with hreflang,
   CI (typecheck, lint, unit matrix, codegen + format gates, a spec-trailer gate, Lighthouse
   budget — all as PR gates), one Cypress happy path, JSON-LD, sitemap/robots.
-- **Tier 3 — closers:** funnel-insights page from seeded events, Storybook, axe checks in
-  CI, Stripe test mode.
+- **Tier 3 — closers:** funnel-insights page from seeded events (spec 023, shipped),
+  axe checks in CI (spec 035, shipped). **Unstarted, no spec yet:** Storybook, Stripe
+  test mode.
 
 **Landed:** the monorepo + AI-governance layer (`.claude/` + `specs/`), the delivery-date
 picker (`packages/ui`), the GraphQL contract + mock Apollo API (`schema.graphql`,
@@ -200,5 +222,7 @@ EMAIL server action — is wired, with pricing centralised in `packages/domain` 
 anti-drift guard (spec 013). **CI gates** (the full verify matrix, a spec-trailer gate, and
 the Lighthouse mobile budget) and **SEO** (sitemap, robots, Product + FAQ JSON-LD) are in
 place (spec 015). **Deployed on Vercel** ([sorrel.akinoztorun.dev](https://sorrel.akinoztorun.dev/)).
-**In active build:** the remaining CATS/RECIPES input polish, a Cypress happy path,
-Storybook, and Stripe test mode.
+**Landed since:** the funnel happy path + a calendar-dialog real-browser catalog under
+**Cypress** with `cypress-axe` rules on the dialog (specs 032 / 034 / 035), so the
+picker is provably real-browser-axe-clean rather than green-by-suppression. **Tracked,
+unstarted, no spec:** Storybook, Stripe test mode.
