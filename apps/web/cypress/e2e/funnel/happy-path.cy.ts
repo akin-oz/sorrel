@@ -1,10 +1,11 @@
 /**
- * Spec 032 — Funnel happy path.
+ * Spec 032 — Funnel happy path, extended through CHECKOUT per spec 039 §6.
  *
- * One deterministic CATS → SUMMARY walk under variant A. Asserts URL
- * transitions, no error states, the assembled SUMMARY copy, and that the
- * typed funnel events from `@sorrel/analytics` fired exactly once per step
- * (per spec 009 + spec 032's analytics section).
+ * One deterministic CATS → CHECKOUT walk under variant A. Asserts URL
+ * transitions, no error states, the assembled SUMMARY copy, the Stripe
+ * PaymentElement happy path with test card `4242 4242 4242 4242`, and that
+ * the typed funnel events from `@sorrel/analytics` fired exactly once per
+ * step (per spec 009 + spec 032's analytics section + spec 039 §5).
  *
  * Pre-conditions:
  *  - `cy.clearLocalStorage()` defeats the spec-010 resume banner.
@@ -12,10 +13,16 @@
  *    arithmetic is deterministic.
  *  - `window.__sorrelVariant = "A"` pins the PROFILE A/B variant — the dev
  *    override in `useVariant` honours it under NODE_ENV !== "production".
+ *  - `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` + `STRIPE_SECRET_KEY` are set in
+ *    the env the dev server reads. Local: `apps/web/.env`. CI:
+ *    `.github/workflows/cypress.yml` `env:` block (spec 039 §8). Without
+ *    them, `/api/checkout/intent` returns 503 and the test fails on
+ *    "Stripe test mode is not configured for this environment."
  */
 
 // Steps match the FunnelStep enum in @sorrel/shared (uppercase).
-const STEPS = ["CATS", "PROFILE", "RECIPES", "DELIVERY", "PLAN", "EMAIL", "SUMMARY"];
+// Decision A in spec 039 placed CHECKOUT after SUMMARY (review-then-pay).
+const STEPS = ["CATS", "PROFILE", "RECIPES", "DELIVERY", "PLAN", "EMAIL", "SUMMARY", "CHECKOUT"];
 
 interface QueuedEvent {
   name: string;
@@ -23,20 +30,27 @@ interface QueuedEvent {
   variant?: string;
   field?: string;
   error?: string;
+  intent_id?: string;
 }
 
 describe("Funnel happy path", () => {
   beforeEach(() => {
     cy.clearLocalStorage();
     cy.window().then((win) => win.sessionStorage.clear());
-    cy.clock(new Date("2026-06-12T09:00:00Z"));
+    // Stub ONLY Date (not setTimeout) so `useDraftAutosave`'s 600 ms
+    // debounce still fires — without this, the draft never persists, the
+    // FunnelProvider's draftId stays null, and the spec-039 CHECKOUT step
+    // sees `amountMinor === null` and never asks `/api/checkout/intent`
+    // for a clientSecret. The picker only needs Date to be pinned (for
+    // earliest-deliverable arithmetic); timers must stay real.
+    cy.clock(new Date("2026-06-12T09:00:00Z"), ["Date"]);
     // Spec 034: pin the SSR `today` (the server-computed value the picker
     // hydrates against). `cy.clock` only stubs the browser; the cookie is
     // how the dev-mode page reads a deterministic date for tests.
     cy.setCookie("sorrel_e2e_today", "2026-06-12");
   });
 
-  it("completes CATS → SUMMARY under variant A", () => {
+  it("completes CATS → CHECKOUT under variant A", () => {
     cy.visit("/en/wizard/cats", {
       onBeforeLoad(win) {
         // Force PROFILE variant A before any client React runs.
@@ -109,6 +123,76 @@ describe("Funnel happy path", () => {
     cy.contains(/Wednesday 17 June/).should("exist");
     cy.contains(/test@example\.com/i).should("exist");
 
+    // 8 — CHECKOUT (spec 039). SUMMARY is no longer the terminal step;
+    // Continue advances into the Stripe Payment Element. Intercept the
+    // intent fetch so we can wait deterministically AND assert the route
+    // returned 200 (the server-side recompute reaches Apollo and the draft
+    // has a non-null `plan` — the latter relies on the autosave debounce
+    // having actually fired, which is why beforeEach stubs Date alone).
+    cy.intercept("POST", "/api/checkout/intent").as("intent");
+    clickContinue();
+    cy.location("pathname").should("include", "/wizard/checkout");
+
+    // Bail loudly if the env is missing rather than silently looking for
+    // an iframe that will never mount — spec 039 §8 makes the three
+    // STRIPE_* secrets a CI requirement.
+    cy.contains(/Stripe test mode is not configured/i).should("not.exist");
+
+    cy.wait("@intent", { timeout: 20000 }).then((interception) => {
+      expect(interception.response?.statusCode, "intent route succeeded").to.equal(200);
+    });
+
+    // Stripe creates several iframes: a 0×0 `__privateStripeController`
+    // sibling, a metrics controller, and one visible PaymentElement frame
+    // whose `name` ALSO starts with `__privateStripeFrame`. Selecting the
+    // first match by name lands on the controller (no body forms) — we
+    // filter to `:visible` to land on the actual PaymentElement.
+    const stripeIframe = () =>
+      cy
+        .get('iframe[name^="__privateStripeFrame"]:visible', { timeout: 30000 })
+        .first()
+        .its("0.contentDocument.body")
+        .should("not.be.empty")
+        .then(cy.wrap);
+
+    // `type({ delay: 30 })` because Stripe validates char-by-char inside
+    // the iframe; the default Cypress typing speed is faster than the
+    // formatter and drops digits in expiry / cvc.
+    stripeIframe()
+      .find('input[name="number"]', { timeout: 15000 })
+      .should("be.visible")
+      .type("4242424242424242", { delay: 30 });
+    stripeIframe().find('input[name="expiry"]').type("1234", { delay: 30 });
+    stripeIframe().find('input[name="cvc"]').type("123", { delay: 30 });
+    // postalCode is conditional on the configured automatic_payment_methods —
+    // fill only if Stripe rendered it for this region.
+    stripeIframe().then((body) => {
+      const $body = body as JQuery<HTMLElement>;
+      const postal = $body.find('input[name="postalCode"]');
+      if (postal.length) cy.wrap(postal).type("12345", { delay: 30 });
+    });
+
+    // The chrome HIDES its CTA on CHECKOUT (WizardChrome.tsx:69) — the
+    // PaymentBody form owns the submit. Label comes from messages.Checkout.submit.
+    cy.contains("button", /^Pay now$/, { timeout: 10000 }).click();
+
+    // `redirect: "if_required"` (CheckoutForm.tsx) means the 4242 card —
+    // which never triggers 3DS — resolves in-place: no browser navigation,
+    // no `?redirect_status=succeeded` on the URL. (The spec body's
+    // redirect_status bullet describes Stripe's *redirect* convention; it
+    // applies to 3DS cards, which aren't on the happy path.) The success
+    // signal is the typed event firing + the pathname not having drifted.
+    cy.window({ timeout: 20000 }).should((win) => {
+      const queue =
+        (win as unknown as { __sorrelAnalyticsQueue?: QueuedEvent[] }).__sorrelAnalyticsQueue ?? [];
+      const succeeded = queue.filter(
+        (event) => event.name === "payment_succeeded" && event.step === "CHECKOUT",
+      );
+      expect(succeeded, "payment_succeeded fires once").to.have.length(1);
+      expect(succeeded[0]?.intent_id, "intent_id is non-empty").to.match(/^pi_/);
+    });
+    cy.location("pathname").should("include", "/wizard/checkout");
+
     // Typed funnel-event assertions — read the in-memory queue exposed by
     // `apps/web/app/[locale]/wizard/analytics.ts` (NODE_ENV !== "production").
     // Per `@sorrel/analytics`, each FunnelEvent has `step` as a top-level
@@ -121,15 +205,26 @@ describe("Funnel happy path", () => {
       const completed = queue.filter((e) => e.name === "step_completed").map((e) => e.step);
 
       expect(viewed, "funnel_step_viewed per step").to.deep.equal(STEPS);
-      // SUMMARY is the final step — the test stops at reading SUMMARY copy
-      // without clicking "Confirm plan", so step_completed fires for the
-      // first six only.
-      expect(completed, "step_completed for CATS…EMAIL").to.deep.equal(STEPS.slice(0, 6));
+      // CHECKOUT does not fire step_completed — the Stripe form's submit
+      // path goes through CheckoutForm.handleSubmit, not the chrome's
+      // handleNext (which is what fires step_completed for the others).
+      expect(completed, "step_completed for CATS…SUMMARY").to.deep.equal(STEPS.slice(0, 7));
 
       const profileCompleted = queue.find(
         (e) => e.name === "step_completed" && e.step === "PROFILE",
       );
       expect(profileCompleted?.variant, "PROFILE step carries variant: A").to.equal("A");
+
+      // Spec 039 §5 typed events: one payment_intent_created, one
+      // payment_succeeded, zero payment_failed.
+      expect(
+        queue.filter((e) => e.name === "payment_intent_created" && e.step === "CHECKOUT"),
+        "payment_intent_created fires once with step=CHECKOUT",
+      ).to.have.length(1);
+      expect(
+        queue.filter((e) => e.name === "payment_failed"),
+        "no payment_failed on the happy path",
+      ).to.have.length(0);
 
       expect(
         queue.filter((e) => e.name === "field_error"),

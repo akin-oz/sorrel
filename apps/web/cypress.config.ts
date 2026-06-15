@@ -28,5 +28,13 @@ export default defineConfig({
     // C-24 in correctness.cy.ts no longer reads it; the TZ matrix is driven
     // by the host shell's `TZ=…` invocation as documented above.
     allowCypressEnv: false,
+    // Spec 039 §6: the Stripe PaymentElement renders inside a
+    // js.stripe.com iframe. Cypress's default same-origin policy blocks
+    // `contentDocument.body` access on cross-origin iframes, which is
+    // how we drive `4242 4242 4242 4242` into the form. Disabling this
+    // unblocks the iframe traversal. (Stripe's iframes are sandboxed +
+    // signed; the lifted check only affects the test runner's view of
+    // the page, not what the bundle ships in prod.)
+    chromeWebSecurity: false,
   },
 });

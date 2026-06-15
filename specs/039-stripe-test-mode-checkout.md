@@ -243,9 +243,14 @@ Extend `apps/web/cypress/e2e/funnel/happy-path.cy.ts`:
   length 0 on the happy path.
 - The trailing SUMMARY assertion (lines 107–110) moves or stays per
   Decision A.
-- The post-success URL assertion uses Stripe's `return_url`
-  convention (`?payment_intent=…&payment_intent_client_secret=…&redirect_status=succeeded`)
-  and asserts `redirect_status=succeeded`.
+- The post-success URL assertion is **not** the `redirect_status=succeeded`
+  Stripe convention because `CheckoutForm` uses `redirect: "if_required"`
+  and the test card `4242 4242 4242 4242` never triggers 3DS — so Stripe
+  resolves in-place with no browser navigation. The success signal is the
+  typed `payment_succeeded` event firing on the queue (asserted in §5's
+  block) plus the pathname not having drifted off `/wizard/checkout`. A
+  3DS card on a separate path would exercise the `redirect_status`
+  convention.
 
 The Cypress count moves from `22 + 1 happy-path` to `22 + 1 extended
 happy-path` — same file, same single test, more assertions.

@@ -42,6 +42,20 @@ jobs:
 
       - name: Build
         run: yarn workspace @sorrel/frontend build
+        env:
+          # Stripe publishable key is read at build time so the bundle ships
+          # with it baked in (CheckoutForm.tsx calls loadStripe at module
+          # scope). Without it, the PaymentElement never mounts and the
+          # spec-039 happy-path leg fails on "Stripe test mode is not
+          # configured". Per spec 039 §8.
+          NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY }}
 
       - name: Run Cypress
         run: yarn workspace @sorrel/frontend e2e
+        env:
+          # `next dev` reads these at request time for /api/checkout/intent
+          # and /api/checkout/webhook. Test-mode keys only — see spec 039 §7
+          # and the README's "Stripe test mode" subsection.
+          STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+          STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
+          NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY }}
