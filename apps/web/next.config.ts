@@ -12,7 +12,7 @@ const monorepoRoot = join(import.meta.dirname, "..", "..");
 // walk confirms no console violations.
 const CSP_DIRECTIVES = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-inline' https://js.stripe.com",
+  "script-src 'self' 'unsafe-inline' https://js.stripe.com https://*.i.posthog.com",
   "style-src 'self' 'unsafe-inline'",
   "connect-src 'self' https://*.i.posthog.com https://api-eu.mixpanel.com https://js.stripe.com https://api.stripe.com https://app.storyblok.com https://a.storyblok.com https://api.storyblok.com",
   "img-src 'self' data: https: blob:",
