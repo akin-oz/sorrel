@@ -43,6 +43,15 @@ jobs:
       - name: Build
         run: yarn workspace @sorrel/frontend build
         env:
+          # Spec 034: `next build` hardcodes NODE_ENV=production, which would
+          # strip the dev-only e2e hooks the specs depend on — the
+          # `sorrel_e2e_today` SSR cookie read (deterministic picker dates),
+          # the `__sorrelVariant` override, and the `__sorrelAnalyticsQueue`
+          # mirror. NEXT_PUBLIC_E2E is inlined at build time into BOTH the
+          # server and client bundles, re-enabling those hooks for this job
+          # only. The Vercel production build never sets it, so the hooks stay
+          # stripped there.
+          NEXT_PUBLIC_E2E: "1"
           # Stripe publishable key is read at build time so the bundle ships
           # with it baked in (CheckoutForm.tsx calls loadStripe at module
           # scope). Without it, the PaymentElement never mounts and the
