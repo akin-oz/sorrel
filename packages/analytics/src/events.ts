@@ -38,6 +38,8 @@ export interface FunnelAbandoned {
   name: "funnel_abandoned";
   /** Furthest step reached before leaving. */
   step: FunnelStep;
+  /** A/B bucket, carried so abandonment is attributable per variant. */
+  variant?: string;
 }
 
 /** The exit-intent recovery modal was shown. */
@@ -45,12 +47,16 @@ export interface ExitIntentShown {
   name: "exit_intent_shown";
   /** Step the recovery modal was shown on. */
   step: FunnelStep;
+  /** A/B bucket, carried so the recovery ratio is attributable per variant. */
+  variant?: string;
 }
 
 /** The user chose "keep going" instead of leaving — the recovery win. */
 export interface ExitIntentRecovered {
   name: "exit_intent_recovered";
   step: FunnelStep;
+  /** A/B bucket, carried so the recovery ratio is attributable per variant. */
+  variant?: string;
 }
 
 /** Spec 039: the server returned a Stripe PaymentIntent `client_secret`. */

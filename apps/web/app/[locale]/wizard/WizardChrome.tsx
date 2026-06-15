@@ -236,14 +236,14 @@ export function WizardChrome({ children }: { children: ReactNode }) {
 
 /** Arms the desktop exit-intent trigger and shows the recovery dialog once per session. */
 function ExitIntentController() {
-  const { currentStep, track, state } = useFunnel();
+  const { currentStep, track, state, variant } = useFunnel();
   const [open, setOpen] = useState(false);
 
   const handleTrigger = useCallback(() => {
     if (!currentStep) return;
     setOpen(true);
-    track({ name: "exit_intent_shown", step: currentStep });
-  }, [currentStep, track]);
+    track({ name: "exit_intent_shown", step: currentStep, variant: variant ?? undefined });
+  }, [currentStep, track, variant]);
 
   useExitIntent({
     armed: currentStep !== null && currentStep !== "SUMMARY",
@@ -251,9 +251,10 @@ function ExitIntentController() {
   });
 
   const handleRecover = useCallback(() => {
-    if (currentStep) track({ name: "exit_intent_recovered", step: currentStep });
+    if (currentStep)
+      track({ name: "exit_intent_recovered", step: currentStep, variant: variant ?? undefined });
     setOpen(false);
-  }, [currentStep, track]);
+  }, [currentStep, track, variant]);
 
   return (
     <ExitIntentModal

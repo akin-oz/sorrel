@@ -157,7 +157,11 @@ export function FunnelProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     function onPageHide() {
       if (currentStep && currentStep !== "SUMMARY") {
-        track({ name: "funnel_abandoned", step: currentStep });
+        track({
+          name: "funnel_abandoned",
+          step: currentStep,
+          variant: variantRef.current ?? undefined,
+        });
       }
     }
     window.addEventListener("pagehide", onPageHide);
