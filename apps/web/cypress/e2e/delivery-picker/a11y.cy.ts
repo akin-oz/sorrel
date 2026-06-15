@@ -85,6 +85,15 @@ describe("DeliveryDatePicker — a11y in a real browser", () => {
     it("A-01 — closed-card axe pass", () => {
       cy.visit("/en/wizard/delivery");
       cy.contains("button", /change/i).should("be.visible");
+      // Spec 020 pre-commits the earliest deliverable in a mount effect, so the
+      // chrome's Continue CTA flips disabled→enabled on the first client tick.
+      // MUI animates `background-color` across that flip (~250ms); against the
+      // fast production build axe would otherwise sample mid-transition and read
+      // the translucent blend over <main> (1.58:1) instead of the settled
+      // opaque accent. Wait for both the enabled state and the settled fill
+      // before injecting axe — the same settle-before-axe guard A-02/A-03 use.
+      cy.contains("button", /^Continue$/).should("not.be.disabled");
+      cy.get(".MuiButton-contained").should("have.css", "background-color", "rgb(161, 77, 39)");
       cy.injectAxe();
       cy.checkA11y(undefined, axeConfig);
     });
