@@ -49,10 +49,12 @@ variant: "A" | "B" }` (spec 043 added the `variant` field).
 
 ## Calendar — extended
 
-10. **Calendar month navigation.** Open the picker. Click "next month" — the
-    calendar advances; header updates. Days before the earliest deliverable
-    in the new month remain blocked. Click "previous month" — returns to the
-    current month.
+10. **Calendar — single-month view.** Open the picker modal. Confirm all cells
+    in the current month render. Blocked weekdays (Tue/Fri/Sat) are dimmed with
+    `aria-disabled="true"` and non-interactive. Valid weekdays are selectable.
+    Keyboard: arrow keys move focus within the month grid, clamping at the month
+    boundary. No prev/next month navigation exists — this is by design (spec
+    001).
 
 ## Locale switch
 
