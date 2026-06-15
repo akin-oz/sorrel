@@ -96,11 +96,16 @@ function emitSession(variant: Variant, furthest: number, index: number) {
   const last = FUNNEL_STEPS.length - 1;
   if (furthest < last) {
     if (index % 3 === 0) {
-      send({ name: "exit_intent_shown", step: FUNNEL_STEPS[furthest] }, distinctId, at(), id());
+      send(
+        { name: "exit_intent_shown", step: FUNNEL_STEPS[furthest], variant },
+        distinctId,
+        at(),
+        id(),
+      );
       seq += 1;
       if (index % 6 === 0) {
         send(
-          { name: "exit_intent_recovered", step: FUNNEL_STEPS[furthest] },
+          { name: "exit_intent_recovered", step: FUNNEL_STEPS[furthest], variant },
           distinctId,
           at(),
           id(),
@@ -108,7 +113,12 @@ function emitSession(variant: Variant, furthest: number, index: number) {
         seq += 1;
       }
     }
-    send({ name: "funnel_abandoned", step: FUNNEL_STEPS[furthest] }, distinctId, at(), id());
+    send(
+      { name: "funnel_abandoned", step: FUNNEL_STEPS[furthest], variant },
+      distinctId,
+      at(),
+      id(),
+    );
   } else {
     send({ name: "step_completed", step: FUNNEL_STEPS[last], variant }, distinctId, at(), id());
   }
