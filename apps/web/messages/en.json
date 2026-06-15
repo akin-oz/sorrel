@@ -165,6 +165,7 @@
     "submit": "Pay now",
     "submitting": "Processing…",
     "preparing": "Preparing checkout…",
+    "success": "Payment received — finishing your subscription…",
     "error": {
       "notConfigured": "Stripe test mode is not configured for this environment.",
       "boot": "Couldn't prepare checkout. Please try again.",

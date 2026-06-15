@@ -177,11 +177,12 @@ describe("Funnel happy path", () => {
     cy.contains("button", /^Pay now$/, { timeout: 10000 }).click();
 
     // `redirect: "if_required"` (CheckoutForm.tsx) means the 4242 card —
-    // which never triggers 3DS — resolves in-place: no browser navigation,
-    // no `?redirect_status=succeeded` on the URL. (The spec body's
-    // redirect_status bullet describes Stripe's *redirect* convention; it
-    // applies to 3DS cards, which aren't on the happy path.) The success
-    // signal is the typed event firing + the pathname not having drifted.
+    // which never triggers 3DS — resolves in-place. Spec 045 then navigates
+    // explicitly via the locale-aware router to /wizard/summary?paid=1, the
+    // same URL the 3DS return_url targets, so the SUMMARY success card
+    // renders. The success signal is now (a) the typed event firing,
+    // (b) the URL landing on /wizard/summary, and (c) the success copy
+    // being on screen.
     cy.window({ timeout: 20000 }).should((win) => {
       const queue =
         (win as unknown as { __sorrelAnalyticsQueue?: QueuedEvent[] }).__sorrelAnalyticsQueue ?? [];
@@ -191,7 +192,11 @@ describe("Funnel happy path", () => {
       expect(succeeded, "payment_succeeded fires once").to.have.length(1);
       expect(succeeded[0]?.intent_id, "intent_id is non-empty").to.match(/^pi_/);
     });
-    cy.location("pathname").should("include", "/wizard/checkout");
+    // Spec 045 §1: non-3DS success navigates to SUMMARY where the success
+    // card renders. The pathname must drift off CHECKOUT.
+    cy.location("pathname", { timeout: 10000 }).should("include", "/wizard/summary");
+    cy.location("search").should("include", "paid=1");
+    cy.contains(/you're all set/i, { timeout: 10000 }).should("be.visible");
 
     // Typed funnel-event assertions — read the in-memory queue exposed by
     // `apps/web/app/[locale]/wizard/analytics.ts` (NODE_ENV !== "production").

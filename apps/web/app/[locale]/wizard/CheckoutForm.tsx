@@ -7,8 +7,17 @@ import { Elements, PaymentElement, useElements, useStripe } from "@stripe/react-
 import { type Stripe, type StripeElementsOptions, loadStripe } from "@stripe/stripe-js";
 import { useLocale, useTranslations } from "next-intl";
 
-import { AppAlert, AppButton, AppCard, AppSkeleton, AppStack, AppText } from "@sorrel/ui";
+import {
+  AppAlert,
+  AppButton,
+  AppCard,
+  AppHeading,
+  AppSkeleton,
+  AppStack,
+  AppText,
+} from "@sorrel/ui";
 
+import { useRouter } from "../../../i18n/navigation";
 import { FunnelDraftByIdDocument } from "../../../lib/graphql/funnel";
 import { useFunnel } from "./FunnelProvider";
 
@@ -30,19 +39,26 @@ function getStripe(): Promise<Stripe | null> {
   return stripePromise;
 }
 
+type CheckoutPhase = "idle" | "pending" | "succeeded";
+
 function PaymentBody() {
   const t = useTranslations("Checkout");
   const locale = useLocale();
   const stripe = useStripe();
   const elements = useElements();
+  const router = useRouter();
   const { track, confirm, variant } = useFunnel();
-  const [pending, setPending] = useState(false);
+  // Spec 045: a three-phase machine instead of a `pending` boolean. Adds a
+  // `succeeded` state that holds the in-card receipt feedback between Stripe's
+  // resolve and the SUMMARY navigation, so the user never sees the
+  // "post-success, pre-redirect" zero-feedback flash.
+  const [phase, setPhase] = useState<CheckoutPhase>("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!stripe || !elements) return;
-    setPending(true);
+    setPhase("pending");
     setErrorMessage(null);
     // Stripe appends `payment_intent` + `payment_intent_client_secret` query
     // params to `return_url` verbatim — locale stays in the app's control,
@@ -54,8 +70,8 @@ function PaymentBody() {
       },
       redirect: "if_required",
     });
-    setPending(false);
     if (result.error) {
+      setPhase("idle");
       track({
         name: "payment_failed",
         step: "CHECKOUT",
@@ -67,6 +83,7 @@ function PaymentBody() {
       return;
     }
     if (result.paymentIntent && result.paymentIntent.status === "succeeded") {
+      setPhase("succeeded");
       track({
         name: "payment_succeeded",
         step: "CHECKOUT",
@@ -74,9 +91,37 @@ function PaymentBody() {
         variant: variant ?? undefined,
       });
       confirm();
+      // Non-3DS happy path: Stripe doesn't redirect, so we navigate explicitly
+      // to the same URL the 3DS return_url targets. The locale-aware router
+      // prepends `/${locale}`. SUMMARY's existing `confirmed` branch renders
+      // the success card.
+      router.push("/wizard/summary?paid=1");
     }
   }
 
+  if (phase === "succeeded") {
+    return (
+      <AppStack
+        role="status"
+        aria-live="polite"
+        alignItems="center"
+        textAlign="center"
+        gap={1.5}
+        py={4}
+      >
+        <AppText component="span" color="primary.main">
+          <svg width="56" height="56" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+          </svg>
+        </AppText>
+        <AppHeading level={3} fontSize="1.25rem">
+          {t("success")}
+        </AppHeading>
+      </AppStack>
+    );
+  }
+
+  const pending = phase === "pending";
   return (
     <form onSubmit={handleSubmit}>
       <AppStack gap={2}>

@@ -165,6 +165,7 @@
     "submit": "Jetzt bezahlen",
     "submitting": "Verarbeitung…",
     "preparing": "Checkout wird vorbereitet…",
+    "success": "Zahlung erhalten — wir richten dein Abo ein…",
     "error": {
       "notConfigured": "Stripe-Testmodus ist in dieser Umgebung nicht konfiguriert.",
       "boot": "Checkout konnte nicht vorbereitet werden. Bitte versuche es erneut.",
