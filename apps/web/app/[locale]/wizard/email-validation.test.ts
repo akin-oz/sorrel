@@ -20,4 +20,11 @@ describe("validateEmail", () => {
     });
     expect(validateEmail("a.b+tag@sub.example.co.uk").error).toBeNull();
   });
+
+  it("rejects an address longer than RFC 5321's 254 chars (spec 041 §7)", () => {
+    // 255-char address: "x".repeat(243) + "@example.com" (243 + 12 = 255)
+    const tooLong = `${"x".repeat(243)}@example.com`;
+    expect(tooLong.length).toBe(255);
+    expect(validateEmail(tooLong)).toEqual({ email: "", error: "invalid" });
+  });
 });

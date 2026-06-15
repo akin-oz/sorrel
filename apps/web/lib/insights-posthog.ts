@@ -38,9 +38,11 @@ function funnelQuery(organicOnly: boolean) {
     dateRange: { date_from: "-90d" },
     funnelsFilter: { funnelOrderType: "ordered" },
   };
-  // Optional: organic-only (exclude seeded synthetic sessions).
+  // Optional: organic-only (exclude seeded synthetic sessions). The seed scripts
+  // stamp `seed: true` as a boolean (spec 023), so the filter compares against
+  // the boolean literal, not the string "true" (spec 041 §6 — was fail-open).
   if (organicOnly) {
-    query.properties = [{ key: "seed", type: "event", value: ["true"], operator: "is_not" }];
+    query.properties = [{ key: "seed", type: "event", value: [true], operator: "is_not" }];
   }
   return query;
 }

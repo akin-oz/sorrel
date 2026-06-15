@@ -1,4 +1,4 @@
-import { GraphQLScalarType, Kind } from "graphql";
+import { GraphQLError, GraphQLScalarType, Kind } from "graphql";
 
 import {
   BLOCKED_WEEKDAY_INDEXES,
@@ -194,13 +194,45 @@ export function filterRecipes(filter?: RecipeFilter | null) {
 
 // ─── Draft store ──────────────────────────────────────────────────────────────
 
+// Mock draft store: process-local Map keyed by server-minted UUID. No owner
+// check; relies on UUID unguessability. Not productionizable as-is — a real
+// backend needs auth, ownership, persistence, and PII-retention bounds.
 const drafts = new Map<string, FunnelDraft>();
+
+// Spec 041 §2: input length caps. Bounded only by Next.js body-size upstream
+// without these; reject explicit known-bad shapes at the resolver edge.
+const MAX_EMAIL = 254; // RFC 5321
+const MAX_NAME = 80;
+const MAX_CATS = 20;
+const MAX_RECIPE_SLUGS = 20;
+
+function badInput(message: string): never {
+  throw new GraphQLError(message, { extensions: { code: "BAD_USER_INPUT" } });
+}
+
+function validateDraftInput(input: {
+  email?: string | null;
+  cats?: ReadonlyArray<{ name: string }> | null;
+  recipeSlugs?: ReadonlyArray<string> | null;
+}): void {
+  if (input.email != null && input.email.length > MAX_EMAIL) badInput("email too long");
+  if (input.cats) {
+    if (input.cats.length > MAX_CATS) badInput("too many cats");
+    for (const cat of input.cats) {
+      if (cat.name.length > MAX_NAME) badInput("cat name too long");
+    }
+  }
+  if (input.recipeSlugs && input.recipeSlugs.length > MAX_RECIPE_SLUGS) {
+    badInput("too many recipe slugs");
+  }
+}
 
 export function getDraft(id: string): FunnelDraft | null {
   return drafts.get(id) ?? null;
 }
 
 export function saveDraft(input: SaveFunnelDraftInput): FunnelDraft {
+  validateDraftInput(input);
   const id = input.id ?? crypto.randomUUID();
   const existing = input.id ? drafts.get(input.id) : undefined;
 
@@ -240,6 +272,7 @@ export function saveDraft(input: SaveFunnelDraftInput): FunnelDraft {
 }
 
 export function updateDraft(draftId: string, input: PlanInput): FunnelDraft {
+  validateDraftInput({ recipeSlugs: input.recipeSlugs });
   const existing = drafts.get(draftId);
   if (!existing) throw new Error(`Draft ${draftId} not found`);
   const updated: FunnelDraft = {

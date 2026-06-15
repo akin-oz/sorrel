@@ -20,7 +20,12 @@ coverage/
 # Env / secrets
 .env
 .env.*
+!.env.example
 *.local
+
+# TLS certs — never commit. mkcert locally instead.
+*.pem
+*-key.pem
 
 # Editor / OS
 .DS_Store

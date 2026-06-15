@@ -19,11 +19,14 @@ export const initialEmailState: EmailFormState = { status: "idle", email: "" };
 
 // Pragmatic single-line check — one @, a dot in the domain, no whitespace.
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+// Spec 041 §7 + RFC 5321: the local + domain together cannot exceed 254 chars.
+const MAX_EMAIL_LENGTH = 254;
 
 /** Trim and validate; returns the cleaned email and an error code (or null if valid). */
 export function validateEmail(raw: string): { email: string; error: EmailError | null } {
   const email = raw.trim();
   if (!email) return { email, error: "required" };
+  if (email.length > MAX_EMAIL_LENGTH) return { email: "", error: "invalid" };
   if (!EMAIL_PATTERN.test(email)) return { email, error: "invalid" };
   return { email, error: null };
 }

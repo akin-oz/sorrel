@@ -158,6 +158,46 @@ describe("draftPlan (FunnelDraft.plan recompute)", () => {
   });
 });
 
+describe("input length caps (spec 041 §2)", () => {
+  const baseCat = {
+    name: "Mochi",
+    ageMonths: 24,
+    neutered: true,
+    weightKg: 4,
+    fussiness: Fussiness.Selective,
+    allergies: [],
+    vetConfirmationAcknowledged: false,
+  };
+
+  it("rejects email longer than 254 chars", () => {
+    expect(() =>
+      saveDraft({
+        step: FunnelStep.Email,
+        email: `${"x".repeat(243)}@example.com`, // length 255
+      }),
+    ).toThrow();
+  });
+
+  it("rejects a cat name longer than 80 chars", () => {
+    expect(() =>
+      saveDraft({
+        step: FunnelStep.Cats,
+        cats: [{ ...baseCat, name: "x".repeat(81) }],
+      }),
+    ).toThrow();
+  });
+
+  it("rejects more than 20 cats", () => {
+    const cats = Array.from({ length: 21 }, (_, i) => ({ ...baseCat, name: `cat-${i}` }));
+    expect(() => saveDraft({ step: FunnelStep.Cats, cats })).toThrow();
+  });
+
+  it("rejects more than 20 recipe slugs", () => {
+    const recipeSlugs = Array.from({ length: 21 }, (_, i) => `slug-${i}`);
+    expect(() => saveDraft({ step: FunnelStep.Recipes, recipeSlugs })).toThrow();
+  });
+});
+
 describe("DIETARY_PROGRAMS", () => {
   it("returns all three programs", () => {
     expect(DIETARY_PROGRAMS).toHaveLength(3);
