@@ -162,15 +162,42 @@ The git log is the demo: spec → approval → implementation → green checks �
 ## Run it locally
 
 ```bash
+nvm use                # Node 24 — see .nvmrc; yarn refuses on Node 18
 yarn install
+cp .env.example .env   # then fill the values — see the env table below
 yarn workspace @sorrel/frontend dev   # the funnel at http://localhost:3000/wizard/cats
 yarn workspace @sorrel/api dev        # GraphQL mock at http://localhost:4000
 
 yarn type-check        # strict TS across the workspaces (0 errors required)
-yarn workspace @sorrel/domain test    # (and @sorrel/api / shared / analytics / frontend)
+yarn test              # the full unit matrix (alias for yarn workspaces run test)
 yarn codegen:check     # fail the build if schema.graphql is invalid
 yarn format:check      # formatting
 ```
+
+### Environment variables (spec 040)
+
+`.env.example` is the canonical template; copy it to `.env` and fill the
+values. The build-time keys must also be set in the **Vercel Production +
+Preview** environment because Next.js inlines `NEXT_PUBLIC_*` at the moment
+`yarn build` runs. Runtime keys only need to live in the Vercel dashboard.
+
+| Class       | Key                                                        | Used by                                                           |
+| ----------- | ---------------------------------------------------------- | ----------------------------------------------------------------- |
+| Build-time  | `NEXT_PUBLIC_POSTHOG_KEY` / `NEXT_PUBLIC_POSTHOG_HOST`     | Client PostHog SDK (ingestion).                                   |
+| Build-time  | `NEXT_PUBLIC_MIXPANEL_TOKEN` / `NEXT_PUBLIC_MIXPANEL_HOST` | Optional second sink.                                             |
+| Build-time  | `NEXT_PUBLIC_SITE_URL`                                     | RSC absolute URL fallback. **Production scope only** — see below. |
+| Build-time  | `NEXT_PUBLIC_STORYBLOK_PUBLIC_TOKEN`                       | Storyblok Visual Editor bridge.                                   |
+| Build-time  | `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`                       | The only client-side Stripe surface.                              |
+| Server-only | `POSTHOG_PERSONAL_API_KEY` / `POSTHOG_PROJECT_ID`          | `/insights` live funnel read (spec 023).                          |
+| Server-only | `POSTHOG_HOST`                                             | Server-side Query API host (spec 040 §4).                         |
+| Server-only | `STRIPE_SECRET_KEY` / `STRIPE_WEBHOOK_SECRET`              | `/api/checkout/{intent,webhook}` (spec 039).                      |
+| Server-only | `STORYBLOK_*` (preview / webhook / PAT / region)           | CMS draft + revalidate paths.                                     |
+
+**Vercel `NEXT_PUBLIC_SITE_URL` scoping.** Set it in the **Production**
+environment only; leave it blank on Preview deploys. The Apollo RSC client
+falls through to `VERCEL_URL` when `NEXT_PUBLIC_SITE_URL` is absent, so
+preview RSC calls hit the preview deploy's own `/api/graphql` rather than
+production's.
 
 ### Dev-only test hooks
 

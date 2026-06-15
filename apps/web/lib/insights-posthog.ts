@@ -18,10 +18,10 @@ export interface InsightsData {
   variants: { A: InsightsVariant; B: InsightsVariant };
 }
 
-const HOST = (process.env.NEXT_PUBLIC_POSTHOG_HOST || "https://eu.i.posthog.com").replace(
-  /\/$/,
-  "",
-);
+// Spec 040 §4: server-only module reads a server-only env var. The client-side
+// ingestion path (`apps/web/.../wizard/posthog.ts`) keeps reading the public
+// `NEXT_PUBLIC_POSTHOG_HOST` — that one legitimately ships to the bundle.
+const HOST = (process.env.POSTHOG_HOST || "https://eu.i.posthog.com").replace(/\/$/, "");
 const REVALIDATE_SECONDS = 3600;
 
 /** One funnel step = a `funnel_step_viewed` filtered to that step value. */

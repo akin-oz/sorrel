@@ -46,6 +46,9 @@ jobs:
       - name: Unit tests — domain (pricing, portion, calendar)
         run: yarn workspace @sorrel/domain test
 
+      - name: Unit tests — ui (DeliveryDatePicker)
+        run: yarn workspace @sorrel/ui test
+
       - name: Unit tests — shared (funnel-step schema sync)
         run: yarn workspace @sorrel/shared test
 
@@ -59,4 +62,6 @@ jobs:
         run: yarn workspace @sorrel/frontend test
 
       - name: Production build
+        env:
+          NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY }}
         run: yarn workspace @sorrel/frontend build

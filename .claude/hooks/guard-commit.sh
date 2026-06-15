@@ -11,9 +11,15 @@ CMD=$(printf '%s' "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null ||
 
 deny() { printf '%s\n' "$1" >&2; exit 2; }
 
-# 3. Secrets — never stage/commit env files
-if printf '%s' "$CMD" | grep -qE 'git[[:space:]]+(add|commit)([[:space:]].*)?\.env'; then
-  deny "BLOCKED: refusing to stage/commit .env* files. Use environment variables or a secrets manager."
+# 3. Secrets — never stage/commit env files. Template names (.env.example /
+# .env.sample / .env.template) are exempt — they never carry real values and
+# spec 040 §3 requires .env.example as the onboarding template. Anything else
+# matching .env* is blocked.
+if printf '%s' "$CMD" | grep -qE '(^|[^[:alnum:]_])git[[:space:]]+(add|commit)'; then
+  if printf '%s' "$CMD" | grep -oE '\.env[A-Za-z0-9_.-]*' \
+    | grep -vE '^\.env\.(example|sample|template)$' | grep -q .; then
+    deny "BLOCKED: refusing to stage/commit .env* files. Use environment variables or a secrets manager."
+  fi
 fi
 
 # Only inspect real commits
