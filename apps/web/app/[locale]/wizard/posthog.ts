@@ -1,5 +1,11 @@
 import type { PostHog } from "posthog-js";
 
+declare global {
+  interface Window {
+    posthog?: import("posthog-js").PostHog;
+  }
+}
+
 /**
  * The single PostHog client (specs 010 + 014) — the one place `posthog-js` loads,
  * shared by the analytics sink AND the A/B feature-flag read. Lazy + cached, so it
@@ -24,6 +30,9 @@ export function getPostHog(): Promise<PostHog | null> {
       capture_pageview: false,
       autocapture: false,
     });
+    if (typeof window !== "undefined") {
+      window.posthog = posthog;
+    }
     return posthog;
   });
   return clientPromise;
