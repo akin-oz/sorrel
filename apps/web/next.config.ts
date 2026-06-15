@@ -14,7 +14,7 @@ const CSP_DIRECTIVES = [
   "default-src 'self'",
   "script-src 'self' 'unsafe-inline' https://js.stripe.com https://*.i.posthog.com",
   "style-src 'self' 'unsafe-inline'",
-  "connect-src 'self' https://*.i.posthog.com https://api-eu.mixpanel.com https://js.stripe.com https://api.stripe.com https://app.storyblok.com https://a.storyblok.com https://api.storyblok.com",
+  "connect-src 'self' https://*.i.posthog.com https://api-eu.mixpanel.com https://api-js.mixpanel.com https://js.stripe.com https://api.stripe.com https://app.storyblok.com https://a.storyblok.com https://api.storyblok.com",
   "img-src 'self' data: https: blob:",
   "frame-src https://js.stripe.com https://hooks.stripe.com",
   "frame-ancestors 'self' https://app.storyblok.com",
