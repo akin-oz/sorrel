@@ -63,11 +63,12 @@ export function WizardChrome({ children }: { children: ReactNode }) {
   }, [currentStep, router]);
 
   // Spec 039: CHECKOUT drives its own submit through the Stripe PaymentElement,
-  // so the chrome's Continue is hidden there. On any other last step, the
-  // confirm button gives way to the success state once pressed.
-  const showCta = currentStep
-    ? currentStep !== "CHECKOUT" && !(isLastStep(currentStep) && confirmed)
-    : false;
+  // so the chrome's Continue is hidden there. Spec 046: once the funnel is
+  // confirmed, the SUMMARY success card is terminal — no chrome CTA is
+  // sensible regardless of which step happens to be mounted (spec 045 pushes
+  // a confirmed user back to SUMMARY, where the old `isLastStep && confirmed`
+  // guard never matched).
+  const showCta = currentStep ? currentStep !== "CHECKOUT" && !confirmed : false;
   const showBack = currentStep ? !isFirstStep(currentStep) : false;
   const progressLabel = t("stepProgress", { current: stepNumber, total });
 

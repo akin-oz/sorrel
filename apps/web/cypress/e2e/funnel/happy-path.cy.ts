@@ -200,6 +200,10 @@ describe("Funnel happy path", () => {
     cy.location("pathname", { timeout: 10000 }).should("include", "/wizard/summary");
     cy.location("search").should("include", "paid=1");
     cy.contains(/you're all set/i, { timeout: 10000 }).should("be.visible");
+    // Spec 046: the funnel is terminal once `confirmed` flips. The chrome
+    // CTA must not render — clicking it would route the just-paid user
+    // back to /wizard/checkout on top of a fresh PaymentElement.
+    cy.contains("button", /^Continue$/).should("not.exist");
 
     // Typed funnel-event assertions — read the in-memory queue exposed by
     // `apps/web/app/[locale]/wizard/analytics.ts` (NODE_ENV !== "production").
