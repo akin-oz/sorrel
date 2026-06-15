@@ -99,15 +99,55 @@ export function FunnelProvider({ children }: { children: ReactNode }) {
   }, [state]);
 
   // Record progress and fire the view event when the step changes.
+  //
+  // Spec 043 §3: PostHog's onFeatureFlags resolves async, so on the very first
+  // step (CATS) variantRef.current is often null at emit time, which would land
+  // an un-attributed third cohort in PostHog's variant-broken-down funnel. Hold
+  // the first emit up to 750ms for variant to resolve; emit immediately if
+  // already resolved; on timeout, fail-open with `variant: undefined` so a
+  // PostHog-down browser still produces the event.
+  const emittedForStepRef = useRef<FunnelStep | null>(null);
   useEffect(() => {
     if (!currentStep) return;
     dispatch({ type: "ADVANCE", step: currentStep });
+    if (emittedForStepRef.current === currentStep) return;
+
+    if (variantRef.current) {
+      emittedForStepRef.current = currentStep;
+      track({
+        name: "funnel_step_viewed",
+        step: currentStep,
+        variant: variantRef.current,
+      });
+      return;
+    }
+
+    const stepAtSchedule = currentStep;
+    const timeout = setTimeout(() => {
+      if (emittedForStepRef.current === stepAtSchedule) return;
+      emittedForStepRef.current = stepAtSchedule;
+      track({
+        name: "funnel_step_viewed",
+        step: stepAtSchedule,
+        variant: variantRef.current ?? undefined,
+      });
+    }, 750);
+    return () => clearTimeout(timeout);
+  }, [currentStep, track]);
+
+  // Companion effect: when variant resolves, emit immediately for the current
+  // step if the timeout-defer above hasn't already fired. Either path sets
+  // `emittedForStepRef.current`, so the other no-ops on the race.
+  useEffect(() => {
+    if (!variant || !currentStep) return;
+    if (emittedForStepRef.current === currentStep) return;
+    emittedForStepRef.current = currentStep;
     track({
       name: "funnel_step_viewed",
       step: currentStep,
-      variant: variantRef.current ?? undefined,
+      variant,
     });
-  }, [currentStep, track]);
+  }, [variant, currentStep, track]);
 
   // Abandonment: leaving the tab/page before SUMMARY is a drop-off.
   useEffect(() => {

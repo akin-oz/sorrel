@@ -7,7 +7,8 @@
     "DELIVERY",
     "PLAN",
     "EMAIL",
-    "SUMMARY"
+    "SUMMARY",
+    "CHECKOUT"
   ],
   "variants": {
     "A": {
@@ -18,9 +19,10 @@
         465,
         414,
         356,
-        324
+        324,
+        243
       ],
-      "completionRate": 0.324
+      "completionRate": 0.243
     },
     "B": {
       "viewed": [
@@ -30,9 +32,10 @@
         518,
         461,
         396,
-        360
+        360,
+        270
       ],
-      "completionRate": 0.36
+      "completionRate": 0.27
     }
   }
 }

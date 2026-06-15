@@ -35,7 +35,7 @@ function PaymentBody() {
   const locale = useLocale();
   const stripe = useStripe();
   const elements = useElements();
-  const { track, confirm } = useFunnel();
+  const { track, confirm, variant } = useFunnel();
   const [pending, setPending] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -61,6 +61,7 @@ function PaymentBody() {
         step: "CHECKOUT",
         intent_id: null,
         code: result.error.code ?? "unknown",
+        variant: variant ?? undefined,
       });
       setErrorMessage(result.error.message ?? t("error.unknown"));
       return;
@@ -70,6 +71,7 @@ function PaymentBody() {
         name: "payment_succeeded",
         step: "CHECKOUT",
         intent_id: result.paymentIntent.id,
+        variant: variant ?? undefined,
       });
       confirm();
     }
@@ -100,7 +102,7 @@ function PaymentBody() {
 
 export function CheckoutForm() {
   const t = useTranslations("Checkout");
-  const { draftId, track } = useFunnel();
+  const { draftId, track, variant } = useFunnel();
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [fetchError, setFetchError] = useState<string | null>(null);
 
@@ -140,6 +142,7 @@ export function CheckoutForm() {
           step: "CHECKOUT",
           amount_minor: amountMinor,
           currency,
+          variant: variant ?? undefined,
         });
       })
       .catch(() => {
@@ -148,7 +151,7 @@ export function CheckoutForm() {
     return () => {
       cancelled = true;
     };
-  }, [draftId, amountMinor, currency, clientSecret, configError, track, t]);
+  }, [draftId, amountMinor, currency, clientSecret, configError, track, t, variant]);
 
   const bootError = configError ?? fetchError;
 

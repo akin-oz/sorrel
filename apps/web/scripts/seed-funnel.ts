@@ -25,9 +25,11 @@ const SESSIONS_PER_VARIANT = 1000;
 // Index i = FUNNEL_STEPS[i] → FUNNEL_STEPS[i+1]. The lever is index 1
 // (PROFILE → RECIPES): inline pills (A, every option visible) vs autocomplete-with-
 // defaults (B). A is a credible control, so the gap narrows — but B still lifts.
+// Index 6 (SUMMARY → CHECKOUT) is equal across arms — the A/B lever is PROFILE,
+// not the Stripe commit step (spec 043 Decision A).
 const RETENTION: Record<Variant, number[]> = {
-  A: [0.82, 0.7, 0.81, 0.89, 0.86, 0.91],
-  B: [0.82, 0.78, 0.81, 0.89, 0.86, 0.91],
+  A: [0.82, 0.7, 0.81, 0.89, 0.86, 0.91, 0.75],
+  B: [0.82, 0.78, 0.81, 0.89, 0.86, 0.91, 0.75],
 };
 
 /** How many sessions reach each step, given a starting cohort + retention. */

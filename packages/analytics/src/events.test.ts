@@ -71,6 +71,48 @@ describe("createTracker + memorySink", () => {
   });
 });
 
+describe("variant carriage (spec 043)", () => {
+  it("preserves variant on step_completed and funnel_step_viewed through tracker→sink", () => {
+    const sink = createMemorySink();
+    const track = createTracker(sink);
+
+    track({ name: "step_completed", step: "PROFILE", variant: "A" });
+    track({ name: "funnel_step_viewed", step: "CATS", variant: "B" });
+
+    expect(sink.events).toEqual([
+      { name: "step_completed", step: "PROFILE", variant: "A" },
+      { name: "funnel_step_viewed", step: "CATS", variant: "B" },
+    ]);
+  });
+
+  it("preserves variant on the three payment events through tracker→sink", () => {
+    const sink = createMemorySink();
+    const track = createTracker(sink);
+
+    track({
+      name: "payment_intent_created",
+      step: "CHECKOUT",
+      amount_minor: 4995,
+      currency: "GBP",
+      variant: "A",
+    });
+    track({ name: "payment_succeeded", step: "CHECKOUT", intent_id: "pi_x", variant: "A" });
+    track({
+      name: "payment_failed",
+      step: "CHECKOUT",
+      intent_id: null,
+      code: "card_declined",
+      variant: "B",
+    });
+
+    expect(sink.events.map((event) => (event as { variant?: string }).variant)).toEqual([
+      "A",
+      "A",
+      "B",
+    ]);
+  });
+});
+
 describe("summarize (exhaustiveness)", () => {
   it("handles every event variant", () => {
     expect(summarize({ name: "funnel_step_viewed", step: "CATS" })).toContain("viewed");

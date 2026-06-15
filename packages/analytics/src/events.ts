@@ -60,6 +60,8 @@ export interface PaymentIntentCreated {
   /** Amount in minor units (cents/pence) — mirrors `packages/domain`'s Money type. */
   amount_minor: number;
   currency: string;
+  /** A/B bucket carried for variant-split payment analysis (spec 043). */
+  variant?: string;
 }
 
 /** Spec 039: `stripe.confirmPayment` resolved with `status: "succeeded"`. */
@@ -67,6 +69,7 @@ export interface PaymentSucceeded {
   name: "payment_succeeded";
   step: "CHECKOUT";
   intent_id: string;
+  variant?: string;
 }
 
 /** Spec 039: `stripe.confirmPayment` resolved with an error or a non-`succeeded` status. */
@@ -77,6 +80,7 @@ export interface PaymentFailed {
   intent_id: string | null;
   /** Stripe error `code` (e.g. `card_declined`) or `"unknown"`. */
   code: string;
+  variant?: string;
 }
 
 export type FunnelEvent =

@@ -28,9 +28,10 @@ const BATCH = 100;
 
 // Per-transition retention by variant — mirrors seed-funnel.ts (the canonical curve).
 // Index i = FUNNEL_STEPS[i] → [i+1]; index 1 (PROFILE→RECIPES) is the lever.
+// Index 6 (SUMMARY→CHECKOUT) equal across arms — spec 043 Decision A.
 const RETENTION: Record<Variant, number[]> = {
-  A: [0.82, 0.7, 0.81, 0.89, 0.86, 0.91],
-  B: [0.82, 0.78, 0.81, 0.89, 0.86, 0.91],
+  A: [0.82, 0.7, 0.81, 0.89, 0.86, 0.91, 0.75],
+  B: [0.82, 0.78, 0.81, 0.89, 0.86, 0.91, 0.75],
 };
 
 // ── Env ──────────────────────────────────────────────────────────────────────
