@@ -1,5 +1,0 @@
-{
-  "buildCommand": "yarn workspace @sorrel/frontend build",
-  "outputDirectory": "apps/web/.next",
-  "framework": "nextjs"
-}
