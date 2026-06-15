@@ -251,6 +251,7 @@ token swap; structure, keyboard model, and ARIA are identical across both. Explo
 nvm use                # Node 24 — see .nvmrc; yarn refuses on Node 18
 yarn install
 cp .env.example .env    # then fill the values — see the env table below
+ln -s .env apps/web/.env # Next.js needs it in the app workspace for the env vars to be available at build time
 yarn workspace @sorrel/frontend dev   # the funnel at http://localhost:3000/wizard/cats
 yarn workspace @sorrel/api dev        # GraphQL mock at http://localhost:4000
 
