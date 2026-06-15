@@ -12,6 +12,7 @@
     "cypress:open": "cypress open",
     "cypress:run": "cypress run",
     "e2e": "start-server-and-test dev http://localhost:3000 cypress:run",
+    "e2e:start": "next start",
     "seed": "tsx scripts/seed-funnel.ts",
     "seed:mixpanel": "tsx scripts/seed-mixpanel.ts",
     "seed:posthog": "tsx scripts/seed-posthog.ts",
