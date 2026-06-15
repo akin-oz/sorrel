@@ -140,7 +140,11 @@ exporting `POST`). It:
 - Attaches `metadata` covering the `draft.id`, `draft.email`, the joined
   `draft.recipeSlugs`, and the `draft.deliveryDate`. This is what makes the
   Stripe dashboard a cross-referenceable view of the funnel for the
-  interview demo.
+  interview demo. Stripe metadata is `Record<string, string>`; null/empty
+  fields are omitted at build-time (rather than stored as the literal
+  `"null"`) so the dashboard view stays honest about what was known at
+  intent-create time — a partial funnel commit (no EMAIL step yet, no
+  delivery date) just yields fewer metadata keys, not lying ones.
 - Returns `{ clientSecret: paymentIntent.client_secret, intentId: paymentIntent.id }`
   as JSON.
 - Imports `Stripe` from a single module-scoped factory keyed on

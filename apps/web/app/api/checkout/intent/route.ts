@@ -26,12 +26,23 @@ interface IntentRequest {
   draftId: string;
 }
 
-interface DraftPlanResponse {
+interface DraftLookupResponse {
   data?: {
     funnelDraft: {
+      email: string | null;
+      recipeSlugs: ReadonlyArray<string>;
+      deliveryDate: string | null;
       plan: { pricing: { firstBox: { amountMinor: number; currency: string } } } | null;
     } | null;
   };
+}
+
+interface DraftLookup {
+  amountMinor: number;
+  currency: string;
+  email: string | null;
+  recipeSlugs: ReadonlyArray<string>;
+  deliveryDate: string | null;
 }
 
 function getStripe(): Stripe | null {
@@ -43,9 +54,12 @@ function getStripe(): Stripe | null {
   return new Stripe(key, { apiVersion: "2026-05-27.dahlia" });
 }
 
-const FUNNEL_DRAFT_PRICE_QUERY = `
-  query FunnelDraftPrice($id: ID!) {
+const FUNNEL_DRAFT_LOOKUP_QUERY = `
+  query FunnelDraftLookup($id: ID!) {
     funnelDraft(id: $id) {
+      email
+      recipeSlugs
+      deliveryDate
       plan {
         pricing {
           firstBox {
@@ -58,20 +72,37 @@ const FUNNEL_DRAFT_PRICE_QUERY = `
   }
 `;
 
-async function readCanonicalPrice(
-  origin: string,
-  draftId: string,
-): Promise<{ amountMinor: number; currency: string } | null> {
+async function readDraft(origin: string, draftId: string): Promise<DraftLookup | null> {
   const response = await fetch(new URL("/api/graphql", origin).toString(), {
     method: "POST",
     headers: { "content-type": "application/json" },
-    body: JSON.stringify({ query: FUNNEL_DRAFT_PRICE_QUERY, variables: { id: draftId } }),
+    body: JSON.stringify({ query: FUNNEL_DRAFT_LOOKUP_QUERY, variables: { id: draftId } }),
   });
   if (!response.ok) return null;
-  const payload = (await response.json()) as DraftPlanResponse;
-  const firstBox = payload.data?.funnelDraft?.plan?.pricing.firstBox;
-  if (!firstBox) return null;
-  return { amountMinor: firstBox.amountMinor, currency: firstBox.currency };
+  const payload = (await response.json()) as DraftLookupResponse;
+  const draft = payload.data?.funnelDraft;
+  const firstBox = draft?.plan?.pricing.firstBox;
+  if (!draft || !firstBox) return null;
+  return {
+    amountMinor: firstBox.amountMinor,
+    currency: firstBox.currency,
+    email: draft.email,
+    recipeSlugs: draft.recipeSlugs,
+    deliveryDate: draft.deliveryDate,
+  };
+}
+
+/**
+ * Stripe metadata is `Record<string, string>` — null/empty fields would either
+ * fail validation or get stored as the literal string "null". We omit them so
+ * the dashboard view stays honest about what was known at intent time.
+ */
+function buildMetadata(draftId: string, draft: DraftLookup): Record<string, string> {
+  const metadata: Record<string, string> = { draft_id: draftId };
+  if (draft.email) metadata.email = draft.email;
+  if (draft.recipeSlugs.length > 0) metadata.recipe_slugs = draft.recipeSlugs.join(",");
+  if (draft.deliveryDate) metadata.delivery_date = draft.deliveryDate;
+  return metadata;
 }
 
 export async function POST(request: Request): Promise<Response> {
@@ -83,8 +114,8 @@ export async function POST(request: Request): Promise<Response> {
   if (!body.draftId || typeof body.draftId !== "string") {
     return NextResponse.json({ error: "invalid_draft_id" }, { status: 400 });
   }
-  const price = await readCanonicalPrice(new URL(request.url).origin, body.draftId);
-  if (!price) {
+  const draft = await readDraft(new URL(request.url).origin, body.draftId);
+  if (!draft) {
     return NextResponse.json({ error: "draft_not_found_or_unpriced" }, { status: 404 });
   }
   // The PaymentIntent's own status-based dedup is strong, but the docs still
@@ -92,10 +123,10 @@ export async function POST(request: Request): Promise<Response> {
   // network-retry double-creates against the same draft.
   const intent = await stripe.paymentIntents.create(
     {
-      amount: price.amountMinor,
-      currency: price.currency.toLowerCase(),
+      amount: draft.amountMinor,
+      currency: draft.currency.toLowerCase(),
       automatic_payment_methods: { enabled: true },
-      metadata: { draft_id: body.draftId },
+      metadata: buildMetadata(body.draftId, draft),
     },
     { idempotencyKey: `pi-${body.draftId}` },
   );

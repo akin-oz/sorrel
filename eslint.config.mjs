@@ -13,6 +13,7 @@ export default defineConfig(
       "**/build/**",
       "**/.next/**",
       "**/__generated__/**",
+      "**/storybook-static/**",
     ],
   },
   {
