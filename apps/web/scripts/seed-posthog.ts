@@ -20,19 +20,11 @@ import { fileURLToPath } from "node:url";
 import type { FunnelEvent } from "@sorrel/analytics";
 import { FUNNEL_STEPS } from "@sorrel/shared";
 
-type Variant = "A" | "B";
+import { RETENTION, type SeedVariant as Variant } from "../lib/seed-retention";
 
 const SESSIONS_PER_VARIANT = 300;
 const DAYS = 14; // PostHog accepts historical timestamps; spread across two weeks
 const BATCH = 100;
-
-// Per-transition retention by variant — mirrors seed-funnel.ts (the canonical curve).
-// Index i = FUNNEL_STEPS[i] → [i+1]; index 1 (PROFILE→RECIPES) is the lever.
-// Index 6 (SUMMARY→CHECKOUT) equal across arms — spec 043 Decision A.
-const RETENTION: Record<Variant, number[]> = {
-  A: [0.82, 0.7, 0.81, 0.89, 0.86, 0.91, 0.75],
-  B: [0.82, 0.78, 0.81, 0.89, 0.86, 0.91, 0.75],
-};
 
 // ── Env ──────────────────────────────────────────────────────────────────────
 const scriptDir = dirname(fileURLToPath(import.meta.url));
@@ -122,7 +114,7 @@ function emitSession(variant: Variant, furthest: number, index: number) {
   }
 }
 
-function viewedCounts(retention: number[]): number[] {
+function viewedCounts(retention: ReadonlyArray<number>): number[] {
   const viewed = [SESSIONS_PER_VARIANT];
   for (let i = 0; i < retention.length; i += 1) viewed.push(Math.round(viewed[i] * retention[i]));
   return viewed;

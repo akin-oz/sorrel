@@ -1,9 +1,12 @@
+import { ApolloServer } from "@apollo/server";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+
 import {
   BLOCKED_WEEKDAY_INDEXES,
   DEFAULT_LEAD_DAYS,
   isDeliverableWeekday,
   parseIso,
-  toIso,
 } from "@sorrel/domain";
 
 import {
@@ -20,9 +23,14 @@ import {
   computeDeliveryEstimate,
   draftPlan,
   getDraft,
+  resolvers,
   saveDraft,
   updateDraft,
 } from "./resolvers";
+
+// Avoid importing `./schema.ts` here — it uses `import.meta.url` which ts-jest's
+// CommonJS module target doesn't support. Read the SDL directly instead.
+const typeDefs = readFileSync(join(__dirname, "..", "..", "..", "schema.graphql"), "utf8");
 
 describe("computeDeliveryEstimate", () => {
   it("returns an earliest date that is a deliverable weekday", () => {
@@ -30,11 +38,19 @@ describe("computeDeliveryEstimate", () => {
     expect(isDeliverableWeekday(earliest)).toBe(true);
   });
 
-  it("earliest is at least DEFAULT_LEAD_DAYS from today", () => {
-    const today = parseIso(toIso(new Date()));
-    const { earliest } = computeDeliveryEstimate();
+  it("earliest is at least DEFAULT_LEAD_DAYS from the injected today (spec 044 §1)", () => {
+    // Pin the clock — no `new Date()` in the assertion path, so a CI run
+    // crossing midnight between two reads can't red the test.
+    const todayIso = "2026-06-12";
+    const today = parseIso(todayIso);
+    const { earliest } = computeDeliveryEstimate(todayIso);
     const diffDays = (parseIso(earliest).getTime() - today.getTime()) / (1000 * 60 * 60 * 24);
     expect(diffDays).toBeGreaterThanOrEqual(DEFAULT_LEAD_DAYS);
+  });
+
+  it("honours an injected todayIso (spec 044 §1)", () => {
+    // 2026-01-05 is a Monday; +3 days is Thursday 2026-01-08 (deliverable).
+    expect(computeDeliveryEstimate("2026-01-05").earliest).toBe("2026-01-08");
   });
 
   it("blockedWeekdays matches domain BLOCKED_WEEKDAY_INDEXES translated to Weekday enum", () => {
@@ -195,6 +211,102 @@ describe("input length caps (spec 041 §2)", () => {
   it("rejects more than 20 recipe slugs", () => {
     const recipeSlugs = Array.from({ length: 21 }, (_, i) => `slug-${i}`);
     expect(() => saveDraft({ step: FunnelStep.Recipes, recipeSlugs })).toThrow();
+  });
+});
+
+describe("GraphQL wiring (spec 044 §4)", () => {
+  function newServer(): ApolloServer {
+    return new ApolloServer({ typeDefs, resolvers });
+  }
+
+  it("funnelDraft query returns a saved draft via the resolver layer", async () => {
+    const saved = saveDraft({
+      step: FunnelStep.Cats,
+      cats: [
+        {
+          name: "Mochi",
+          ageMonths: 24,
+          neutered: true,
+          weightKg: 4,
+          fussiness: Fussiness.Selective,
+          allergies: [],
+          vetConfirmationAcknowledged: false,
+        },
+      ],
+    });
+
+    const server = newServer();
+    const response = await server.executeOperation({
+      query: `query F($id: ID!) { funnelDraft(id: $id) { id step } }`,
+      variables: { id: saved.id },
+    });
+
+    expect(response.body.kind).toBe("single");
+    if (response.body.kind !== "single") return;
+    expect(response.body.singleResult.errors).toBeUndefined();
+    expect(response.body.singleResult.data?.funnelDraft).toMatchObject({
+      id: saved.id,
+      step: FunnelStep.Cats,
+    });
+  });
+
+  it("updateFunnelPlan mutation recomputes pricing through the resolver layer", async () => {
+    const saved = saveDraft({
+      step: FunnelStep.Plan,
+      recipeSlugs: ["wild-caught-salmon"],
+      cats: [
+        {
+          name: "Mochi",
+          ageMonths: 24,
+          neutered: true,
+          weightKg: 4,
+          fussiness: Fussiness.Selective,
+          allergies: [],
+          vetConfirmationAcknowledged: false,
+        },
+      ],
+    });
+
+    const server = newServer();
+    const response = await server.executeOperation({
+      query: `
+        mutation U($draftId: ID!, $input: PlanInput!) {
+          updateFunnelPlan(draftId: $draftId, input: $input) {
+            plan {
+              frequency
+              mealsPerBox
+              pricing { perDay { amountMinor currency } }
+            }
+          }
+        }
+      `,
+      variables: {
+        draftId: saved.id,
+        input: {
+          cats: [
+            {
+              name: "Mochi",
+              ageMonths: 24,
+              neutered: true,
+              weightKg: 4,
+              fussiness: Fussiness.Selective,
+              allergies: [],
+              vetConfirmationAcknowledged: false,
+            },
+          ],
+          recipeSlugs: ["wild-caught-salmon"],
+          frequency: BoxFrequency.Every_2Weeks,
+        },
+      },
+    });
+
+    expect(response.body.kind).toBe("single");
+    if (response.body.kind !== "single") return;
+    expect(response.body.singleResult.errors).toBeUndefined();
+    const plan = (
+      response.body.singleResult.data?.updateFunnelPlan as { plan: { mealsPerBox: number } } | null
+    )?.plan;
+    expect(plan?.mealsPerBox).toBe(14);
   });
 });
 

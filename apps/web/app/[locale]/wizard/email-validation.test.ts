@@ -27,4 +27,12 @@ describe("validateEmail", () => {
     expect(tooLong.length).toBe(255);
     expect(validateEmail(tooLong)).toEqual({ email: "", error: "invalid" });
   });
+
+  it("rejects a double-@ address (spec 044 §7)", () => {
+    expect(validateEmail("test@@example.com").error).toBe("invalid");
+  });
+
+  it("rejects a bare-TLD address with no dot in the domain (spec 044 §7)", () => {
+    expect(validateEmail("owner@com").error).toBe("invalid");
+  });
 });

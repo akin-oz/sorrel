@@ -246,6 +246,29 @@ leave it blank on Preview. The Apollo RSC client falls through to `VERCEL_URL` w
 absent, so preview RSC calls hit the preview deploy's own `/api/graphql` rather than
 production's.
 
+### Cypress e2e — required GitHub secrets (spec 044)
+
+The Cypress workflow (`.github/workflows/cypress.yml`) reds on its first PR if these three
+repository secrets are absent. The other CI jobs (typecheck, lint, format, unit matrix,
+codegen-check, Lighthouse) don't need them.
+
+- **`NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`** — Stripe test-mode publishable key (`pk_test_…`).
+  Baked into the Next.js client bundle at build time.
+- **`STRIPE_SECRET_KEY`** — Stripe test-mode key. README recommends a Restricted API Key
+  (`rk_test_…`).
+- **`STRIPE_WEBHOOK_SECRET`** — Stripe webhook signing secret (`whsec_…`).
+
+Set them once in GitHub → Settings → Secrets and variables → Actions.
+
+### Pre-delivery smoke checklist (spec 044)
+
+Before any demo or delivery, walk
+[`docs/pre-delivery-smoke.md`](docs/pre-delivery-smoke.md). It's a 19-item manual run-list
+covering the funnel (CATS through CHECKOUT with the 4242 card), the calendar's three close
+affordances, locale switch en/de, back-navigation, `/insights`, the Storyblok draft preview
+
+- revalidate webhook, console cleanliness, and the Lighthouse re-run.
+
 ### Stripe test mode
 
 The CHECKOUT step uses Stripe's PaymentElement against **test mode only**. The route handlers

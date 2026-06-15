@@ -33,6 +33,16 @@ describe("portionGramsPerDay", () => {
   it("is zero for an empty household", () => {
     expect(portionGramsPerDay([])).toBe(0);
   });
+
+  it("handles the 4-cat UI maximum at 5kg each (spec 044 §3)", () => {
+    expect(
+      portionGramsPerDay([{ weightKg: 5 }, { weightKg: 5 }, { weightKg: 5 }, { weightKg: 5 }]),
+    ).toBe(600); // 4 × 5 × 30 = 600g/day
+  });
+
+  it("rounds an ultra-light 0.5kg cat to 15g without collapsing to zero (spec 044 §3)", () => {
+    expect(portionGramsPerDay([{ weightKg: 0.5 }])).toBe(15);
+  });
 });
 
 describe("computePlan", () => {
@@ -58,6 +68,11 @@ describe("computePlan", () => {
       Math.round(plan.pricing.perBox.amountMinor * FIRST_BOX_DISCOUNT),
     );
     expect(plan.pricing.firstBox.amountMinor).toBeLessThan(plan.pricing.perBox.amountMinor);
+  });
+
+  it("firstBox.amountMinor is an integer pence value (spec 044 §3)", () => {
+    const plan = computePlan({ cats: oneCat, frequency: "EVERY_4_WEEKS" });
+    expect(Number.isInteger(plan.pricing.firstBox.amountMinor)).toBe(true);
   });
 
   it("echoes the chosen frequency back", () => {

@@ -152,9 +152,13 @@ function toGraphQLMoney(m: DomainMoney): Money {
   };
 }
 
-export function computeDeliveryEstimate() {
-  const today = toIso(new Date());
-  const earliest = earliestDeliverableDate(today);
+/**
+ * Spec 044 §1: `todayIso` is injectable so the resolver test can pin a date
+ * instead of double-reading `new Date()` (which crossed a midnight boundary
+ * very rarely and reds CI). Production callers omit the arg and get today.
+ */
+export function computeDeliveryEstimate(todayIso: string = toIso(new Date())) {
+  const earliest = earliestDeliverableDate(todayIso);
   return { earliest, blockedWeekdays, leadDays: DEFAULT_LEAD_DAYS };
 }
 

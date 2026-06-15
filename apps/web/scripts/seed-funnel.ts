@@ -17,23 +17,12 @@ import { fileURLToPath } from "node:url";
 import { createMemorySink, createTracker } from "@sorrel/analytics";
 import { FUNNEL_STEPS } from "@sorrel/shared";
 
-type Variant = "A" | "B";
+import { RETENTION, type SeedVariant as Variant } from "../lib/seed-retention";
 
 const SESSIONS_PER_VARIANT = 1000;
 
-// Per-transition retention (fraction continuing to the next step), by variant.
-// Index i = FUNNEL_STEPS[i] → FUNNEL_STEPS[i+1]. The lever is index 1
-// (PROFILE → RECIPES): inline pills (A, every option visible) vs autocomplete-with-
-// defaults (B). A is a credible control, so the gap narrows — but B still lifts.
-// Index 6 (SUMMARY → CHECKOUT) is equal across arms — the A/B lever is PROFILE,
-// not the Stripe commit step (spec 043 Decision A).
-const RETENTION: Record<Variant, number[]> = {
-  A: [0.82, 0.7, 0.81, 0.89, 0.86, 0.91, 0.75],
-  B: [0.82, 0.78, 0.81, 0.89, 0.86, 0.91, 0.75],
-};
-
 /** How many sessions reach each step, given a starting cohort + retention. */
-function viewedCounts(retention: number[]): number[] {
+function viewedCounts(retention: ReadonlyArray<number>): number[] {
   const viewed = [SESSIONS_PER_VARIANT];
   for (let i = 0; i < retention.length; i += 1) {
     viewed.push(Math.round(viewed[i] * retention[i]));

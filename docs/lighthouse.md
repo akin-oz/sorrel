@@ -4,7 +4,10 @@ Backs the performance/SEO/accessibility posture with measured numbers rather tha
 a claim. The budget runs in CI on every PR (`.github/workflows/lighthouse.yml` →
 `lighthouserc.json`) against the landing page and a wizard step. Accessibility and
 best-practices are hard error budgets; performance and SEO `warn` toward the 0.95
-target.
+target. The accessibility hard floor is `0.95` (spec 040 §8) — matches the claim
+below; a regression to 94 reds the gate.
+
+Last updated: 2026-06-15 (spec 044 §6 — re-run before delivery and bump this line).
 
 ## Reproduce
 
@@ -14,6 +17,19 @@ yarn lighthouse            # lhci autorun: builds-server + 3 runs/URL, asserts t
 ```
 
 Reports land in `.lighthouseci/` (git-ignored) as HTML + JSON.
+
+## Re-running before delivery (spec 044 §6)
+
+The CI gate runs every PR, but the README cites a measured _median_ that's
+worth refreshing immediately before a demo so the screenshot is current:
+
+```bash
+yarn workspace @sorrel/frontend build
+yarn lighthouse
+# then update the median row in the table below and bump the
+# `Last updated` header line so a reviewer can tell at a glance
+# whether the numbers reflect the deployed code.
+```
 
 ## Measured (median of 3 runs, mobile emulation, Chromium 140)
 
