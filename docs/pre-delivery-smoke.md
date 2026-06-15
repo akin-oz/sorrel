@@ -21,12 +21,15 @@ locale switching, real PostHog ingestion when keys are set).
    first card — label changes to "Added." Continue enables → navigates to
    `/en/wizard/delivery`.
 5. **`/en/wizard/delivery`.** Closed card shows the earliest deliverable day
-   (3 days from today, skipping the blocked Tue/Fri/Sat). "Change" opens the
-   modal. Blocked days are dimmed (`aria-disabled="true"`) — click is a no-op.
-   Click a valid Wednesday — `aria-selected` updates. Confirm closes the
-   modal and updates the closed card. Open again; Cancel closes without
-   changing. Open again; ESC closes without changing. Open again; backdrop
-   click closes without changing. Continue → navigates to `/en/wizard/plan`.
+   (3 days from today, skipping the blocked Tue/Fri/Sat). **Continue is
+   already enabled on entry** — the earliest date is pre-committed to funnel
+   state per spec 020 §DELIVERY, so the modal dance is optional. "Change"
+   opens the modal. Blocked days are dimmed (`aria-disabled="true"`) — click
+   is a no-op. Click a valid Wednesday — `aria-selected` updates. Confirm
+   closes the modal and updates the closed card. Open again; Cancel closes
+   without changing. Open again; ESC closes without changing. Open again;
+   backdrop click closes without changing. Continue → navigates to
+   `/en/wizard/plan`.
 6. **`/en/wizard/plan`.** Portion grams/day + per-day/per-box/first-box pricing
    render. Toggle frequency (2-week ↔ 4-week) — pricing updates in real time.
    Continue → navigates to `/en/wizard/email`.

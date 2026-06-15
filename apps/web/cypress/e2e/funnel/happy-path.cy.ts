@@ -89,6 +89,9 @@ describe("Funnel happy path", () => {
 
     // 4 — DELIVERY (the picker centerpiece).
     cy.location("pathname").should("include", "/wizard/delivery");
+    // Spec 020 §DELIVERY: the earliest deliverable date is pre-committed on
+    // entry, so Continue must be enabled BEFORE the user opens the modal.
+    cy.contains("button", /^Continue$/).should("not.be.disabled");
     cy.contains("button", /change/i).click();
     cy.get('[role="dialog"]').should("be.visible");
     cy.get('[role="gridcell"]').contains(/^17$/).click();

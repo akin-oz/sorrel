@@ -1,9 +1,10 @@
 "use client";
 
-import { type ComponentType, type ReactNode } from "react";
+import { type ComponentType, type ReactNode, useEffect } from "react";
 
 import { useLocale, useTranslations } from "next-intl";
 
+import { earliestDeliverableDate } from "@sorrel/domain";
 import { FUNNEL_STEPS, type FunnelStep } from "@sorrel/shared";
 import {
   AppHeading,
@@ -85,6 +86,18 @@ function DeliveryStep({ today }: StepProps = {}) {
   const appLocale = useLocale();
   const tp = useTranslations("Picker");
   const locale = appLocale === "de" ? "de-DE" : "en-GB";
+
+  // Spec 020 §DELIVERY: "the picker pre-selects the earliest; invalid only if
+  // the picker somehow has no commit". The picker shows the earliest date but
+  // does not emit `onConfirm` until the user opens the modal — without this,
+  // `state.deliveryDate` stays null and Continue stays disabled on first paint.
+  // Effect depends on `state.deliveryDate` so it self-corrects after the
+  // FunnelProvider's HYDRATE (parent useEffect) lands.
+  useEffect(() => {
+    if (state.deliveryDate || !today) return;
+    dispatch({ type: "SET_DELIVERY_DATE", date: earliestDeliverableDate(today) });
+  }, [state.deliveryDate, today, dispatch]);
+
   const labels: Partial<DeliveryLabels> = {
     dialogTitle: tp("dialogTitle"),
     cancel: tp("cancel"),
