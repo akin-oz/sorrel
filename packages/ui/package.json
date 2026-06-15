@@ -18,7 +18,7 @@
     "@emotion/styled": "^11.14.1",
     "@mui/material": "^9.1.1",
     "@mui/material-nextjs": "^9.1.1",
-    "@sorrel/domain": "1.0.0",
+    "@sorrel/domain": "*",
     "react": "^19.2.4"
   },
   "devDependencies": {
