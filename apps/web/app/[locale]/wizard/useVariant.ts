@@ -51,6 +51,7 @@ export function useVariant(): Variant | null {
 
   useEffect(() => {
     let active = true;
+    let unsub: (() => void) | undefined;
 
     // Spec 032 dev hook: a Cypress-set window override wins over PostHog so
     // the happy-path test pins variant A deterministically. Stripped in prod.
@@ -72,13 +73,19 @@ export function useVariant(): Variant | null {
         setVariant(localBucket()); // offline fallback (no PostHog key)
         return;
       }
-      // PostHog evaluates flags asynchronously after init; settle when they arrive.
-      posthog.onFeatureFlags(() => {
+      // PostHog evaluates flags asynchronously after init; settle when they
+      // arrive. `onFeatureFlags` returns an unsubscribe; keep it so the
+      // listener is torn down on cleanup instead of accumulating across
+      // Strict Mode remount cycles.
+      unsub = posthog.onFeatureFlags(() => {
         if (active) setVariant(mapFlag(posthog.getFeatureFlag(FLAG)) ?? localBucket());
       });
     });
     return () => {
       active = false;
+      // May be undefined if cleanup runs before getPostHog resolves, or on
+      // the no-key path that never subscribes.
+      unsub?.();
     };
   }, []);
 
