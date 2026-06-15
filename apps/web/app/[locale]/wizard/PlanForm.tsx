@@ -61,10 +61,17 @@ export function PlanForm() {
     if (!next || next === committedFrequency) return;
     startTransition(async () => {
       setOptimisticFrequency(next);
-      if (draftId) {
-        await updatePlan({ variables: { draftId, input: toPlanInput(state, next) } });
+      try {
+        if (draftId) {
+          await updatePlan({ variables: { draftId, input: toPlanInput(state, next) } });
+        }
+        dispatch({ type: "SET_FREQUENCY", frequency: next });
+      } catch {
+        // useOptimistic reverts to committedFrequency automatically
+        // when the transition settles — no manual rollback needed.
+        // Leaving committedFrequency untouched keeps the displayed price
+        // in sync with the server, which rejected the change.
       }
-      dispatch({ type: "SET_FREQUENCY", frequency: next });
     });
   }
 
