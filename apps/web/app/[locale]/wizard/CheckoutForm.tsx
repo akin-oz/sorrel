@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 
 import { useQuery } from "@apollo/client/react";
 import { Elements, PaymentElement, useElements, useStripe } from "@stripe/react-stripe-js";
-import { type Stripe, type StripeElementsOptions, loadStripe } from "@stripe/stripe-js";
+import type { Stripe, StripeElementsOptions } from "@stripe/stripe-js";
+import { loadStripe } from "@stripe/stripe-js/pure";
 import { useLocale, useTranslations } from "next-intl";
 
 import {

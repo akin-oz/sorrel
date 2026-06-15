@@ -106,14 +106,18 @@ export function FunnelProvider({ children }: { children: ReactNode }) {
   // the first emit up to 750ms for variant to resolve; emit immediately if
   // already resolved; on timeout, fail-open with `variant: undefined` so a
   // PostHog-down browser still produces the event.
-  const emittedForStepRef = useRef<FunnelStep | null>(null);
+  //
+  // A Set (not a single value) ensures a step that was already emitted never
+  // re-fires even if the user navigates back to it — e.g. the post-payment
+  // CHECKOUT → SUMMARY redirect must not produce a second SUMMARY event.
+  const emittedStepsRef = useRef<Set<FunnelStep>>(new Set());
   useEffect(() => {
     if (!currentStep) return;
     dispatch({ type: "ADVANCE", step: currentStep });
-    if (emittedForStepRef.current === currentStep) return;
+    if (emittedStepsRef.current.has(currentStep)) return;
 
     if (variantRef.current) {
-      emittedForStepRef.current = currentStep;
+      emittedStepsRef.current.add(currentStep);
       track({
         name: "funnel_step_viewed",
         step: currentStep,
@@ -124,8 +128,8 @@ export function FunnelProvider({ children }: { children: ReactNode }) {
 
     const stepAtSchedule = currentStep;
     const timeout = setTimeout(() => {
-      if (emittedForStepRef.current === stepAtSchedule) return;
-      emittedForStepRef.current = stepAtSchedule;
+      if (emittedStepsRef.current.has(stepAtSchedule)) return;
+      emittedStepsRef.current.add(stepAtSchedule);
       track({
         name: "funnel_step_viewed",
         step: stepAtSchedule,
@@ -136,12 +140,12 @@ export function FunnelProvider({ children }: { children: ReactNode }) {
   }, [currentStep, track]);
 
   // Companion effect: when variant resolves, emit immediately for the current
-  // step if the timeout-defer above hasn't already fired. Either path sets
-  // `emittedForStepRef.current`, so the other no-ops on the race.
+  // step if the timeout-defer above hasn't already fired. Either path adds to
+  // `emittedStepsRef`, so the other no-ops on the race.
   useEffect(() => {
     if (!variant || !currentStep) return;
-    if (emittedForStepRef.current === currentStep) return;
-    emittedForStepRef.current = currentStep;
+    if (emittedStepsRef.current.has(currentStep)) return;
+    emittedStepsRef.current.add(currentStep);
     track({
       name: "funnel_step_viewed",
       step: currentStep,
