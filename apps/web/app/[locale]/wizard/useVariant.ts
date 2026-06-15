@@ -27,7 +27,12 @@ declare global {
 }
 
 function readDevOverride(): Variant | null {
-  if (process.env.NODE_ENV === "production") return null;
+  // Spec 032/034: honoured in `next dev` (NODE_ENV !== "production") and in the
+  // Cypress production-build e2e job (NEXT_PUBLIC_E2E === "1", inlined at build
+  // time), but never in the Vercel production deploy where neither holds.
+  const e2eHooksEnabled =
+    process.env.NODE_ENV !== "production" || process.env.NEXT_PUBLIC_E2E === "1";
+  if (!e2eHooksEnabled) return null;
   if (typeof window === "undefined") return null;
   return window.__sorrelVariant ?? null;
 }

@@ -9,10 +9,12 @@
  * Vendor SDKs live only behind their sinks; this module fans events out to every
  * configured destination and returns the typed tracker the rest of the app uses.
  *
- * Spec 032: in non-production builds, a memorySink is *always* included and its
- * `events` array is exposed at `window.__sorrelAnalyticsQueue` so Cypress can
- * assert the typed funnel events that fired across the happy path. The hook is
- * stripped in production by the `NODE_ENV !== "production"` guard.
+ * Spec 032/034: when the e2e hooks are enabled — `next dev` or the Cypress
+ * production-build job (NEXT_PUBLIC_E2E === "1") — a memorySink is *always*
+ * included and its `events` array is exposed at `window.__sorrelAnalyticsQueue`
+ * so Cypress can assert the typed funnel events that fired across the happy
+ * path. The hook stays stripped in the Vercel production deploy, where neither
+ * flag holds.
  */
 import {
   type AnalyticsSink,
@@ -42,9 +44,14 @@ export function createAppTracker(): Track {
   const mixpanelToken = process.env.NEXT_PUBLIC_MIXPANEL_TOKEN;
   if (mixpanelToken) sinks.push(createMixpanelSink(mixpanelToken));
 
-  // Always include an in-memory sink in non-production for Cypress assertions.
-  // The window hook is read-only and stripped in production builds.
-  if (process.env.NODE_ENV !== "production" && typeof window !== "undefined") {
+  // Always include an in-memory sink for Cypress assertions when the e2e hooks
+  // are enabled: `next dev` (NODE_ENV !== "production") or the Cypress
+  // production-build job (NEXT_PUBLIC_E2E === "1", inlined at build time). The
+  // window hook is read-only and stays stripped in the Vercel production deploy,
+  // where neither flag holds.
+  const e2eHooksEnabled =
+    process.env.NODE_ENV !== "production" || process.env.NEXT_PUBLIC_E2E === "1";
+  if (e2eHooksEnabled && typeof window !== "undefined") {
     const memorySink = createMemorySink();
     sinks.push(memorySink);
     window.__sorrelAnalyticsQueue = memorySink.events;
