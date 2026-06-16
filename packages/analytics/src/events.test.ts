@@ -111,6 +111,21 @@ describe("variant carriage (spec 043)", () => {
       "B",
     ]);
   });
+
+  it("preserves variant on the abandonment + exit-intent events through tracker→sink (spec 047)", () => {
+    const sink = createMemorySink();
+    const track = createTracker(sink);
+
+    track({ name: "funnel_abandoned", step: "PLAN", variant: "A" });
+    track({ name: "exit_intent_shown", step: "RECIPES", variant: "B" });
+    track({ name: "exit_intent_recovered", step: "RECIPES", variant: "B" });
+
+    expect(sink.events).toEqual([
+      { name: "funnel_abandoned", step: "PLAN", variant: "A" },
+      { name: "exit_intent_shown", step: "RECIPES", variant: "B" },
+      { name: "exit_intent_recovered", step: "RECIPES", variant: "B" },
+    ]);
+  });
 });
 
 describe("summarize (exhaustiveness)", () => {

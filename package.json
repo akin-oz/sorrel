@@ -2,6 +2,7 @@
   "name": "sorrel-monorepo",
   "private": true,
   "version": "1.0.0",
+  "license": "UNLICENSED",
   "engines": {
     "node": "^20.19.0 || ^22.13.0 || >=24"
   },

@@ -2,6 +2,7 @@
   "name": "@sorrel/api",
   "version": "1.0.0",
   "private": true,
+  "license": "UNLICENSED",
   "main": "src/schema.ts",
   "exports": {
     ".": "./src/schema.ts",
