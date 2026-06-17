@@ -40,6 +40,8 @@ export interface DeliveryTheme {
   radiusCta: number;
   /** Free-delivery pill radius (px). */
   radiusPill: number;
+  /** Modal dialog border radius (px). Falls back to `radiusControl + 8` when absent. */
+  radiusModal?: number;
 }
 
 // The host app loads the faces (e.g. via next/font) and exposes them as these
@@ -70,6 +72,7 @@ export const sorrelTheme: DeliveryTheme = {
   radiusControl: 12,
   radiusCta: 999,
   radiusPill: 999,
+  radiusModal: 20,
 };
 
 export const brambleTheme: DeliveryTheme = {
@@ -93,6 +96,7 @@ export const brambleTheme: DeliveryTheme = {
   radiusControl: 8,
   radiusCta: 10,
   radiusPill: 6,
+  radiusModal: 16,
 };
 
 export const deliveryThemes = { sorrel: sorrelTheme, bramble: brambleTheme } as const;

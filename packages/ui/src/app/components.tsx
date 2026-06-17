@@ -223,7 +223,10 @@ export type AppFieldProps = Omit<TextFieldProps, "sx"> & {
 /** Text or select field (PROFILE/EMAIL). Pass `select` + `options` for a dropdown. */
 export function AppField({ options, children, ...props }: AppFieldProps) {
   return (
-    <TextField {...props}>
+    <TextField
+      {...props}
+      FormHelperTextProps={props.error ? { role: "alert", "aria-live": "polite" } : undefined}
+    >
       {options
         ? options.map((o) => (
             <MenuItem key={o.value} value={o.value}>
@@ -235,7 +238,7 @@ export function AppField({ options, children, ...props }: AppFieldProps) {
   );
 }
 
-export type AppToggleGroupProps = Omit<ToggleButtonGroupProps, "sx"> & {
+export type AppToggleGroupProps = Omit<ToggleButtonGroupProps, "sx" | "color"> & {
   /** `segmented` = equal-width connected bar (frequency); `cards` = a grid of
    *  standalone selectable cards (cat count); `pills` = wrapping rounded pills
    *  sized to their content (PROFILE age/weight). */
@@ -551,12 +554,27 @@ interface AppMeterProps {
   height?: number;
   /** Track (unfilled) colour. */
   trackColor?: string;
+  /** Accessible label for the meter. */
+  label?: string;
 }
 /** Horizontal proportion bar — a funnel step's fill against its track. */
-export function AppMeter({ value, color, height = 22, trackColor = "#ECE4D9" }: AppMeterProps) {
+export function AppMeter({
+  value,
+  color,
+  height = 22,
+  trackColor = sorrelTheme.accentTint,
+  label,
+}: AppMeterProps) {
   const pct = `${Math.max(0, Math.min(1, value)) * 100}%`;
   return (
-    <Box sx={{ flex: 1, height, borderRadius: "6px", bgcolor: trackColor, overflow: "hidden" }}>
+    <Box
+      role="meter"
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-valuenow={Math.round(Math.max(0, Math.min(1, value)) * 100)}
+      aria-label={label}
+      sx={{ flex: 1, height, borderRadius: "11px", bgcolor: trackColor, overflow: "hidden" }}
+    >
       <Box sx={{ width: pct, height: "100%", bgcolor: color }} />
     </Box>
   );
