@@ -5,6 +5,15 @@ import { defineConfig, globalIgnores } from "eslint/config";
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
+  // Pin the React version so eslint-plugin-react (a dep of eslint-config-next) never
+  // calls context.getFilename() for auto-detection — that API was removed in ESLint 10.
+  // Without this override the `version: 'detect'` setting from eslint-config-next
+  // triggers a crash on every file. Spec 042.
+  {
+    settings: {
+      react: { version: "19.0.0" },
+    },
+  },
   // Override default ignores of eslint-config-next.
   globalIgnores([
     // Default ignores of eslint-config-next:
@@ -74,7 +83,7 @@ const eslintConfig = defineConfig([
         {
           patterns: [
             {
-              group: ["@mui/*", "@emotion/*"],
+              group: ["@mui", "@mui/*", "@emotion", "@emotion/*"],
               message:
                 "No direct @mui/@emotion imports in apps/web — use the App* layer from @sorrel/ui (spec 018).",
             },
