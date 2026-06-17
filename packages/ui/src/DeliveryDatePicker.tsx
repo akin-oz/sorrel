@@ -24,6 +24,7 @@ import {
   toWeeks,
 } from "@sorrel/domain";
 
+import { appTokens } from "./app/tokens";
 import { useInjectDeliveryStyles } from "./theme/styles";
 import { type DeliveryTheme, FONT_MONO, FONT_SANS, FONT_SERIF, sorrelTheme } from "./theme/tokens";
 
@@ -436,7 +437,7 @@ function ClosedCard({
       style={{
         background: theme.surface,
         border: `1.5px solid ${theme.border}`,
-        borderRadius: 16,
+        borderRadius: appTokens.radius.surface,
         padding: 16,
         display: "flex",
         alignItems: "center",
@@ -595,7 +596,10 @@ function Modal(props: ModalProps) {
     year: "numeric",
     timeZone: "UTC",
   }).format(new Date(Date.UTC(year, month - 1, 1)));
-  const weekdayHeaders = Array.from({ length: 7 }, (_, i) => weekdayName(i, locale, "narrow"));
+  const weekdayHeaders = Array.from({ length: 7 }, (_, i) => ({
+    narrow: weekdayName(i, locale, "narrow"),
+    long: weekdayName(i, locale, "long"),
+  }));
   return (
     <div ref={overlayRef} style={{ position: "fixed", inset: 0, zIndex: 1000 }}>
       <div
@@ -620,7 +624,7 @@ function Modal(props: ModalProps) {
           top: "50%",
           transform: "translateY(-50%)",
           background: theme.surface,
-          borderRadius: theme.radiusControl + 8,
+          borderRadius: theme.radiusModal ?? theme.radiusControl + 8,
           boxShadow: `0 32px 64px -24px ${theme.scrim}`,
           padding: "20px 16px 16px",
           display: "flex",
@@ -679,10 +683,11 @@ function Modal(props: ModalProps) {
           style={{ display: "flex", flexDirection: "column", gap: 6 }}
         >
           <div role="row" style={{ display: "grid", gridTemplateColumns: "repeat(7,1fr)", gap: 6 }}>
-            {weekdayHeaders.map((label, i) => (
+            {weekdayHeaders.map((hdr, i) => (
               <div
                 key={i}
                 role="columnheader"
+                abbr={hdr.long}
                 style={{
                   height: 28,
                   display: "flex",
@@ -693,7 +698,7 @@ function Modal(props: ModalProps) {
                   color: theme.inkMuted,
                 }}
               >
-                {label}
+                {hdr.narrow}
               </div>
             ))}
           </div>
@@ -787,6 +792,13 @@ function DayCell({ theme, locale, labels, cell, isActive, cellRefs, onSelect }: 
   const reasonText = cell.blockedReason
     ? blockedReasonText(cell.blockedReason, locale, labels)
     : null;
+  const fullDateLabel = new Intl.DateTimeFormat(locale, {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    timeZone: "UTC",
+  }).format(new Date(`${cell.iso}T00:00:00Z`));
+  const cellAriaLabel = reasonText ? `${fullDateLabel} — ${reasonText}` : fullDateLabel;
   const base: CSSProperties = {
     minHeight: 44,
     display: "flex",
@@ -833,7 +845,7 @@ function DayCell({ theme, locale, labels, cell, isActive, cellRefs, onSelect }: 
         else cellRefs.current.delete(cell.iso);
       }}
       tabIndex={isActive ? 0 : -1}
-      aria-label={cell.blocked && reasonText ? `${cell.day} — ${reasonText}` : undefined}
+      aria-label={cellAriaLabel}
       aria-disabled={cell.blocked || undefined}
       onClick={() => onSelect(cell.iso)}
       style={{ ...base, ...skin, width: "100%", cursor: cell.blocked ? "default" : "pointer" }}
