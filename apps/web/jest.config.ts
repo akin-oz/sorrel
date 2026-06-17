@@ -1,9 +1,8 @@
 import type { Config } from "jest";
 
 const config: Config = {
-  // The current suite is the pure wizard reducer (no DOM). jsdom can come back
-  // with the first component/interaction test (its own spec).
-  testEnvironment: "node",
+  // jsdom provides window/document/sessionStorage for hook unit tests.
+  testEnvironment: "jsdom",
   transform: {
     "^.+\\.tsx?$": ["ts-jest", { tsconfig: "<rootDir>/tsconfig.json" }],
   },
