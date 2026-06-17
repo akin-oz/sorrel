@@ -119,8 +119,22 @@ describe("DeliveryDatePicker — a11y in a real browser", () => {
   });
 });
 
-// Shim for the Tab key — Cypress' native `cy.tab()` lives in a separate plugin;
-// trigger a Tab keydown on the focused element to simulate it.
+// Shim for the Tab key.
+//
+// LIMITATION: `cy.focused().trigger("keydown", { key: "Tab" })` fires a
+// synthetic KeyboardEvent that does NOT move actual browser focus — the
+// browser's built-in Tab-key focus handling is not triggered by synthetic
+// events. As a result the C-01 focus-trap assertion checks that `activeElement`
+// stays inside the dialog, but because focus never moves, it is always true
+// and cannot catch a real focus-trap regression.
+//
+// TODO: install `cypress-real-events` (adds `cy.realPress("Tab")` which
+// injects a genuine OS-level key event via Chrome DevTools Protocol and
+// actually moves focus). Once installed, replace the body below with:
+//   cy.realPress("Tab");
+// and remove this comment block.
+//
+// Tracked in the QA gap list — adding the dependency requires an approved spec.
 Cypress.Commands.add("realPressOrTab" as never, () => {
   cy.focused().trigger("keydown", { key: "Tab" });
 });

@@ -203,6 +203,11 @@ export function filterRecipes(filter?: RecipeFilter | null) {
 // backend needs auth, ownership, persistence, and PII-retention bounds.
 const drafts = new Map<string, FunnelDraft>();
 
+/** Spec 044: reset the in-memory draft store between tests to prevent cross-test contamination. */
+export function clearDrafts(): void {
+  drafts.clear();
+}
+
 // Spec 041 §2: input length caps. Bounded only by Next.js body-size upstream
 // without these; reject explicit known-bad shapes at the resolver edge.
 const MAX_EMAIL = 254; // RFC 5321
