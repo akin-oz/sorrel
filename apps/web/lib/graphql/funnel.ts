@@ -74,3 +74,27 @@ export const FunnelDraftByIdDocument = graphql(`
     }
   }
 `);
+
+/**
+ * Server-side draft lookup for the checkout intent route (spec 039/043).
+ * Selects only the fields the route needs — email, recipeSlugs, deliveryDate,
+ * and the firstBox price. This is the typed-document alternative to the
+ * hand-written query string in apps/web/app/api/checkout/intent/route.ts.
+ */
+export const FunnelDraftLookupDocument = graphql(`
+  query FunnelDraftLookup($id: ID!) {
+    funnelDraft(id: $id) {
+      email
+      recipeSlugs
+      deliveryDate
+      plan {
+        pricing {
+          firstBox {
+            amountMinor
+            currency
+          }
+        }
+      }
+    }
+  }
+`);

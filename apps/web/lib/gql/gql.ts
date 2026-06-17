@@ -19,6 +19,7 @@ type Documents = {
     "\n  mutation SaveFunnelDraft($input: SaveFunnelDraftInput!) {\n    saveFunnelDraft(input: $input) {\n      ...FunnelDraftFields\n    }\n  }\n": typeof types.SaveFunnelDraftDocument,
     "\n  mutation UpdateFunnelPlan($draftId: ID!, $input: PlanInput!) {\n    updateFunnelPlan(draftId: $draftId, input: $input) {\n      ...FunnelDraftFields\n    }\n  }\n": typeof types.UpdateFunnelPlanDocument,
     "\n  query FunnelDraftById($id: ID!) {\n    funnelDraft(id: $id) {\n      ...FunnelDraftFields\n    }\n  }\n": typeof types.FunnelDraftByIdDocument,
+    "\n  query FunnelDraftLookup($id: ID!) {\n    funnelDraft(id: $id) {\n      email\n      recipeSlugs\n      deliveryDate\n      plan {\n        pricing {\n          firstBox {\n            amountMinor\n            currency\n          }\n        }\n      }\n    }\n  }\n": typeof types.FunnelDraftLookupDocument,
 };
 const documents: Documents = {
     "\n  fragment FunnelPlanFields on Plan {\n    frequency\n    portionGramsPerDay\n    mealsPerBox\n    pricing {\n      perDay {\n        amountMinor\n        currency\n        formatted\n      }\n      perBox {\n        amountMinor\n        currency\n        formatted\n      }\n      firstBox {\n        amountMinor\n        currency\n        formatted\n      }\n    }\n  }\n": types.FunnelPlanFieldsFragmentDoc,
@@ -26,6 +27,7 @@ const documents: Documents = {
     "\n  mutation SaveFunnelDraft($input: SaveFunnelDraftInput!) {\n    saveFunnelDraft(input: $input) {\n      ...FunnelDraftFields\n    }\n  }\n": types.SaveFunnelDraftDocument,
     "\n  mutation UpdateFunnelPlan($draftId: ID!, $input: PlanInput!) {\n    updateFunnelPlan(draftId: $draftId, input: $input) {\n      ...FunnelDraftFields\n    }\n  }\n": types.UpdateFunnelPlanDocument,
     "\n  query FunnelDraftById($id: ID!) {\n    funnelDraft(id: $id) {\n      ...FunnelDraftFields\n    }\n  }\n": types.FunnelDraftByIdDocument,
+    "\n  query FunnelDraftLookup($id: ID!) {\n    funnelDraft(id: $id) {\n      email\n      recipeSlugs\n      deliveryDate\n      plan {\n        pricing {\n          firstBox {\n            amountMinor\n            currency\n          }\n        }\n      }\n    }\n  }\n": types.FunnelDraftLookupDocument,
 };
 
 /**
@@ -62,6 +64,10 @@ export function graphql(source: "\n  mutation UpdateFunnelPlan($draftId: ID!, $i
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  query FunnelDraftById($id: ID!) {\n    funnelDraft(id: $id) {\n      ...FunnelDraftFields\n    }\n  }\n"): (typeof documents)["\n  query FunnelDraftById($id: ID!) {\n    funnelDraft(id: $id) {\n      ...FunnelDraftFields\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query FunnelDraftLookup($id: ID!) {\n    funnelDraft(id: $id) {\n      email\n      recipeSlugs\n      deliveryDate\n      plan {\n        pricing {\n          firstBox {\n            amountMinor\n            currency\n          }\n        }\n      }\n    }\n  }\n"): (typeof documents)["\n  query FunnelDraftLookup($id: ID!) {\n    funnelDraft(id: $id) {\n      email\n      recipeSlugs\n      deliveryDate\n      plan {\n        pricing {\n          firstBox {\n            amountMinor\n            currency\n          }\n        }\n      }\n    }\n  }\n"];
 
 export function graphql(source: string) {
   return (documents as any)[source] ?? {};

@@ -1,6 +1,6 @@
 "use client";
 
-import { type ReactNode } from "react";
+import { type ReactNode, useEffect } from "react";
 
 import { apiPlugin, storyblokInit } from "@storyblok/react/rsc";
 
@@ -19,25 +19,28 @@ import { TestimonialSection } from "./TestimonialSection";
 
 // Client-side registration so the Visual Editor Bridge can resolve + highlight bloks.
 const clientToken = process.env.NEXT_PUBLIC_STORYBLOK_PUBLIC_TOKEN;
-storyblokInit({
-  accessToken: clientToken,
-  use: clientToken ? [apiPlugin] : [],
-  components: {
-    page: Page,
-    site_nav: SiteNav,
-    hero: Hero,
-    feature_grid: FeatureGrid,
-    feature_item: FeatureItem,
-    how_it_works: HowItWorks,
-    recipe_showcase: RecipeShowcase,
-    testimonial_section: TestimonialSection,
-    faq_section: FaqSection,
-    cta_section: CtaSection,
-    site_footer: SiteFooter,
-    recipe: RecipeCard,
-  },
-});
 
 export function StoryblokProvider({ children }: { children: ReactNode }) {
-  return children;
+  useEffect(() => {
+    storyblokInit({
+      accessToken: clientToken,
+      use: clientToken ? [apiPlugin] : [],
+      components: {
+        page: Page,
+        site_nav: SiteNav,
+        hero: Hero,
+        feature_grid: FeatureGrid,
+        feature_item: FeatureItem,
+        how_it_works: HowItWorks,
+        recipe_showcase: RecipeShowcase,
+        testimonial_section: TestimonialSection,
+        faq_section: FaqSection,
+        cta_section: CtaSection,
+        site_footer: SiteFooter,
+        recipe: RecipeCard,
+      },
+    });
+  }, []);
+
+  return <>{children}</>;
 }
