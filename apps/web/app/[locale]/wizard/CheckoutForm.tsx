@@ -165,8 +165,9 @@ export function CheckoutForm() {
   const configError = PUBLISHABLE_KEY ? null : t("error.notConfigured");
 
   useEffect(() => {
-    if (clientSecret || configError) return;
+    if (configError) return;
     if (!draftId || amountMinor === null) return;
+    if (clientSecret) return;
     let cancelled = false;
     // Server-side recompute pattern: the route reads the canonical
     // amountMinor + currency from the GraphQL contract via draftId. The

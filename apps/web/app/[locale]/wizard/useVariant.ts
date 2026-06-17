@@ -37,10 +37,10 @@ function readDevOverride(): Variant | null {
   return window.__sorrelVariant ?? null;
 }
 
-function localBucket(): Variant {
+function localBucket(random: () => number = Math.random): Variant {
   const stored = window.sessionStorage.getItem(SESSION_KEY);
   if (stored === "A" || stored === "B") return stored;
-  const assigned: Variant = Math.random() < 0.5 ? "A" : "B";
+  const assigned: Variant = random() < 0.5 ? "A" : "B";
   window.sessionStorage.setItem(SESSION_KEY, assigned);
   return assigned;
 }
