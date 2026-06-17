@@ -33,7 +33,19 @@ while [ "$dir" != "$PROJECT_DIR" ] && [ "$dir" != "/" ]; do
 done
 
 FAIL=0
-if ! ( cd "$ESLINT_DIR" && npx --no-install eslint --max-warnings 0 "$FILE_PATH" ) 2>&1; then
+# Prefer the workspace-local ESLint binary so apps/web's ESLint 9 (via
+# eslint-config-next) is used instead of the root's incompatible ESLint 10.
+# In a git worktree the workspace may not have its own node_modules — fall
+# back to the root binary in that case (which may emit a non-fatal crash but
+# exits 0 on files it can't parse, so the hook stays non-blocking).
+if [ -x "$ESLINT_DIR/node_modules/.bin/eslint" ]; then
+  ESLINT_BIN="$ESLINT_DIR/node_modules/.bin/eslint"
+elif [ -x "$PROJECT_DIR/node_modules/.bin/eslint" ]; then
+  ESLINT_BIN="$PROJECT_DIR/node_modules/.bin/eslint"
+else
+  ESLINT_BIN="npx --no-install eslint"
+fi
+if ! ( cd "$ESLINT_DIR" && $ESLINT_BIN --max-warnings 0 "$FILE_PATH" ) 2>&1; then
   echo "" >&2
   echo "ESLint failed on $FILE_PATH (zero-warning policy). Fix before continuing." >&2
   FAIL=1
