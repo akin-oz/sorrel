@@ -20,6 +20,7 @@ import {
 import {
   DIETARY_PROGRAMS,
   blockedWeekdays,
+  clearDrafts,
   computeDeliveryEstimate,
   draftPlan,
   getDraft,
@@ -31,6 +32,16 @@ import {
 // Avoid importing `./schema.ts` here — it uses `import.meta.url` which ts-jest's
 // CommonJS module target doesn't support. Read the SDL directly instead.
 const typeDefs = readFileSync(join(__dirname, "..", "..", "..", "schema.graphql"), "utf8");
+
+// ─── Cross-test isolation ─────────────────────────────────────────────────────
+// The in-memory `drafts` Map is module-level state shared across all tests in
+// this file. Without a reset, a draft saved in an earlier `it` block is visible
+// to every later test — making the order of execution matter and masking bugs
+// where a draft should have been absent. `clearDrafts()` is exposed by
+// `resolvers.ts` specifically for this purpose (spec 044).
+beforeEach(() => {
+  clearDrafts();
+});
 
 describe("computeDeliveryEstimate", () => {
   it("returns an earliest date that is a deliverable weekday", () => {
@@ -171,6 +182,52 @@ describe("draftPlan (FunnelDraft.plan recompute)", () => {
     expect(fortnightly!.mealsPerBox).toBe(14);
     // half the meals → half the box price
     expect(fortnightly!.pricing.perBox.amountMinor).toBe(monthly!.pricing.perBox.amountMinor / 2);
+  });
+
+  it("updateDraft preserves existing cats (plan input cats are for recompute only)", () => {
+    // `updateDraft` receives a `PlanInput` whose `cats` field is the optimistic
+    // recompute input — it is NOT used to overwrite the stored cat list.
+    // The resolver spreads `...existing` and ignores `input.cats`, so passing
+    // a different cat weight must NOT change the draft's stored cats field.
+    const draft = saveDraft({
+      step: FunnelStep.Plan,
+      recipeSlugs: ["wild-caught-salmon"],
+      frequency: BoxFrequency.Every_4Weeks,
+      cats: [
+        {
+          name: "Mochi",
+          ageMonths: 24,
+          neutered: true,
+          weightKg: 4,
+          fussiness: Fussiness.Selective,
+          allergies: [],
+          vetConfirmationAcknowledged: false,
+        },
+      ],
+    });
+
+    // Pass a cat with a wildly different weight in the PlanInput.
+    const updated = updateDraft(draft.id, {
+      cats: [
+        {
+          name: "Phantom Cat",
+          ageMonths: 12,
+          neutered: false,
+          weightKg: 99,
+          fussiness: Fussiness.Selective,
+          allergies: [],
+          vetConfirmationAcknowledged: false,
+        },
+      ],
+      recipeSlugs: ["wild-caught-salmon"],
+      frequency: BoxFrequency.Every_2Weeks,
+    });
+
+    // The stored cats must still be the original Mochi — the PlanInput cats
+    // are ignored by updateDraft (it uses ...existing to preserve the cat list).
+    expect(updated.cats).toHaveLength(1);
+    expect(updated.cats[0].name).toBe("Mochi");
+    expect(updated.cats[0].weightKg).toBe(4);
   });
 });
 
