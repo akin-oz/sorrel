@@ -26,6 +26,7 @@ export function RecipesPicker({ recipes }: { recipes: RecipeBlok[] }) {
           onClick={() => setFilter(null)}
           color={filter === null ? "primary" : "default"}
           variant={filter === null ? "filled" : "outlined"}
+          aria-pressed={filter === null}
         />
         {DIETARY_TAGS.map((tag) => (
           <AppChip
@@ -34,6 +35,7 @@ export function RecipesPicker({ recipes }: { recipes: RecipeBlok[] }) {
             onClick={() => setFilter(tag)}
             color={filter === tag ? "primary" : "default"}
             variant={filter === tag ? "filled" : "outlined"}
+            aria-pressed={filter === tag}
           />
         ))}
       </AppStack>

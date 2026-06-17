@@ -3,7 +3,7 @@
 import { storyblokEditable } from "@storyblok/react/rsc";
 import { useTranslations } from "next-intl";
 
-import { AppCard, AppChip, AppHeading, AppImage, AppStack, AppText } from "@sorrel/ui";
+import { AppCard, AppChip, AppHeading, AppImage, AppStack, AppText, appTokens } from "@sorrel/ui";
 
 import { isDietaryTag } from "../../lib/dietary";
 import type { RecipeBlok } from "../../types/storyblok.gen";
@@ -13,13 +13,14 @@ export function RecipeCard({ blok }: { blok: RecipeBlok }) {
   return (
     <AppCard
       tone="surface"
-      radius="16px"
+      radius={`${appTokens.radius.surface}px`}
       overflow="hidden"
       padding={0}
       editable={storyblokEditable(blok)}
     >
       <AppImage
-        alt=""
+        src={blok.image?.filename}
+        alt={blok.image?.alt || blok.name}
         height={120}
         fallbackBackground="repeating-linear-gradient(45deg,#F1E7D9,#F1E7D9 10px,#EBDFCE 10px,#EBDFCE 20px)"
       />

@@ -35,6 +35,7 @@ const PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ?? "";
 
 let stripePromise: Promise<Stripe | null> | null = null;
 function getStripe(): Promise<Stripe | null> {
+  if (typeof window === "undefined") return Promise.resolve(null);
   if (!PUBLISHABLE_KEY) return Promise.resolve(null);
   if (!stripePromise) stripePromise = loadStripe(PUBLISHABLE_KEY);
   return stripePromise;
@@ -137,7 +138,7 @@ function PaymentBody() {
           {pending ? t("submitting") : t("submit")}
         </AppButton>
         {errorMessage ? (
-          <AppAlert severity="error" aria-live="polite">
+          <AppAlert severity="error" aria-live="assertive">
             {errorMessage}
           </AppAlert>
         ) : null}

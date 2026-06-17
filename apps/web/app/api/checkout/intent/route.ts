@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 
+import type { FunnelDraftLookupQuery } from "../../../../lib/gql/graphql";
+import { FunnelDraftLookupDocument } from "../../../../lib/graphql/funnel";
+
 /**
  * Spec 039 — POST /api/checkout/intent
  *
@@ -26,17 +29,6 @@ interface IntentRequest {
   draftId: string;
 }
 
-interface DraftLookupResponse {
-  data?: {
-    funnelDraft: {
-      email: string | null;
-      recipeSlugs: ReadonlyArray<string>;
-      deliveryDate: string | null;
-      plan: { pricing: { firstBox: { amountMinor: number; currency: string } } } | null;
-    } | null;
-  };
-}
-
 interface DraftLookup {
   amountMinor: number;
   currency: string;
@@ -54,32 +46,17 @@ function getStripe(): Stripe | null {
   return new Stripe(key, { apiVersion: "2026-05-27.dahlia" });
 }
 
-const FUNNEL_DRAFT_LOOKUP_QUERY = `
-  query FunnelDraftLookup($id: ID!) {
-    funnelDraft(id: $id) {
-      email
-      recipeSlugs
-      deliveryDate
-      plan {
-        pricing {
-          firstBox {
-            amountMinor
-            currency
-          }
-        }
-      }
-    }
-  }
-`;
-
 async function readDraft(origin: string, draftId: string): Promise<DraftLookup | null> {
   const response = await fetch(new URL("/api/graphql", origin).toString(), {
     method: "POST",
     headers: { "content-type": "application/json" },
-    body: JSON.stringify({ query: FUNNEL_DRAFT_LOOKUP_QUERY, variables: { id: draftId } }),
+    body: JSON.stringify({
+      query: FunnelDraftLookupDocument.loc?.source.body,
+      variables: { id: draftId },
+    }),
   });
   if (!response.ok) return null;
-  const payload = (await response.json()) as DraftLookupResponse;
+  const payload = (await response.json()) as { data?: FunnelDraftLookupQuery };
   const draft = payload.data?.funnelDraft;
   const firstBox = draft?.plan?.pricing.firstBox;
   if (!draft || !firstBox) return null;
