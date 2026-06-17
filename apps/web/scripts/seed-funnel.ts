@@ -38,7 +38,7 @@ function emitSession(track: ReturnType<typeof createTracker>, variant: Variant, 
   }
   const last = FUNNEL_STEPS.length - 1;
   if (furthest < last) {
-    track({ name: "funnel_abandoned", step: FUNNEL_STEPS[furthest] });
+    track({ name: "funnel_abandoned", step: FUNNEL_STEPS[furthest], variant });
   } else {
     track({ name: "step_completed", step: FUNNEL_STEPS[last], variant });
   }
