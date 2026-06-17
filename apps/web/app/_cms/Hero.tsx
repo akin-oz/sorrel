@@ -11,6 +11,7 @@ import {
   AppImage,
   AppStack,
   AppText,
+  appTokens,
   sorrelTheme,
 } from "@sorrel/ui";
 
@@ -71,7 +72,7 @@ export function Hero({ blok }: { blok: HeroBlok }) {
           src={blok.image?.filename}
           alt={blok.image?.alt ?? ""}
           height={{ xs: 250, md: 440 }}
-          radius={{ xs: "20px", md: "24px" }}
+          radius={{ xs: `${appTokens.radius.surface}px`, md: `${appTokens.radius.shell}px` }}
           fallbackBackground={STRIPED_PLACEHOLDER}
         />
       </AppGrid>

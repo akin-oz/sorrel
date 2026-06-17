@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 
-import { AppButton, AppCard, AppText } from "@sorrel/ui";
+import { AppButton, AppCard, AppText, appTokens, sorrelTheme } from "@sorrel/ui";
 
 import { useRouter } from "../../../i18n/navigation";
 import { useFunnel } from "./FunnelProvider";
@@ -22,7 +22,7 @@ export function ResumeBanner() {
     <AppCard
       tone="accentTint"
       border={false}
-      radius="14px"
+      radius={`${appTokens.radius.surface}px`}
       direction="row"
       alignItems="center"
       justifyContent="space-between"
@@ -31,7 +31,7 @@ export function ResumeBanner() {
       px={2}
       py={1.5}
     >
-      <AppText fontSize={14} lineHeight={1.45} color="#5E4434">
+      <AppText fontSize={14} lineHeight={1.45} color={sorrelTheme.inkMuted}>
         {t("resumeBanner")}
       </AppText>
       <AppButton
