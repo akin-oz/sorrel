@@ -15,16 +15,17 @@ export function LocaleSwitcher() {
   const t = useTranslations("LocaleSwitcher");
 
   return (
-    <AppStack direction="row" gap={0.25} role="group" aria-label={t("label")}>
+    <AppStack direction="row" gap={0.25} role="radiogroup" aria-label={t("label")}>
       {routing.locales.map((locale) => {
         const isActive = locale === active;
         return (
           <button
             key={locale}
             type="button"
+            role="radio"
+            aria-checked={isActive}
             className="app-unstyled-button app-locale-toggle"
             onClick={() => router.replace(pathname, { locale })}
-            aria-current={isActive ? "true" : undefined}
           >
             <AppText
               component="span"

@@ -84,7 +84,7 @@ export function WizardChrome({ children }: { children: ReactNode }) {
         tone="paper"
         border={{ xs: false, sm: true }}
         padding={0}
-        radius={{ xs: 0, sm: "24px" }}
+        radius={{ xs: 0, sm: `${appTokens.radius.shell}px` }}
         shadow={{ xs: false, sm: true }}
         overflow="hidden"
         direction="column"
@@ -193,7 +193,6 @@ export function WizardChrome({ children }: { children: ReactNode }) {
           >
             <AppStack
               width="100%"
-              maxWidth={{ md: 520 }}
               flex={{ xs: 1, md: "none" }}
               gap={{ xs: 2.75, md: 3.5 }}
             >
@@ -212,22 +211,44 @@ export function WizardChrome({ children }: { children: ReactNode }) {
                   >
                     {isLastStep(currentStep) ? t("confirm") : t("continue")}
                   </AppButton>
-                  {!validity.valid ? (
-                    <AppText
-                      variant="body2"
-                      color="text.secondary"
-                      aria-live="polite"
-                      align="center"
-                    >
-                      {t("incomplete")}
-                    </AppText>
-                  ) : null}
+                  <span
+                    role="status"
+                    aria-live="polite"
+                    aria-atomic="true"
+                    style={{
+                      position: "absolute",
+                      width: 1,
+                      height: 1,
+                      overflow: "hidden",
+                      clip: "rect(0,0,0,0)",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {!validity.valid ? t("incomplete") : ""}
+                  </span>
                 </AppStack>
               ) : null}
             </AppStack>
           </AppCard>
         </AppGrid>
       </AppCard>
+
+      {/* Persistent status region — announces funnel completion to AT when confirmed state arrives. */}
+      <span
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+        style={{
+          position: "absolute",
+          width: 1,
+          height: 1,
+          overflow: "hidden",
+          clip: "rect(0,0,0,0)",
+          whiteSpace: "nowrap",
+        }}
+      >
+        {confirmed ? t("confirm") : ""}
+      </span>
 
       <ExitIntentController />
     </AppStack>

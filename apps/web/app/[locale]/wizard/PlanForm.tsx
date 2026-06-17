@@ -7,7 +7,6 @@ import { useTranslations } from "next-intl";
 
 import {
   AppCard,
-  AppChip,
   AppSkeleton,
   AppStack,
   AppText,
@@ -94,7 +93,21 @@ export function PlanForm() {
           <AppText variant="overline" color={sorrelTheme.mono}>
             {t("summary")}
           </AppText>
-          {updating ? <AppChip label={t("updating")} size="small" aria-live="polite" /> : null}
+          <span
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"
+            style={{
+              position: "absolute",
+              width: 1,
+              height: 1,
+              overflow: "hidden",
+              clip: "rect(0,0,0,0)",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {updating ? t("updating") : ""}
+          </span>
         </AppStack>
 
         {plan ? (
