@@ -225,7 +225,11 @@ export function AppField({ options, children, ...props }: AppFieldProps) {
   return (
     <TextField
       {...props}
-      FormHelperTextProps={props.error ? { role: "alert", "aria-live": "polite" } : undefined}
+      slotProps={
+        props.error
+          ? { formHelperText: { role: "alert", "aria-live": "polite" as const } }
+          : undefined
+      }
     >
       {options
         ? options.map((o) => (

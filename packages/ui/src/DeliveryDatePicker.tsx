@@ -687,7 +687,7 @@ function Modal(props: ModalProps) {
               <div
                 key={i}
                 role="columnheader"
-                abbr={hdr.long}
+                aria-label={hdr.long}
                 style={{
                   height: 28,
                   display: "flex",
