@@ -96,10 +96,12 @@ export function FunnelProvider({ children }: { children: ReactNode }) {
       try {
         const restored = JSON.parse(raw) as FunnelState;
         dispatch({ type: "HYDRATE", state: restored });
-        if (restored.furthestStep !== "CATS" && currentStep) {
-          track({
+        const step = currentStepRef.current;
+        if (restored.furthestStep !== "CATS" && step) {
+          if (!trackerRef.current) trackerRef.current = createAppTracker();
+          trackerRef.current({
             name: "funnel_draft_resumed",
-            step: currentStep,
+            step,
             resumed_from: restored.furthestStep,
             variant: variantRef.current ?? undefined,
           });
@@ -109,7 +111,6 @@ export function FunnelProvider({ children }: { children: ReactNode }) {
       }
     }
     hydratedRef.current = true;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
