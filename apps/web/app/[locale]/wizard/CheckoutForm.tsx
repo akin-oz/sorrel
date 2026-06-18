@@ -149,7 +149,7 @@ function PaymentBody() {
 
 export function CheckoutForm() {
   const t = useTranslations("Checkout");
-  const { draftId, track, variant } = useFunnel();
+  const { draftId, track, variant, state } = useFunnel();
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [fetchError, setFetchError] = useState<string | null>(null);
 
@@ -221,7 +221,12 @@ export function CheckoutForm() {
     );
   }
 
-  const options: StripeElementsOptions = { clientSecret, appearance: { theme: "stripe" } };
+  const email = state.email ?? undefined;
+  const options: StripeElementsOptions = {
+    clientSecret,
+    appearance: { theme: "stripe" },
+    ...(email ? { defaultValues: { billingDetails: { email } } } : {}),
+  };
 
   return (
     <AppCard tone="paper">
