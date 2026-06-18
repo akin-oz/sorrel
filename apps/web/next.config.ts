@@ -24,7 +24,13 @@ const CSP_DIRECTIVES = [
 const nextConfig: NextConfig = {
   reactCompiler: true,
   images: {
-    remotePatterns: [{ protocol: "https", hostname: "a2.storyblok.com" }],
+    remotePatterns: [
+      // Storyblok asset CDN — uploaded files are served from a.storyblok.com.
+      // a2.storyblok.com is the Storyblok image-transformation service; both
+      // are needed so next/image can optimize any Storyblok-hosted URL.
+      { protocol: "https", hostname: "a.storyblok.com" },
+      { protocol: "https", hostname: "a2.storyblok.com" },
+    ],
   },
   // Workspace packages ship TS/TSX source (main -> src/index.ts), so Next must
   // transpile them rather than treat them as pre-built node_modules. @sorrel/api
