@@ -23,6 +23,9 @@ const CSP_DIRECTIVES = [
 
 const nextConfig: NextConfig = {
   reactCompiler: true,
+  images: {
+    remotePatterns: [{ protocol: "https", hostname: "a2.storyblok.com" }],
+  },
   // Workspace packages ship TS/TSX source (main -> src/index.ts), so Next must
   // transpile them rather than treat them as pre-built node_modules. @sorrel/api
   // (+ its @sorrel/domain dependency) back the co-located GraphQL Route Handler.

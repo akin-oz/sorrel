@@ -479,7 +479,7 @@ export function AppBand({
   );
 }
 
-export interface AppImageProps {
+interface AppImageBaseProps {
   src?: string;
   alt: string;
   height?: Responsive<number | string>;
@@ -488,9 +488,45 @@ export interface AppImageProps {
   fallbackBackground?: string;
 }
 
+/**
+ * `AppImageProps` is a discriminated union:
+ *
+ * - Without `imageComponent`: plain `<img>` fallback (Storybook, any non-Next host).
+ * - With `imageComponent`: `intrinsicWidth` + `intrinsicHeight` are required so the
+ *   browser can reserve layout space before the asset loads (CLS prevention). The
+ *   component is injected by the host (e.g. `next/image`) — `packages/ui` stays
+ *   framework-agnostic and never imports `next`.
+ */
+export type AppImageProps =
+  | (AppImageBaseProps & {
+      imageComponent?: undefined;
+      intrinsicWidth?: undefined;
+      intrinsicHeight?: undefined;
+    })
+  | (AppImageBaseProps & {
+      /** Render-prop replacing the native `<img>`. Structurally satisfied by
+       *  `next/image`'s default export for the props we pass — the minimal
+       *  type is intentional: wider types (ImgHTMLAttributes.src?: string|Blob)
+       *  make next/image's required `src: string|StaticImport` incompatible. */
+      imageComponent: (props: {
+        src: string;
+        alt: string;
+        width: number;
+        height: number;
+      }) => React.ReactNode;
+      /** Asset's natural pixel width — required when `imageComponent` is provided. */
+      intrinsicWidth: number;
+      /** Asset's natural pixel height — required when `imageComponent` is provided. */
+      intrinsicHeight: number;
+    });
+
 /** Cover image with tokenized height/radius; renders a decorative placeholder
- *  band when `src` is unset (spec 012's striped stand-in). */
-export function AppImage({ src, alt, height, radius, fallbackBackground }: AppImageProps) {
+ *  band when `src` is unset (spec 012's striped stand-in).
+ *
+ *  Pass `imageComponent` (e.g. `next/image`) + `intrinsicWidth`/`intrinsicHeight`
+ *  to enable AVIF/WebP transcoding, lazy loading, and CLS-safe layout reservation
+ *  without importing a framework-specific package into `packages/ui`. */
+export function AppImage({ src, alt, height, radius, fallbackBackground, ...rest }: AppImageProps) {
   if (!src) {
     return (
       <Box
@@ -499,6 +535,25 @@ export function AppImage({ src, alt, height, radius, fallbackBackground }: AppIm
       />
     );
   }
+
+  if ("imageComponent" in rest && rest.imageComponent !== undefined) {
+    const { imageComponent: ImageComponent, intrinsicWidth, intrinsicHeight } = rest;
+    return (
+      <Box
+        sx={{
+          width: "100%",
+          height,
+          borderRadius: radius,
+          overflow: "hidden",
+          display: "block",
+          "& img": { width: "100%", height: "100%", objectFit: "cover", display: "block" },
+        }}
+      >
+        {ImageComponent({ src, alt, width: intrinsicWidth, height: intrinsicHeight })}
+      </Box>
+    );
+  }
+
   return (
     <Box
       component="img"

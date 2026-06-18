@@ -1,6 +1,7 @@
 "use client";
 
 import { storyblokEditable } from "@storyblok/react/rsc";
+import NextImage from "next/image";
 
 import {
   AppBand,
@@ -74,6 +75,9 @@ export function Hero({ blok }: { blok: HeroBlok }) {
           height={{ xs: 250, md: 440 }}
           radius={{ xs: `${appTokens.radius.surface}px`, md: `${appTokens.radius.shell}px` }}
           fallbackBackground={STRIPED_PLACEHOLDER}
+          imageComponent={NextImage}
+          intrinsicWidth={1120}
+          intrinsicHeight={880}
         />
       </AppGrid>
     </AppBand>
