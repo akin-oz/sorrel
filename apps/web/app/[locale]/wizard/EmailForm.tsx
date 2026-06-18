@@ -21,7 +21,7 @@ import { type EmailFormState, initialEmailState } from "./email-validation";
  */
 export function EmailForm() {
   const t = useTranslations("Email");
-  const { dispatch, track } = useFunnel();
+  const { dispatch, track, state } = useFunnel();
   const [result, formAction, pending] = useActionState<EmailFormState, FormData>(
     submitEmail,
     initialEmailState,
@@ -43,7 +43,7 @@ export function EmailForm() {
           type="email"
           label={t("label")}
           placeholder={t("placeholder")}
-          defaultValue={result.email}
+          defaultValue={result.email || state.email || ""}
           error={result.status === "error"}
           helperText={result.error ? t(`error.${result.error}`) : t("hint")}
           fullWidth
