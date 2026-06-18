@@ -21,6 +21,7 @@ import {
 import { useRouter } from "../../../i18n/navigation";
 import { FunnelDraftByIdDocument } from "../../../lib/graphql/funnel";
 import { useFunnel } from "./FunnelProvider";
+import { toBoxFrequency, weightToKg } from "./draft-input";
 
 /**
  * CHECKOUT step (spec 039, Decision A: SUMMARY → CHECKOUT, Decision B:
@@ -169,14 +170,22 @@ export function CheckoutForm() {
     if (!draftId || amountMinor === null) return;
     if (clientSecret) return;
     let cancelled = false;
-    // Server-side recompute pattern: the route reads the canonical
-    // amountMinor + currency from the GraphQL contract via draftId. The
-    // client number stays in the analytics event for parity but is no
-    // longer accepted as the source of truth for the charge.
+    // The route calls computePlan(@sorrel/domain) server-side using these
+    // inputs — the client cannot supply a price, only the inputs that
+    // determine it. No self-referential GraphQL fetch needed (works on Vercel).
+    const frequency = toBoxFrequency(state.frequency);
+    const cats = state.cats.map((c) => ({ weightKg: weightToKg(c.weight) }));
     void fetch("/api/checkout/intent", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ draftId }),
+      body: JSON.stringify({
+        draftId,
+        cats,
+        frequency,
+        recipeSlugs: state.recipeSlugs,
+        email: state.email,
+        deliveryDate: state.deliveryDate,
+      }),
     })
       .then((response) => {
         if (!response.ok) throw new Error(`http ${response.status}`);
@@ -199,7 +208,7 @@ export function CheckoutForm() {
     return () => {
       cancelled = true;
     };
-  }, [draftId, amountMinor, currency, clientSecret, configError, track, t, variant]);
+  }, [draftId, amountMinor, currency, clientSecret, configError, track, t, variant, state]);
 
   const bootError = configError ?? fetchError;
 
