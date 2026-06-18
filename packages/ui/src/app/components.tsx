@@ -505,16 +505,16 @@ export type AppImageProps =
       intrinsicHeight?: undefined;
     })
   | (AppImageBaseProps & {
-      /** Render-prop replacing the native `<img>`. Structurally satisfied by
-       *  `next/image`'s default export for the props we pass — the minimal
-       *  type is intentional: wider types (ImgHTMLAttributes.src?: string|Blob)
-       *  make next/image's required `src: string|StaticImport` incompatible. */
-      imageComponent: (props: {
+      /** React component replacing the native `<img>`. Accepts plain function
+       *  components, class components, and exotic components such as
+       *  `next/image` (which is a forwardRef object — not directly callable as
+       *  a function, but renderable by React.createElement / JSX). */
+      imageComponent: React.ComponentType<{
         src: string;
         alt: string;
         width: number;
         height: number;
-      }) => React.ReactNode;
+      }>;
       /** Asset's natural pixel width — required when `imageComponent` is provided. */
       intrinsicWidth: number;
       /** Asset's natural pixel height — required when `imageComponent` is provided. */
@@ -550,7 +550,7 @@ export function AppImage({ src, alt, height, radius, fallbackBackground, ...rest
           "& img": { width: "100%", height: "100%", objectFit: "cover", display: "block" },
         }}
       >
-        {ImageComponent({ src, alt, width: intrinsicWidth, height: intrinsicHeight })}
+        <ImageComponent src={src} alt={alt} width={intrinsicWidth} height={intrinsicHeight} />
       </Box>
     );
   }
