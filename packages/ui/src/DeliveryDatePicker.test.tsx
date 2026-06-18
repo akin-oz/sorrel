@@ -812,4 +812,195 @@ describe("DeliveryDatePicker", () => {
       finishCloseAnimation(dialog);
     });
   });
+
+  // --- Spec 048: month navigation -------------------------------------------
+
+  describe("spec 048 — month navigation", () => {
+    // today = 2026-06-12 → earliest = 2026-06-15 (Mon).
+    // The min month is June 2026 (the month containing earliest).
+
+    it("(a) PageDown moves to the next month and focuses the same day number when deliverable", async () => {
+      const user = userEvent.setup();
+      renderPicker();
+      const dialog = await openDialog(user);
+
+      // Open with active = Mon 15 Jun. Navigate to Wed 17 Jun (deliverable).
+      await user.keyboard("{ArrowRight}{ArrowRight}"); // active = 17 Jun
+      // PageDown → July 2026. Day 17 Jul 2026 = Friday (blocked); focus falls to
+      // first deliverable in July instead. But day 20 Jul is Monday (deliverable).
+      // Let's first navigate to day 20 Jun (Mon) so the preferred day is 20.
+      await user.keyboard("{ArrowDown}"); // 17 → 24 Jun (Thu, deliverable)
+      await user.keyboard("{ArrowLeft}"); // 24 → 23 Jun (Wed)
+      await user.keyboard("{ArrowLeft}"); // 23 → 22 Jun (Mon)
+      await user.keyboard("{ArrowLeft}"); // 22 → 21 Jun (Sun)
+      await user.keyboard("{ArrowLeft}"); // 21 → 20 Jun (Mon, deliverable — preferredDay = 20)
+
+      // PageDown → July 2026. 20 Jul 2026 = Monday (deliverable).
+      await user.keyboard("{PageDown}");
+
+      // The dialog should now show July 2026 in its month heading.
+      expect(within(dialog).getByText(/JULY 2026/i)).toBeInTheDocument();
+      // Focus should land on July 20.
+      expect(document.activeElement?.textContent).toBe("20");
+
+      await user.keyboard("{Escape}");
+      finishCloseAnimation(dialog);
+    });
+
+    it("(b) PageDown onto a month where that day is blocked focuses the earliest deliverable day", async () => {
+      const user = userEvent.setup();
+      renderPicker();
+      const dialog = await openDialog(user);
+
+      // Active starts on Mon 15 Jun. Navigate to Thu 18 Jun.
+      await user.keyboard("{ArrowRight}"); // 16 Tue (blocked)
+      await user.keyboard("{ArrowRight}"); // 17 Wed
+      await user.keyboard("{ArrowRight}"); // 18 Thu — preferredDay = 18
+
+      // 18 Jul 2026 = Saturday (blocked). So PageDown should fall back to the
+      // first deliverable day in July 2026 = Wed 1 Jul.
+      await user.keyboard("{PageDown}");
+
+      expect(within(dialog).getByText(/JULY 2026/i)).toBeInTheDocument();
+      // Wed 1 Jul 2026 is the first deliverable day (not Tue/Fri/Sat, after earliest Jun 15).
+      expect(document.activeElement?.textContent).toBe("1");
+
+      await user.keyboard("{Escape}");
+      finishCloseAnimation(dialog);
+    });
+
+    it("(c) Next button click changes the visible month and the aria-live heading updates", async () => {
+      const user = userEvent.setup();
+      renderPicker();
+      const dialog = await openDialog(user);
+
+      expect(within(dialog).getByText(/JUNE 2026/i)).toBeInTheDocument();
+
+      // Click the Next month button.
+      await user.click(
+        within(dialog).getByRole("button", { name: DEFAULT_DELIVERY_LABELS.nextMonth }),
+      );
+
+      expect(within(dialog).getByText(/JULY 2026/i)).toBeInTheDocument();
+
+      // The month heading element carries aria-live="polite".
+      // (The aria-live attribute is verified in test (e) below.)
+
+      await user.keyboard("{Escape}");
+      finishCloseAnimation(dialog);
+    });
+
+    it("(d) Prev button is disabled and PageUp is a no-op when at the min month", async () => {
+      const user = userEvent.setup();
+      renderPicker();
+      const dialog = await openDialog(user);
+
+      // We start in June 2026 — the min month (contains earliest = 2026-06-15).
+      const prevBtn = within(dialog).getByRole("button", {
+        name: DEFAULT_DELIVERY_LABELS.prevMonth,
+      });
+      expect(prevBtn).toBeDisabled();
+
+      // PageUp at the min month should be a no-op — still June.
+      await user.keyboard("{PageUp}");
+      expect(within(dialog).getByText(/JUNE 2026/i)).toBeInTheDocument();
+
+      await user.keyboard("{Escape}");
+      finishCloseAnimation(dialog);
+    });
+
+    it("(d-prev-enabled) Prev button is enabled and navigates back when not at the min month", async () => {
+      const user = userEvent.setup();
+      renderPicker();
+      const dialog = await openDialog(user);
+
+      // Go forward one month first.
+      await user.click(
+        within(dialog).getByRole("button", { name: DEFAULT_DELIVERY_LABELS.nextMonth }),
+      );
+      expect(within(dialog).getByText(/JULY 2026/i)).toBeInTheDocument();
+
+      const prevBtn = within(dialog).getByRole("button", {
+        name: DEFAULT_DELIVERY_LABELS.prevMonth,
+      });
+      expect(prevBtn).not.toBeDisabled();
+
+      // Click Prev → back to June.
+      await user.click(prevBtn);
+      expect(within(dialog).getByText(/JUNE 2026/i)).toBeInTheDocument();
+
+      await user.keyboard("{Escape}");
+      finishCloseAnimation(dialog);
+    });
+
+    it("(e) the month heading element carries aria-live='polite'", async () => {
+      const user = userEvent.setup();
+      renderPicker();
+      const dialog = await openDialog(user);
+
+      // The month heading is identified by its text content matching the month label.
+      // We look for the element with aria-live="polite" that is NOT role="status"
+      // (the selection live region is role="status"; the month heading has no role
+      // but does have aria-live="polite" per spec 048).
+      const liveRegions = dialog.querySelectorAll<HTMLElement>("[aria-live='polite']");
+      // One is role="status" (selection), one is the month heading.
+      let monthHeadingLive: HTMLElement | undefined;
+      liveRegions.forEach((el) => {
+        if (el.getAttribute("role") !== "status") monthHeadingLive = el;
+      });
+      expect(monthHeadingLive).toBeTruthy();
+      expect(monthHeadingLive?.textContent).toMatch(/JUNE 2026/i);
+
+      await user.keyboard("{Escape}");
+      finishCloseAnimation(dialog);
+    });
+
+    it("Prev/Next buttons are reachable by Tab inside the dialog", async () => {
+      const user = userEvent.setup();
+      renderPicker();
+      const dialog = await openDialog(user);
+      unblockFocusableInJsdom(dialog);
+
+      // Navigate to July so Prev is enabled.
+      await user.click(
+        within(dialog).getByRole("button", { name: DEFAULT_DELIVERY_LABELS.nextMonth }),
+      );
+      unblockFocusableInJsdom(dialog);
+
+      const prevBtn = within(dialog).getByRole("button", {
+        name: DEFAULT_DELIVERY_LABELS.prevMonth,
+      });
+      const nextBtn = within(dialog).getByRole("button", {
+        name: DEFAULT_DELIVERY_LABELS.nextMonth,
+      });
+
+      // Both should be in getFocusable (neither is disabled, neither is aria-disabled).
+      expect(prevBtn).not.toBeDisabled();
+      expect(nextBtn).not.toBeDisabled();
+
+      // The buttons have accessible names from labels.
+      expect(prevBtn).toHaveAccessibleName(DEFAULT_DELIVERY_LABELS.prevMonth);
+      expect(nextBtn).toHaveAccessibleName(DEFAULT_DELIVERY_LABELS.nextMonth);
+
+      await user.keyboard("{Escape}");
+      finishCloseAnimation(dialog);
+    });
+
+    it("jest-axe reports no new violations on the open dialog with a non-min month", async () => {
+      const user = userEvent.setup();
+      const { container } = renderPicker();
+      const dialog = await openDialog(user);
+
+      // Navigate to July so Prev is enabled (non-min month).
+      await user.click(
+        within(dialog).getByRole("button", { name: DEFAULT_DELIVERY_LABELS.nextMonth }),
+      );
+
+      const results = await axe(container);
+      expect(results).toHaveNoViolations();
+
+      await user.keyboard("{Escape}");
+      finishCloseAnimation(dialog);
+    });
+  });
 });

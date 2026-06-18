@@ -18,12 +18,14 @@ import {
   type IsoDate,
   buildMonthView,
   earliestDeliverableDate,
+  focusTargetForMonth,
   moveFocus,
   parseIso,
   toIso,
   toWeeks,
 } from "@sorrel/domain";
 
+import { appTokens } from "./app/tokens";
 import { useInjectDeliveryStyles } from "./theme/styles";
 import { type DeliveryTheme, FONT_MONO, FONT_SANS, FONT_SERIF, sorrelTheme } from "./theme/tokens";
 
@@ -45,6 +47,10 @@ export interface DeliveryLabels {
    * the picker without requiring a translation change.
    */
   selectionAnnouncement: (date: string) => string;
+  /** Accessible name for the Previous month button (spec 048). */
+  prevMonth: string;
+  /** Accessible name for the Next month button (spec 048). */
+  nextMonth: string;
 }
 
 export const DEFAULT_DELIVERY_LABELS: DeliveryLabels = {
@@ -58,6 +64,8 @@ export const DEFAULT_DELIVERY_LABELS: DeliveryLabels = {
   blockedWeekday: (weekday) => `No deliveries on ${weekday}s`,
   beforeEarliest: (date) => `Earliest delivery is ${date}`,
   selectionAnnouncement: (date) => `Delivery set to ${date}`,
+  prevMonth: "Previous month",
+  nextMonth: "Next month",
 };
 
 // 2024-01-01 is a Monday — reference point for naming a Monday-first weekday index.
@@ -173,6 +181,12 @@ function neutraliseBackground(overlay: HTMLElement): () => void {
   };
 }
 
+/** Return { year, month } for a month offset by `delta` from (year, month). */
+function offsetMonth(year: number, month: number, delta: number): { year: number; month: number } {
+  const total = year * 12 + (month - 1) + delta;
+  return { year: Math.floor(total / 12), month: (total % 12) + 1 };
+}
+
 export function DeliveryDatePicker({
   today: todayProp,
   value,
@@ -208,6 +222,19 @@ export function DeliveryDatePicker({
   // R3 (spec 025): live-region message for screen readers. "" is silent.
   const [announcement, setAnnouncement] = useState("");
 
+  // Spec 048: the visible month is held in state so it can move independently of
+  // the draft selection. Seeded from the committed date when the modal opens.
+  const committedDate = parseIso(committed);
+  const [viewYear, setViewYear] = useState<number>(committedDate.getUTCFullYear());
+  const [viewMonth, setViewMonth] = useState<number>(committedDate.getUTCMonth() + 1);
+
+  const monthView = buildMonthView(viewYear, viewMonth, { earliest, selected: draft });
+
+  // Earliest navigable month — the month that contains `earliest`.
+  const earliestDate = parseIso(earliest);
+  const minYear = earliestDate.getUTCFullYear();
+  const minMonth = earliestDate.getUTCMonth() + 1;
+
   const changeRef = useRef<HTMLButtonElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -228,11 +255,6 @@ export function DeliveryDatePicker({
 
   const labelId = useId();
   const monthId = useId();
-
-  const committedDate = parseIso(committed);
-  const viewYear = committedDate.getUTCFullYear();
-  const viewMonth = committedDate.getUTCMonth() + 1;
-  const monthView = buildMonthView(viewYear, viewMonth, { earliest, selected: draft });
 
   // Focus the active cell after keyboard navigation or on open.
   useEffect(() => {
@@ -260,6 +282,10 @@ export function DeliveryDatePicker({
 
   function open() {
     hasOpened.current = true;
+    // Spec 048: seed the visible month from the committed date on each open.
+    const cd = parseIso(committed);
+    setViewYear(cd.getUTCFullYear());
+    setViewMonth(cd.getUTCMonth() + 1);
     setDraft(committed);
     setActiveIso(committed);
     setAnnouncement("");
@@ -327,6 +353,27 @@ export function DeliveryDatePicker({
     announceSelection(iso);
   }
 
+  /**
+   * Spec 048: navigate the visible month by `delta` (-1 = prev, +1 = next).
+   * Clamps at the min month (month containing `earliest`). Uses
+   * `focusTargetForMonth` from the domain to determine where focus lands in the
+   * new month, preferring the same day number as the current `activeIso`.
+   */
+  function goToMonth(delta: number) {
+    const target = offsetMonth(viewYear, viewMonth, delta);
+    // Clamp: never navigate before the min month.
+    if (target.year < minYear || (target.year === minYear && target.month < minMonth)) return;
+    const preferredDay = parseIso(activeIso).getUTCDate();
+    const nextIso = focusTargetForMonth(target.year, target.month, preferredDay, earliest);
+    if (nextIso === null) return; // No deliverable day in that month — do nothing.
+    setViewYear(target.year);
+    setViewMonth(target.month);
+    setActiveIso(nextIso);
+    setFocusTick((n) => n + 1);
+    // Clear stale announcements when the month changes.
+    setAnnouncement("");
+  }
+
   function handleDialogKeyDown(event: ReactKeyboardEvent<HTMLDivElement>) {
     if (event.key === "Escape") {
       event.preventDefault();
@@ -359,11 +406,21 @@ export function DeliveryDatePicker({
       const nextCell = monthView.cells.find((c) => c.iso === next);
       if (nextCell && !nextCell.blocked) announceSelection(next);
       else setAnnouncement("");
+    } else if (event.key === "PageUp") {
+      // Spec 048: PageUp = previous month (ARIA grid date-picker pattern).
+      event.preventDefault();
+      goToMonth(-1);
+    } else if (event.key === "PageDown") {
+      // Spec 048: PageDown = next month (ARIA grid date-picker pattern).
+      event.preventDefault();
+      goToMonth(1);
     } else if (event.key === "Enter" || event.key === " ") {
       event.preventDefault();
       attemptSelect(activeIso);
     }
   }
+
+  const isPrevDisabled = viewYear === minYear && viewMonth === minMonth;
 
   const rootVars = {
     "--sdp-surface": theme.surface,
@@ -398,6 +455,7 @@ export function DeliveryDatePicker({
           activeIso={activeIso}
           announcement={announcement}
           cellRefs={cellRefs}
+          isPrevDisabled={isPrevDisabled}
           onAnimationEnd={handleAnimationEnd}
           onDialogKeyDown={handleDialogKeyDown}
           onGridKeyDown={handleGridKeyDown}
@@ -405,6 +463,8 @@ export function DeliveryDatePicker({
           onSelect={attemptSelect}
           onCancel={() => requestClose(false)}
           onConfirm={() => requestClose(true)}
+          onPrevMonth={() => goToMonth(-1)}
+          onNextMonth={() => goToMonth(1)}
         />
       )}
     </div>
@@ -436,7 +496,7 @@ function ClosedCard({
       style={{
         background: theme.surface,
         border: `1.5px solid ${theme.border}`,
-        borderRadius: 16,
+        borderRadius: appTokens.radius.surface,
         padding: 16,
         display: "flex",
         alignItems: "center",
@@ -564,6 +624,7 @@ interface ModalProps {
   activeIso: IsoDate;
   announcement: string;
   cellRefs: RefObject<Map<IsoDate, HTMLButtonElement>>;
+  isPrevDisabled: boolean;
   onAnimationEnd: (e: ReactAnimationEvent<HTMLDivElement>) => void;
   onDialogKeyDown: (e: ReactKeyboardEvent<HTMLDivElement>) => void;
   onGridKeyDown: (e: ReactKeyboardEvent<HTMLDivElement>) => void;
@@ -571,6 +632,8 @@ interface ModalProps {
   onSelect: (iso: IsoDate) => void;
   onCancel: () => void;
   onConfirm: () => void;
+  onPrevMonth: () => void;
+  onNextMonth: () => void;
 }
 
 function Modal(props: ModalProps) {
@@ -589,6 +652,7 @@ function Modal(props: ModalProps) {
     activeIso,
     announcement,
     cellRefs,
+    isPrevDisabled,
   } = props;
   const monthLabel = new Intl.DateTimeFormat(locale, {
     month: "long",
@@ -596,6 +660,24 @@ function Modal(props: ModalProps) {
     timeZone: "UTC",
   }).format(new Date(Date.UTC(year, month - 1, 1)));
   const weekdayHeaders = Array.from({ length: 7 }, (_, i) => weekdayName(i, locale, "narrow"));
+
+  /** Shared style for the Prev/Next chevron buttons (spec 048). */
+  const navBtnStyle: CSSProperties = {
+    minHeight: 44,
+    minWidth: 44,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    background: "transparent",
+    border: `1px solid ${theme.border}`,
+    borderRadius: theme.radiusControl,
+    color: theme.ink,
+    cursor: "pointer",
+    fontFamily: FONT_SANS,
+    fontSize: 16,
+    padding: 0,
+  };
+
   return (
     <div ref={overlayRef} style={{ position: "fixed", inset: 0, zIndex: 1000 }}>
       <div
@@ -620,7 +702,7 @@ function Modal(props: ModalProps) {
           top: "50%",
           transform: "translateY(-50%)",
           background: theme.surface,
-          borderRadius: theme.radiusControl + 8,
+          borderRadius: theme.radiusModal ?? theme.radiusControl + 8,
           boxShadow: `0 32px 64px -24px ${theme.scrim}`,
           padding: "20px 16px 16px",
           display: "flex",
@@ -652,6 +734,8 @@ function Modal(props: ModalProps) {
         >
           {announcement}
         </div>
+
+        {/* Header: dialog title + month navigation row (spec 048). */}
         <div style={{ display: "flex", flexDirection: "column", gap: 2, padding: "0 4px" }}>
           <div
             id={labelId}
@@ -659,16 +743,51 @@ function Modal(props: ModalProps) {
           >
             {labels.dialogTitle}
           </div>
-          <div
-            id={monthId}
-            style={{
-              fontFamily: FONT_MONO,
-              fontSize: 11,
-              letterSpacing: "0.12em",
-              color: theme.inkMuted,
-            }}
-          >
-            {monthLabel.toUpperCase()}
+          {/* Month heading row: label (live region) flanked by Prev/Next buttons. */}
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 4 }}>
+            {/* Spec 048: Prev month button. Native `disabled` excludes it from
+                getFocusable so Tab cannot land on it at the min month. */}
+            <button
+              type="button"
+              aria-label={labels.prevMonth}
+              disabled={isPrevDisabled}
+              onClick={props.onPrevMonth}
+              style={{
+                ...navBtnStyle,
+                opacity: isPrevDisabled ? 0.35 : 1,
+                cursor: isPrevDisabled ? "default" : "pointer",
+              }}
+            >
+              ‹
+            </button>
+
+            {/* Spec 048: aria-live="polite" so screen readers announce the month when it changes. */}
+            <div
+              id={monthId}
+              aria-live="polite"
+              aria-atomic="true"
+              style={{
+                flex: 1,
+                textAlign: "center",
+                fontFamily: FONT_MONO,
+                fontSize: 11,
+                letterSpacing: "0.12em",
+                color: theme.inkMuted,
+              }}
+            >
+              {monthLabel.toUpperCase()}
+            </div>
+
+            {/* Spec 048: Next month button. No upper clamp per spec — arbitrary
+                forward navigation is allowed. */}
+            <button
+              type="button"
+              aria-label={labels.nextMonth}
+              onClick={props.onNextMonth}
+              style={navBtnStyle}
+            >
+              ›
+            </button>
           </div>
         </div>
 

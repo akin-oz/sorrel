@@ -213,6 +213,36 @@ export function toWeeks<T>(leadingBlanks: number, cells: readonly T[]): (T | nul
   return weeks;
 }
 
+/**
+ * Pick the focus target when the calendar moves to (year, month).
+ *
+ * Prefers `preferredDay` in the new month if it exists AND is deliverable
+ * (i.e. not blocked). If that day is blocked or does not exist in the month
+ * (e.g. day 31 into a 30-day month), falls back to the first non-blocked,
+ * non-before-earliest day in the month. Returns `null` when the month
+ * contains no deliverable day at all — the caller should keep the current
+ * view and not change the visible month.
+ *
+ * Reuses existing `buildMonthView` / `blockedInfo` primitives; no new date
+ * math is introduced (spec 048).
+ */
+export function focusTargetForMonth(
+  year: number,
+  month: number,
+  preferredDay: number,
+  earliest: IsoDate,
+): IsoDate | null {
+  const view = buildMonthView(year, month, { earliest });
+  // Try the preferred day first (clamped to what exists in this month).
+  const clampedDay = Math.min(preferredDay, daysInMonth(year, month));
+  const preferredIso = `${year}-${pad2(month)}-${pad2(clampedDay)}`;
+  const preferredCell = view.cells.find((c) => c.iso === preferredIso);
+  if (preferredCell && !preferredCell.blocked) return preferredIso;
+  // Fall back to the first deliverable day in the month.
+  const firstDeliverable = view.cells.find((c) => !c.blocked);
+  return firstDeliverable?.iso ?? null;
+}
+
 export type GridKey = "ArrowLeft" | "ArrowRight" | "ArrowUp" | "ArrowDown" | "Home" | "End";
 
 /** Roving-tabindex movement within a single month grid (clamped to month bounds). */
