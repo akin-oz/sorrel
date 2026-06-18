@@ -27,6 +27,8 @@ function summarize(event: FunnelEvent): string {
       return `payment succeeded for ${event.intent_id}`;
     case "payment_failed":
       return `payment failed (${event.code}) for ${event.intent_id ?? "unknown intent"}`;
+    case "funnel_draft_resumed":
+      return `draft resumed at ${event.step} from ${event.resumed_from}`;
   }
 }
 
@@ -151,5 +153,8 @@ describe("summarize (exhaustiveness)", () => {
         code: "card_declined",
       }),
     ).toContain("failed");
+    expect(
+      summarize({ name: "funnel_draft_resumed", step: "CATS", resumed_from: "PROFILE" }),
+    ).toContain("resumed");
   });
 });

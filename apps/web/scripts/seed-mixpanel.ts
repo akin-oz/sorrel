@@ -90,6 +90,19 @@ function emitSession(variant: Variant, furthest: number, index: number) {
   const at = () => start + seq * 30;
   const id = () => `${distinctId}:${seq}`;
 
+  // Spec 049: ~20% of sessions are returning users resuming a previous draft.
+  // resumed_from = one step behind furthest (simulates typical resume pattern).
+  if (index % 5 === 0 && furthest > 0) {
+    const resumedFrom = FUNNEL_STEPS[Math.max(0, furthest - 1)];
+    send(
+      { name: "funnel_draft_resumed", step: FUNNEL_STEPS[0], resumed_from: resumedFrom, variant },
+      distinctId,
+      at(),
+      id(),
+    );
+    seq += 1;
+  }
+
   for (let i = 0; i <= furthest; i += 1) {
     send({ name: "funnel_step_viewed", step: FUNNEL_STEPS[i], variant }, distinctId, at(), id());
     seq += 1;
