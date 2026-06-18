@@ -89,6 +89,17 @@ export interface PaymentFailed {
   variant?: string;
 }
 
+/** Spec 049: the user returned to a funnel they had started in a previous session. */
+export interface FunnelDraftResumed {
+  name: "funnel_draft_resumed";
+  /** The step the user is currently on when resumption is detected. */
+  step: FunnelStep;
+  /** The furthest step the user had previously reached (stored in localStorage). */
+  resumed_from: FunnelStep;
+  /** A/B bucket, carried so resumption rate is attributable per variant. */
+  variant?: string;
+}
+
 export type FunnelEvent =
   | FunnelStepViewed
   | StepCompleted
@@ -98,7 +109,8 @@ export type FunnelEvent =
   | ExitIntentRecovered
   | PaymentIntentCreated
   | PaymentSucceeded
-  | PaymentFailed;
+  | PaymentFailed
+  | FunnelDraftResumed;
 
 /** The set of valid event names, derived from the union. */
 export type FunnelEventName = FunnelEvent["name"];

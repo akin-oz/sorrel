@@ -72,6 +72,13 @@ export function FunnelProvider({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const currentStep = stepFromSegment(pathname?.split("/")[2] ?? "");
 
+  // Stable ref so the one-shot HYDRATE effect can read the current step without
+  // taking it as a dependency (it must fire exactly once on mount).
+  const currentStepRef = useRef<FunnelStep | null>(currentStep);
+  useEffect(() => {
+    currentStepRef.current = currentStep;
+  });
+
   // Server-backed autosave (spec 013): persists the draft and hands back its id.
   const draftId = useDraftAutosave(state, currentStep);
 
@@ -80,17 +87,29 @@ export function FunnelProvider({ children }: { children: ReactNode }) {
   const confirm = useCallback(() => setConfirmed(true), []);
 
   // Resume: hydrate once from localStorage, then persist on every change.
+  // Spec 049: when the hydrated draft shows the user has previously advanced past
+  // the first step, fire funnel_draft_resumed so we can track return-session rate.
   const hydratedRef = useRef(false);
   useEffect(() => {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (raw) {
       try {
-        dispatch({ type: "HYDRATE", state: JSON.parse(raw) as FunnelState });
+        const restored = JSON.parse(raw) as FunnelState;
+        dispatch({ type: "HYDRATE", state: restored });
+        if (restored.furthestStep !== "CATS" && currentStep) {
+          track({
+            name: "funnel_draft_resumed",
+            step: currentStep,
+            resumed_from: restored.furthestStep,
+            variant: variantRef.current ?? undefined,
+          });
+        }
       } catch {
         // Corrupt draft — ignore and start fresh.
       }
     }
     hydratedRef.current = true;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
