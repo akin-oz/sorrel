@@ -52,6 +52,9 @@ export const German: Story = {
       freeDelivery: "Kostenlose Lieferung",
       blockedWeekday: (weekday) => `Keine Lieferung am ${weekday}`,
       beforeEarliest: (date) => `Frühste Lieferung am ${date}`,
+      // Spec 048: localised month-navigation labels exercised in this story.
+      prevMonth: "Vorheriger Monat",
+      nextMonth: "Nächster Monat",
     },
   },
 };

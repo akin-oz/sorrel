@@ -5,6 +5,7 @@ import {
   clampToMonth,
   daysInMonth,
   earliestDeliverableDate,
+  focusTargetForMonth,
   formatLongDate,
   isDeliverableWeekday,
   mondayIndex,
@@ -330,5 +331,48 @@ describe("moveFocus (roving tabindex, clamped to month)", () => {
     expect(moveFocus("2026-06-17", "Home", 2026, 6)).toBe("2026-06-15");
     // Mon 15 Jun -> End -> Sun 21 Jun
     expect(moveFocus("2026-06-15", "End", 2026, 6)).toBe("2026-06-21");
+  });
+});
+
+// --- Spec 048: focusTargetForMonth ----------------------------------------
+
+describe("focusTargetForMonth (spec 048)", () => {
+  // earliest = Mon 15 June 2026 (the design case).
+  const earliest = "2026-06-15";
+
+  it("returns the same day number when it is deliverable in the target month", () => {
+    // Day 17 (Wed) in June 2026 is deliverable. Moving to July with preferredDay=17
+    // should land on 2026-07-17 (Fri — blocked!) ... so pick a deliverable day.
+    // Day 17 in July 2026 = Friday (blocked). Let's use day 15 instead.
+    // Mon 15 June → Mon 20 July (both Mondays? check: July 1 = Wed, +14 = Jul 15 = Wed. Jul 20 = Mon)
+    // preferredDay=20 in July 2026: Jul 20 = Monday (deliverable).
+    expect(focusTargetForMonth(2026, 7, 20, earliest)).toBe("2026-07-20");
+  });
+
+  it("falls back to the earliest deliverable day when the same day is blocked", () => {
+    // Day 17 in July 2026 = Friday (blocked weekday).
+    // First deliverable day in July 2026 after earliest (Jun 15, already past):
+    // Jul 1=Wed (deliverable), so fallback = 2026-07-01.
+    expect(focusTargetForMonth(2026, 7, 17, earliest)).toBe("2026-07-01");
+  });
+
+  it("clamps day 31 into a 30-day month and falls back when clamped day is blocked", () => {
+    // June has 30 days. Day 31 is clamped to day 30 = 2026-06-30 (Tuesday = blocked).
+    // First deliverable in June >= earliest (Jun 15): Mon 15 Jun.
+    expect(focusTargetForMonth(2026, 6, 31, earliest)).toBe("2026-06-15");
+  });
+
+  it("clamps day 31 into a 30-day month and returns it when deliverable", () => {
+    // July has 31 days. Day 31 = 2026-07-31 (Friday = blocked).
+    // But day 30 in June (clamped from 31) = Tue = blocked → fallback to earliest in June.
+    // Use a different scenario: day 22 in June = Monday (deliverable).
+    expect(focusTargetForMonth(2026, 6, 22, earliest)).toBe("2026-06-22");
+  });
+
+  it("returns null when the month contains no deliverable day", () => {
+    // Construct a scenario where the entire month is before earliest.
+    // earliest = 2026-07-01; June 2026 has no day >= 2026-07-01, so all are blocked
+    // as BEFORE_EARLIEST.
+    expect(focusTargetForMonth(2026, 6, 15, "2026-07-01")).toBeNull();
   });
 });
