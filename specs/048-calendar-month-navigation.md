@@ -81,7 +81,7 @@ short-month day-31 clamp, fully-blocked-month → null).
 
 - `DeliveryLabels` gains two **optional** fields, `prevMonth` and `nextMonth`,
   with English defaults added to `DEFAULT_DELIVERY_LABELS` (`prevMonth:
-  "Previous month"`, `nextMonth: "Next month"`). Because `labels` is already
+"Previous month"`, `nextMonth: "Next month"`). Because `labels` is already
   `Partial<DeliveryLabels>` merged over the defaults
   (`DeliveryDatePicker.tsx:189`), and the two fields are added to the defaults,
   hosts that pass no labels keep working.
@@ -212,8 +212,8 @@ emits no analytics; the typed funnel events (`funnel_step_viewed`,
 `packages/analytics/src/events.ts`) are emitted by the web layer
 (`apps/web/.../wizard/FunnelProvider.tsx` and the seed scripts), keyed off the
 picker's `onConfirm` callback — which this spec does not alter. Month
-navigation changes only which day is *visible/focused*, not which day is
-*committed*, so it crosses no funnel-step boundary and warrants no new event.
+navigation changes only which day is _visible/focused_, not which day is
+_committed_, so it crosses no funnel-step boundary and warrants no new event.
 The existing `step_completed` for the delivery step still fires on confirm,
 unchanged. If the human wants a sub-step "month_navigated" interaction event,
 that is a new field on the analytics contract and must be its own spec — it is

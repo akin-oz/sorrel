@@ -20,7 +20,7 @@ owner: packages/ui · apps/web
   card grid and the hero image.
 
 No existing approved spec covers image optimization. Spec 012 (landing redesign)
-introduced the striped placeholder fallback and spec 018 introduced the App* UI
+introduced the striped placeholder fallback and spec 018 introduced the App\* UI
 layer, but both treat the image as a raw `<img>`. Spec 015 (CI SEO/Lighthouse)
 sets a budget that CLS regressions would threaten, but did not give `AppImage`
 the tooling to satisfy it.
@@ -56,7 +56,7 @@ Exact files, symbols, and call sites touched:
 - `AppImage` render logic:
   - `!src` → unchanged decorative placeholder `Box` (the spec 012 stand-in).
   - `src` **and** `imageComponent` provided → call `imageComponent({ src, alt,
-    width: intrinsicWidth, height: intrinsicHeight, ... })` and wrap/style it so
+width: intrinsicWidth, height: intrinsicHeight, ... })` and wrap/style it so
     the rendered element keeps `width: 100%`, `objectFit: cover`, the tokenized
     CSS `height`, and `borderRadius: radius`. (The injected element receives the
     intrinsic dimensions for aspect-ratio reservation; CSS overrides the display
@@ -67,7 +67,7 @@ Exact files, symbols, and call sites touched:
 
 **`packages/ui/src/app/AppImage.stories.tsx` (new):**
 
-- `title: "App*/AppImage"`, matching the App* story convention (per spec 038).
+- `title: "App*/AppImage"`, matching the App\* story convention (per spec 038).
 - Stories: `PlaceholderFallback` (no `src`), `PlainImg` (`src`, no
   `imageComponent`), and `WithImageComponent` — the last passes a tiny local
   stub render-prop (e.g. a plain `<img {...props} loading="lazy" />`) to
@@ -80,11 +80,13 @@ type their wrapper.
 
 **`apps/web/next.config.ts`:** add `images.remotePatterns` allowing the Storyblok
 CDN host so `next/image` will optimize Storyblok assets:
+
 ```ts
 images: {
   remotePatterns: [{ protocol: "https", hostname: "a2.storyblok.com" }],
 },
 ```
+
 (The existing CSP `img-src` already allows `https:`, so no CSP change is needed.)
 
 **`apps/web/app/_cms/Hero.tsx`:** this is the one current call site whose `src`

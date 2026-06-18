@@ -15,7 +15,7 @@ the Continue button (`AppButton variant="contained"`) and, when the step is inva
 the `incomplete` helper text — but it renders **no Save & exit affordance at all**.
 
 The draft is already persisted continuously by `useDraftAutosave` (spec 013), so the
-data side is solved. What is missing is the *intentional-exit* affordance: a way for a
+data side is solved. What is missing is the _intentional-exit_ affordance: a way for a
 user who wants to stop now (knowing their progress is saved) to leave deliberately,
 and for us to attribute that exit distinctly from the passive page-close drop-off.
 
@@ -48,7 +48,7 @@ Exact files, components, and events touched:
     3. navigates to the locale root via the existing `router.push("/")` (the
        `useRouter` import from `../../../i18n/navigation` is locale-aware, so `"/"`
        resolves to `/${locale}` — confirm this matches how the Sorrel logo `Link
-       href="/"` already behaves in this same file). If the locale-aware router does
+href="/"` already behaves in this same file). If the locale-aware router does
        **not** prefix the locale, use `` `/${locale}` `` instead — but do not invent a
        new navigation helper; reuse the `useRouter`/`Link` already imported here.
   - No new autosave call on click — the draft is already persisted by
@@ -107,7 +107,7 @@ Analytics event touched: **`funnel_abandoned`** (gains an optional `reason`).
 - [ ] `yarn lint` clean.
 - [ ] `packages/analytics` unit tests pass; a test asserts a `funnel_abandoned` emit
       carrying `reason: "save_exit"` type-checks and round-trips through the sink, and
-      that an emit *without* `reason` still type-checks (back-compat).
+      that an emit _without_ `reason` still type-checks (back-compat).
 - [ ] The Save & exit `AppButton variant="text"` renders below Continue on the CATS,
       PROFILE, RECIPES, DELIVERY, and PLAN steps.
 - [ ] It does **not** render on CHECKOUT (payment in progress) or SUMMARY (complete).

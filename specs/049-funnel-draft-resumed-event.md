@@ -54,7 +54,7 @@ Exact symbols and files touched:
 - **`apps/web/app/[locale]/wizard/FunnelProvider.tsx`** — in the hydrate effect
   (lines 84–94), after a successful `dispatch({ type: "HYDRATE", ... })`, emit
   `track({ name: "funnel_draft_resumed", step: <restored furthest step>, variant:
-  variantRef.current ?? undefined })` **only when the restored draft is genuinely
+variantRef.current ?? undefined })` **only when the restored draft is genuinely
   resumable** (see decision note below). Variant is read via the existing
   `variantRef` fail-open pattern (lines 66–70, 119–138); resume must not block on
   variant resolution.
@@ -93,8 +93,8 @@ change is **purely additive**: a new union member. Consequences:
 - **No server-side resume tracking.** The draft autosave write-path
   (`useDraftAutosave`, spec 013) is untouched; this event is client-emit only.
 - **No change to `ResumeBanner` behaviour or copy**, and no new event when the user
-  *clicks* "Resume" (that would be a distinct `resume_clicked`-style event — not in
-  this spec). This spec fires on *restore*, not on the click.
+  _clicks_ "Resume" (that would be a distinct `resume_clicked`-style event — not in
+  this spec). This spec fires on _restore_, not on the click.
 - **No reducer/state-shape change.** `FunnelState.furthestStep` and the `HYDRATE`
   action are used as-is.
 
@@ -103,8 +103,8 @@ change is **purely additive**: a new union member. Consequences:
 The brief says emit "when the restored state has a **non-null** `furthestStep`."
 But `furthestStep` is typed `FunnelStep` (non-nullable) and defaults to `"CATS"`
 (`state.ts` lines 30, 39) — it is **never null**. A literal "non-null" guard would
-fire on *every* hydrate, including a brand-new draft sitting at `CATS`, inflating
-resume-rate. The faithful intent of a *resume* matches `ResumeBanner`'s own guard
+fire on _every_ hydrate, including a brand-new draft sitting at `CATS`, inflating
+resume-rate. The faithful intent of a _resume_ matches `ResumeBanner`'s own guard
 (`ResumeBanner.tsx` line 20): there is real progress to resume, i.e.
 `restored.furthestStep !== "CATS"`. **Recommended guard: `restored.furthestStep !== FUNNEL_STEPS[0]`.**
 The reviewer must confirm this interpretation (resume = progress beyond the first
@@ -131,7 +131,7 @@ step) versus a literal every-hydrate emit before implementation proceeds.
 New typed event:
 
 - **`funnel_draft_resumed`** — `{ name: "funnel_draft_resumed"; step: FunnelStep;
-  variant?: string }`. Fires once when a resumable draft is restored from
+variant?: string }`. Fires once when a resumable draft is restored from
   `localStorage` on session start. `step` = the restored `furthestStep`;
   `variant` = the A/B arm (so resume-rate splits per arm). Mirrors the
   `funnel_abandoned` structure.

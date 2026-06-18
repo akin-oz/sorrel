@@ -1,3 +1,4 @@
+import { print } from "graphql";
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 
@@ -51,7 +52,7 @@ async function readDraft(origin: string, draftId: string): Promise<DraftLookup |
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify({
-      query: FunnelDraftLookupDocument.loc?.source.body,
+      query: print(FunnelDraftLookupDocument),
       variables: { id: draftId },
     }),
   });

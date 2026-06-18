@@ -2,8 +2,8 @@
 
 import { type ComponentType, type ReactNode, useEffect } from "react";
 
-import dynamic from "next/dynamic";
 import { useLocale, useTranslations } from "next-intl";
+import dynamic from "next/dynamic";
 
 import { earliestDeliverableDate } from "@sorrel/domain";
 import { FUNNEL_STEPS, type FunnelStep } from "@sorrel/shared";
@@ -18,16 +18,17 @@ import {
 
 import type { RecipeBlok } from "../../../../types/storyblok.gen";
 import { CatsForm } from "../CatsForm";
-const CheckoutForm = dynamic(
-  () => import("../CheckoutForm").then((m) => ({ default: m.CheckoutForm })),
-  { ssr: false },
-);
 import { EmailForm } from "../EmailForm";
 import { useFunnel } from "../FunnelProvider";
 import { PlanForm } from "../PlanForm";
 import { ProfileForm } from "../ProfileForm";
 import { RecipesPicker } from "../RecipesPicker";
 import { SummaryForm } from "../SummaryForm";
+
+const CheckoutForm = dynamic(
+  () => import("../CheckoutForm").then((m) => ({ default: m.CheckoutForm })),
+  { ssr: false },
+);
 
 /**
  * Presentational frame shared by every step — the "Step N of 7" overline, a serif
