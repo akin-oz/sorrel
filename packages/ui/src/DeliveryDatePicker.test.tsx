@@ -20,7 +20,7 @@ const TODAY = "2026-06-12";
 const EARLIEST_DAY = "15";
 const NEXT_DELIVERABLE_ISO = "2026-06-17";
 const NEXT_DELIVERABLE_DAY = "17";
-const BLOCKED_FRIDAY_LABEL = "19 — No deliveries on Fridays";
+const BLOCKED_FRIDAY_LABEL = "Friday 19 June — No deliveries on Fridays";
 
 type PickerProps = ComponentProps<typeof DeliveryDatePicker>;
 
@@ -428,7 +428,7 @@ describe("DeliveryDatePicker", () => {
       const dialog = await openDialog(user);
 
       // Wed 17 is the next deliverable day after the earliest (Mon 15).
-      await user.click(within(dialog).getByRole("gridcell", { name: /^17/ }));
+      await user.click(within(dialog).getByRole("gridcell", { name: /17 June/ }));
       const selected = within(dialog).getAllByRole("gridcell", { selected: true });
       expect(selected).toHaveLength(1);
       expect(selected[0].textContent).toContain(NEXT_DELIVERABLE_DAY);
@@ -506,8 +506,11 @@ describe("DeliveryDatePicker", () => {
       confirm.focus();
       expect(confirm).toHaveFocus();
       await user.keyboard("{Tab}");
-      // First focusable in the dialog is the currently-active gridcell button.
-      const firstFocusable = within(dialog).getByRole("gridcell", { selected: true });
+      // First focusable is the Next month button — Prev is disabled (native
+      // `disabled`) at the min month (June) and excluded from getFocusable.
+      const firstFocusable = within(dialog).getByRole("button", {
+        name: DEFAULT_DELIVERY_LABELS.nextMonth,
+      });
       expect(firstFocusable).toHaveFocus();
 
       await user.keyboard("{Escape}");
@@ -520,7 +523,11 @@ describe("DeliveryDatePicker", () => {
       const dialog = await openDialog(user);
       unblockFocusableInJsdom(dialog);
 
-      const firstFocusable = within(dialog).getByRole("gridcell", { selected: true });
+      // First focusable is the Next month button — Prev is disabled (native
+      // `disabled`) at the min month (June) and excluded from getFocusable.
+      const firstFocusable = within(dialog).getByRole("button", {
+        name: DEFAULT_DELIVERY_LABELS.nextMonth,
+      });
       firstFocusable.focus();
       expect(firstFocusable).toHaveFocus();
       await user.keyboard("{Shift>}{Tab}{/Shift}");
