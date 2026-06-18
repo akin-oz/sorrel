@@ -131,7 +131,7 @@ export type AppButtonProps = Omit<ButtonProps, "sx"> & {
   inverted?: boolean;
 };
 /** CTA / text button — styling from the theme's MuiButton overrides. */
-export function AppButton({ inverted, ...props }: AppButtonProps) {
+export function AppButton({ inverted, ref, ...props }: AppButtonProps) {
   const sx = inverted
     ? {
         bgcolor: sorrelTheme.onAccent,
@@ -139,7 +139,7 @@ export function AppButton({ inverted, ...props }: AppButtonProps) {
         "&:hover": { bgcolor: sorrelTheme.accentTint },
       }
     : undefined;
-  return <Button sx={sx} {...props} />;
+  return <Button ref={ref} sx={sx} {...props} />;
 }
 
 export interface AppLinkProps extends LayoutProps {
@@ -196,8 +196,8 @@ export function AppLink({
 
 export type AppIconButtonProps = Omit<IconButtonProps, "sx">;
 /** Icon-only button (e.g. the wizard back arrow) — 44px target, inherits ink. */
-export function AppIconButton(props: AppIconButtonProps) {
-  return <IconButton sx={{ width: 44, height: 44, color: "text.primary" }} {...props} />;
+export function AppIconButton({ ref, ...props }: AppIconButtonProps) {
+  return <IconButton ref={ref} sx={{ width: 44, height: 44, color: "text.primary" }} {...props} />;
 }
 
 export type AppChipProps = Omit<ChipProps, "sx">;
@@ -221,9 +221,10 @@ export type AppFieldProps = Omit<TextFieldProps, "sx"> & {
   options?: { value: string; label: string }[];
 };
 /** Text or select field (PROFILE/EMAIL). Pass `select` + `options` for a dropdown. */
-export function AppField({ options, children, ...props }: AppFieldProps) {
+export function AppField({ options, children, ref, ...props }: AppFieldProps) {
   return (
     <TextField
+      ref={ref}
       {...props}
       slotProps={
         props.error

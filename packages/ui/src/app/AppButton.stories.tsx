@@ -1,3 +1,5 @@
+import { useRef } from "react";
+
 import type { Meta, StoryObj } from "@storybook/react";
 
 import { AppButton } from "./components";
@@ -25,4 +27,12 @@ export const Large: Story = {
 };
 export const Disabled: Story = {
   args: { variant: "contained", disabled: true, children: "Continue (disabled)" },
+};
+
+export const WithRef: Story = {
+  render: function RefSmoke(args) {
+    const ref = useRef<HTMLButtonElement>(null);
+    return <AppButton ref={ref} {...args} />;
+  },
+  args: { variant: "contained", children: "With ref" },
 };
