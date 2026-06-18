@@ -42,15 +42,12 @@ Exact files, components, and events touched:
     Note SUMMARY is `isLastStep`, so the Save & exit gate must key on the step
     identity, not on `showCta`.
   - Add a `handleSaveExit` callback (mirroring the `handleNext`/`handleBack`
-    `useCallback` style already in the file) that:
-    1. returns early if `!currentStep`;
-    2. fires `track({ name: "funnel_abandoned", step: currentStep, reason: "save_exit", variant: variant ?? undefined })`;
-    3. navigates to the locale root via the existing `router.push("/")` (the
-       `useRouter` import from `../../../i18n/navigation` is locale-aware, so `"/"`
-       resolves to `/${locale}` — confirm this matches how the Sorrel logo `Link
+    `useCallback` style already in the file) that: 1. returns early if `!currentStep`; 2. fires `track({ name: "funnel_abandoned", step: currentStep, reason: "save_exit", variant: variant ?? undefined })`; 3. navigates to the locale root via the existing `router.push("/")` (the
+    `useRouter` import from `../../../i18n/navigation` is locale-aware, so `"/"`
+    resolves to `/${locale}` — confirm this matches how the Sorrel logo `Link
 href="/"` already behaves in this same file). If the locale-aware router does
-       **not** prefix the locale, use `` `/${locale}` `` instead — but do not invent a
-       new navigation helper; reuse the `useRouter`/`Link` already imported here.
+    **not** prefix the locale, use `` `/${locale}` `` instead — but do not invent a
+    new navigation helper; reuse the `useRouter`/`Link` already imported here.
   - No new autosave call on click — the draft is already persisted by
     `useDraftAutosave`; `handleSaveExit` must not invoke `save`/`saveFunnelDraft`.
 

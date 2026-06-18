@@ -35,6 +35,13 @@ export function useExitIntent({ armed, onTrigger }: UseExitIntentOptions): void 
     }
 
     document.addEventListener("mouseleave", handle);
+
+    // E2E test signal: tells Cypress the listener is registered and the
+    // trigger is ready to receive a synthetic mouseleave.
+    const e2e = process.env.NODE_ENV !== "production" || process.env.NEXT_PUBLIC_E2E === "1";
+    if (e2e)
+      (window as Window & { __sorrelExitIntentArmed?: boolean }).__sorrelExitIntentArmed = true;
+
     return () => document.removeEventListener("mouseleave", handle);
   }, [armed]);
 }

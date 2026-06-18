@@ -39,10 +39,10 @@ describe("Exit-intent modal (spec 010 / spec 044)", () => {
       },
     });
 
-    // Wait for React to hydrate: the Continue button is rendered by the wizard
-    // shell only after client-side hydration completes, so its presence confirms
-    // that useExitIntent's addEventListener has been registered.
-    cy.contains("button", /continue/i).should("be.visible");
+    // Wait until useExitIntent has registered its mouseleave listener.
+    // __sorrelExitIntentArmed is set synchronously inside the effect, so its
+    // presence is an exact signal — not a timing heuristic.
+    cy.window().should("have.property", "__sorrelExitIntentArmed");
 
     // Fire a synthetic mouseleave with clientY: 0 on document.
     // The useExitIntent hook listens on `document` via addEventListener, so
