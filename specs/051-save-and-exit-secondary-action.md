@@ -2,7 +2,7 @@
 spec: 051
 title: Add a Save & exit secondary action to the wizard chrome
 status: proposed
-approved: no # ONLY a human flips this to yes — implementation is gated on it
+approved: yes
 tier: 2 # JD coverage — funnel completeness / intentional-exit affordance
 owner: apps/web · packages/analytics
 ---

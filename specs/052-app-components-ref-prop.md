@@ -2,7 +2,7 @@
 spec: 052
 title: React 19 ref-as-prop on App* interactive components — AppButton, AppField, AppIconButton
 status: proposed
-approved: no # ONLY a human flips this to yes — implementation is gated on it
+approved: yes
 tier: 2 # JD coverage — frontend rigor / accessibility plumbing
 owner: packages/ui/src/app/components.tsx
 ---

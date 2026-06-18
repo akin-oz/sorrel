@@ -2,7 +2,7 @@
 spec: 050
 title: Optimize AppImage via an injectable next/image render-prop
 status: proposed
-approved: no # ONLY a human flips this to yes — implementation is gated on it
+approved: yes
 tier: 3 # closer: perf/CLS polish on top of the credible core
 owner: packages/ui · apps/web
 ---

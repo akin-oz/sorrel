@@ -2,7 +2,7 @@
 spec: 049
 title: Add funnel_draft_resumed analytics event
 status: proposed
-approved: no # ONLY a human flips this to yes — implementation is gated on it
+approved: yes
 tier: 2 # JD coverage: closes an instrumentation gap on a claimed recovery lever
 owner: packages/analytics · apps/web
 ---

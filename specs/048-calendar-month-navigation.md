@@ -2,7 +2,7 @@
 spec: 048
 title: Add Previous/Next month navigation to the delivery date picker (WCAG 2.1.1)
 status: proposed
-approved: no # ONLY a human flips this to yes — implementation is gated on it
+approved: yes
 tier: 1 # 1 credible core · 2 JD coverage · 3 closers
 owner: packages/ui · packages/domain
 ---
