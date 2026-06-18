@@ -11,7 +11,8 @@
     "incomplete": "Complete this step to continue",
     "stepProgress": "Step {current} of {total}",
     "resume": "Resume",
-    "resumeBanner": "Welcome back — we saved where you left off."
+    "resumeBanner": "Welcome back — we saved where you left off.",
+    "saveAndExit": "Save & exit"
   },
   "ExitIntent": {
     "title": "Leaving so soon?",

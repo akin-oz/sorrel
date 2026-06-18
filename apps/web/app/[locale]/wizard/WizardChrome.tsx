@@ -62,6 +62,17 @@ export function WizardChrome({ children }: { children: ReactNode }) {
     router.push(`/wizard/${segmentForStep(prevStep(currentStep))}`);
   }, [currentStep, router]);
 
+  const handleSaveExit = useCallback(() => {
+    if (!currentStep) return;
+    track({
+      name: "funnel_abandoned",
+      step: currentStep,
+      reason: "save_exit",
+      variant: variant ?? undefined,
+    });
+    router.push("/");
+  }, [currentStep, track, variant, router]);
+
   // Spec 039: CHECKOUT drives its own submit through the Stripe PaymentElement,
   // so the chrome's Continue is hidden there. Spec 046: once the funnel is
   // confirmed, the SUMMARY success card is terminal — no chrome CTA is
@@ -69,6 +80,11 @@ export function WizardChrome({ children }: { children: ReactNode }) {
   // a confirmed user back to SUMMARY, where the old `isLastStep && confirmed`
   // guard never matched).
   const showCta = currentStep ? currentStep !== "CHECKOUT" && !confirmed : false;
+  // Spec 051: visible on CATS/PROFILE/RECIPES/DELIVERY/PLAN/EMAIL; hidden on
+  // CHECKOUT (payment in progress) and SUMMARY (already complete).
+  const showSaveExit = currentStep
+    ? currentStep !== "CHECKOUT" && currentStep !== "SUMMARY"
+    : false;
   const showBack = currentStep ? !isFirstStep(currentStep) : false;
   const progressLabel = t("stepProgress", { current: stepNumber, total });
 
@@ -191,11 +207,7 @@ export function WizardChrome({ children }: { children: ReactNode }) {
             alignItems={{ md: "center" }}
             justifyContent={{ md: "center" }}
           >
-            <AppStack
-              width="100%"
-              flex={{ xs: 1, md: "none" }}
-              gap={{ xs: 2.75, md: 3.5 }}
-            >
+            <AppStack width="100%" flex={{ xs: 1, md: "none" }} gap={{ xs: 2.75, md: 3.5 }}>
               <AppBox display={{ xs: "block", md: "none" }}>
                 <ResumeBanner />
               </AppBox>
@@ -227,6 +239,11 @@ export function WizardChrome({ children }: { children: ReactNode }) {
                     {!validity.valid ? t("incomplete") : ""}
                   </span>
                 </AppStack>
+              ) : null}
+              {showSaveExit ? (
+                <AppButton variant="text" fullWidth onClick={handleSaveExit}>
+                  {t("saveAndExit")}
+                </AppButton>
               ) : null}
             </AppStack>
           </AppCard>

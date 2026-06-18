@@ -11,7 +11,8 @@
     "incomplete": "Schließe diesen Schritt ab, um fortzufahren",
     "stepProgress": "Schritt {current} von {total}",
     "resume": "Fortsetzen",
-    "resumeBanner": "Willkommen zurück — wir haben gespeichert, wo du aufgehört hast."
+    "resumeBanner": "Willkommen zurück — wir haben gespeichert, wo du aufgehört hast.",
+    "saveAndExit": "Speichern & beenden"
   },
   "ExitIntent": {
     "title": "Schon dabei zu gehen?",

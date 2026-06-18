@@ -38,6 +38,9 @@ export interface FunnelAbandoned {
   name: "funnel_abandoned";
   /** Furthest step reached before leaving. */
   step: FunnelStep;
+  /** Why the user left. Absent on the passive pagehide path; "save_exit" on the
+   *  deliberate Save & exit click (spec 051). */
+  reason?: "save_exit";
   /** A/B bucket, carried so abandonment is attributable per variant. */
   variant?: string;
 }
