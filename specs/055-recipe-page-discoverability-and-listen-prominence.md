@@ -1,8 +1,8 @@
 ---
 spec: 055
 title: Make recipe pages reachable from the landing showcase and the Listen button prominent
-status: proposed
-approved: no # ONLY a human flips this to yes — implementation is gated on it
+status: accepted
+approved: yes # ONLY a human flips this to yes — implementation is gated on it
 tier: 3 # closer — finishes spec 053 so the feature can actually be found
 owner: apps/web · packages/ui
 ---
