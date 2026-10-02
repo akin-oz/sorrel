@@ -4,7 +4,6 @@ import { notFound } from "next/navigation";
 
 import { AppBox, AppLink, AppStack, AppText } from "@sorrel/ui";
 
-import { Link } from "../../../../i18n/navigation";
 import { getRecipes } from "../../../../lib/cms";
 import { RecipeCard } from "../../../_cms/RecipeCard";
 import { ListenButton } from "./ListenButton";
@@ -40,7 +39,7 @@ export default async function RecipePage({
       gap={2.5}
     >
       <AppText variant="body2" color="text.secondary">
-        <AppLink href="/" component={Link} color="inherit">
+        <AppLink href={`/${locale}`} color="inherit">
           ← Sorrel
         </AppLink>
       </AppText>
