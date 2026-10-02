@@ -245,6 +245,26 @@ token swap; structure, keyboard model, and ARIA are identical across both. Explo
 
 ---
 
+## Text to speech
+
+A **Listen** button on each recipe page (`/recipes/[slug]`) reads the recipe description aloud
+([spec 053](specs/053-recipe-listen-tts.md)). The `ListenButton` posts the text to `/api/tts`,
+which proxies ElevenLabs' streaming endpoint with the low-latency `eleven_flash_v2_5` model and
+streams the mp3 back. Text is capped at 1,000 characters, and each IP gets 5 requests a minute
+(in memory, per instance). The button has idle / loading / playing / paused / error states, an
+`aria-live` status line, and fires the typed `tts_play` / `tts_pause` / `tts_ended` /
+`tts_error` events.
+
+- **Env vars (server-only):** `ELEVENLABS_API_KEY`, `ELEVENLABS_VOICE_ID`. Without them the route
+  returns `503 { error: "not_configured" }` and the button shows its retry state.
+- **Design decision:** the route calls the REST endpoint with plain `fetch` rather than the
+  `@elevenlabs/elevenlabs-js` SDK. It is one POST, and `fetch` already returns a `ReadableStream`
+  that pipes straight into the `Response`, so the SDK would be a dependency with no behavioural
+  gain. The key stays on the server, and tests never call ElevenLabs (Cypress intercepts
+  `/api/tts` with a fixture).
+
+---
+
 ## Run it locally
 
 ```bash
@@ -280,6 +300,7 @@ runtime keys only need to live in the Vercel dashboard.
 | Server-only | `POSTHOG_PERSONAL_API_KEY` / `POSTHOG_PROJECT_ID` / `POSTHOG_HOST` | `/insights` live funnel read (`query:read` scope — never `NEXT_PUBLIC_*`)      |
 | Server-only | `STRIPE_SECRET_KEY` / `STRIPE_WEBHOOK_SECRET`                      | `/api/checkout/{intent,webhook}` (a Restricted `rk_test_…` key is recommended) |
 | Server-only | `STORYBLOK_*` (preview / webhook / PAT / region)                   | CMS draft + revalidate paths                                                   |
+| Server-only | `ELEVENLABS_API_KEY` / `ELEVENLABS_VOICE_ID`                       | `/api/tts` read-aloud proxy (spec 053)                                         |
 
 **Vercel `NEXT_PUBLIC_SITE_URL` scoping.** Set it in **Production** only; leave it blank on
 Preview, so the Apollo RSC client falls through to `VERCEL_URL` and preview RSC calls hit the

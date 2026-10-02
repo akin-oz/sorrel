@@ -27,7 +27,9 @@
       "title": "How many cats are we feeding?",
       "description": "Every bowl gets its own portion plan."
     },
-    "PROFILE": { "title": "Tell us about your cat" },
+    "PROFILE": {
+      "title": "Tell us about your cat"
+    },
     "RECIPES": {
       "title": "Recipes your cat will love",
       "description": "Filtered to your cat's tastes and needs."
@@ -86,6 +88,22 @@
       "GRAIN_FREE": "Grain-free",
       "CHICKEN_FREE": "Chicken-free",
       "SENSITIVE": "Sensitive"
+    },
+    "listen": {
+      "action": {
+        "idle": "Listen",
+        "loading": "Loading audio…",
+        "playing": "Pause",
+        "paused": "Resume",
+        "error": "Retry"
+      },
+      "status": {
+        "loading": "Loading audio",
+        "playing": "Playing",
+        "paused": "Paused",
+        "ended": "Finished",
+        "error": "Audio unavailable"
+      }
     }
   },
   "Rail": {

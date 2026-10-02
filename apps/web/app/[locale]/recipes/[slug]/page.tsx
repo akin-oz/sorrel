@@ -7,6 +7,7 @@ import { AppBox, AppLink, AppStack, AppText } from "@sorrel/ui";
 import { Link } from "../../../../i18n/navigation";
 import { getRecipes } from "../../../../lib/cms";
 import { RecipeCard } from "../../../_cms/RecipeCard";
+import { ListenButton } from "./ListenButton";
 
 /**
  * Recipe detail / preview page (spec 011). Recipes are a CMS content type with no
@@ -43,6 +44,11 @@ export default async function RecipePage({
           ← Sorrel
         </AppLink>
       </AppText>
+      {recipe.description ? (
+        <AppBox>
+          <ListenButton text={recipe.description} contentId={recipe.slug} />
+        </AppBox>
+      ) : null}
       <AppBox maxWidth={440}>
         <RecipeCard blok={recipe} />
       </AppBox>

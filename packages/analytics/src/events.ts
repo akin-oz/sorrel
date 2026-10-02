@@ -103,6 +103,50 @@ export interface FunnelDraftResumed {
   variant?: string;
 }
 
+/**
+ * Spec 053: read-aloud (TTS) error codes. Server codes mirror the `/api/tts`
+ * `{ error }` body; `network` and `playback_failed` are client-side failures.
+ */
+export type TtsErrorCode =
+  | "invalid_json"
+  | "text_required"
+  | "text_too_long"
+  | "rate_limited"
+  | "not_configured"
+  | "upstream_error"
+  | "network"
+  | "playback_failed";
+
+/** Spec 053: read-aloud audio started (first play or resume). Not a funnel step. */
+export interface TtsPlay {
+  name: "tts_play";
+  /** What was read — the recipe slug. */
+  content_id: string;
+  /** Characters sent to TTS. */
+  chars: number;
+}
+
+/** Spec 053: the user paused read-aloud audio. */
+export interface TtsPause {
+  name: "tts_pause";
+  content_id: string;
+  /** Playback position in seconds when paused. */
+  position_s: number;
+}
+
+/** Spec 053: read-aloud audio played to the end. */
+export interface TtsEnded {
+  name: "tts_ended";
+  content_id: string;
+}
+
+/** Spec 053: read-aloud failed (fetch, network, or playback). */
+export interface TtsError {
+  name: "tts_error";
+  content_id: string;
+  error: TtsErrorCode;
+}
+
 export type FunnelEvent =
   | FunnelStepViewed
   | StepCompleted
@@ -113,7 +157,11 @@ export type FunnelEvent =
   | PaymentIntentCreated
   | PaymentSucceeded
   | PaymentFailed
-  | FunnelDraftResumed;
+  | FunnelDraftResumed
+  | TtsPlay
+  | TtsPause
+  | TtsEnded
+  | TtsError;
 
 /** The set of valid event names, derived from the union. */
 export type FunnelEventName = FunnelEvent["name"];

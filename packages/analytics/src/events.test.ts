@@ -29,6 +29,14 @@ function summarize(event: FunnelEvent): string {
       return `payment failed (${event.code}) for ${event.intent_id ?? "unknown intent"}`;
     case "funnel_draft_resumed":
       return `draft resumed at ${event.step} from ${event.resumed_from}`;
+    case "tts_play":
+      return `tts play ${event.content_id} (${event.chars} chars)`;
+    case "tts_pause":
+      return `tts pause ${event.content_id} at ${event.position_s}s`;
+    case "tts_ended":
+      return `tts ended ${event.content_id}`;
+    case "tts_error":
+      return `tts error ${event.error} on ${event.content_id}`;
   }
 }
 
@@ -156,5 +164,13 @@ describe("summarize (exhaustiveness)", () => {
     expect(
       summarize({ name: "funnel_draft_resumed", step: "CATS", resumed_from: "PROFILE" }),
     ).toContain("resumed");
+    expect(summarize({ name: "tts_play", content_id: "salmon", chars: 120 })).toContain("play");
+    expect(summarize({ name: "tts_pause", content_id: "salmon", position_s: 2.5 })).toContain(
+      "pause",
+    );
+    expect(summarize({ name: "tts_ended", content_id: "salmon" })).toContain("ended");
+    expect(summarize({ name: "tts_error", content_id: "salmon", error: "rate_limited" })).toContain(
+      "rate_limited",
+    );
   });
 });

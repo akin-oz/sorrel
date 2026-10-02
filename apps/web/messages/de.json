@@ -27,7 +27,9 @@
       "title": "Wie viele Katzen füttern wir?",
       "description": "Jeder Napf bekommt seinen eigenen Portionsplan."
     },
-    "PROFILE": { "title": "Erzähl uns von deiner Katze" },
+    "PROFILE": {
+      "title": "Erzähl uns von deiner Katze"
+    },
     "RECIPES": {
       "title": "Rezepte, die deine Katze lieben wird",
       "description": "Gefiltert nach dem Geschmack und den Bedürfnissen deiner Katze."
@@ -86,6 +88,22 @@
       "GRAIN_FREE": "Getreidefrei",
       "CHICKEN_FREE": "Hühnerfrei",
       "SENSITIVE": "Sensibel"
+    },
+    "listen": {
+      "action": {
+        "idle": "Anhören",
+        "loading": "Audio wird geladen…",
+        "playing": "Pause",
+        "paused": "Fortsetzen",
+        "error": "Erneut versuchen"
+      },
+      "status": {
+        "loading": "Audio wird geladen",
+        "playing": "Wird abgespielt",
+        "paused": "Pausiert",
+        "ended": "Fertig",
+        "error": "Audio nicht verfügbar"
+      }
     }
   },
   "Rail": {
