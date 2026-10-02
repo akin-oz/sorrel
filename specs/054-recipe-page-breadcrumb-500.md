@@ -1,8 +1,8 @@
 ---
 spec: 054
 title: Fix the recipe detail page 500 — server page passes a function to the client AppLink
-status: proposed
-approved: no # ONLY a human flips this to yes — implementation is gated on it
+status: accepted
+approved: yes # ONLY a human flips this to yes — implementation is gated on it
 tier: 1 # credible core — a public route returns 500
 owner: apps/web
 ---
