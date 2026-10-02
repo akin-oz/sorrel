@@ -28,7 +28,7 @@ describe("Recipe Listen button (spec 053)", () => {
 
     cy.visit("/en/recipes/wild-caught-salmon");
 
-    cy.get("[data-testid=listen-button]").should("have.text", "Listen").click();
+    cy.get("[data-testid=listen-button]").should("have.attr", "aria-label", "Listen").click();
 
     cy.wait("@tts").its("request.body.text").should("be.a", "string").and("not.be.empty");
     cy.get("[role=status]").should("contain.text", "Playing");
@@ -47,6 +47,17 @@ describe("Recipe Listen button (spec 053)", () => {
     });
   });
 
+  it("is reachable from the landing showcase (spec 055)", () => {
+    cy.visit("/en");
+    cy.get("#recipes a[href*='/recipes/']").first().as("cardLink");
+    cy.get("@cardLink")
+      .invoke("attr", "href")
+      .should("match", /\/recipes\/[a-z0-9-]+$/);
+    cy.get("@cardLink").click();
+    cy.location("pathname").should("match", /\/recipes\/[a-z0-9-]+$/);
+    cy.get("[data-testid=listen-button]").should("be.visible");
+  });
+
   it("shows the retry state on a rate-limited response", () => {
     cy.intercept("POST", "/api/tts", { statusCode: 429, body: { error: "rate_limited" } }).as(
       "tts",
@@ -55,7 +66,7 @@ describe("Recipe Listen button (spec 053)", () => {
     cy.visit("/en/recipes/wild-caught-salmon");
     cy.get("[data-testid=listen-button]").click();
     cy.wait("@tts");
-    cy.get("[data-testid=listen-button]").should("have.text", "Retry");
+    cy.get("[data-testid=listen-button]").should("have.attr", "aria-label", "Retry");
     cy.get("[role=status]").should("contain.text", "Audio unavailable");
     cy.window().should((win) => {
       expect(queue(win).map((event) => event.name)).to.include("tts_error");

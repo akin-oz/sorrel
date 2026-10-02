@@ -9,6 +9,7 @@ import { AppButton } from "@sorrel/ui";
 
 import { isTtsError, truncateForTts } from "../../../../lib/tts";
 import { createAppTracker } from "../../wizard/analytics";
+import { LISTEN_STYLES, ListenIcon, type ListenStatus } from "./ListenIcon";
 
 /**
  * Spec 053 — "Listen" read-aloud button for the recipe description.
@@ -17,7 +18,7 @@ import { createAppTracker } from "../../wizard/analytics";
  * `Audio` element. Blob-then-play over MediaSource streaming: ≤1,000 chars is a
  * few seconds of audio, and blob playback works in every browser incl. Safari.
  */
-type ListenStatus = "idle" | "loading" | "playing" | "paused" | "error";
+const STATUSES: readonly ListenStatus[] = ["idle", "loading", "playing", "paused", "error"];
 
 interface Player {
   audio: HTMLAudioElement;
@@ -127,15 +128,29 @@ export function ListenButton({ text, contentId }: { text: string; contentId: str
 
   return (
     <>
+      <style href="sorrel-listen" precedence="default">
+        {LISTEN_STYLES}
+      </style>
       <AppButton
-        variant="outlined"
+        className="sorrel-listen"
+        variant="contained"
+        size="large"
+        startIcon={<ListenIcon status={status} />}
         onClick={handleClick}
         aria-label={label}
         aria-busy={status === "loading"}
         data-testid="listen-button"
         data-status={status}
       >
-        {label}
+        {/* Every label sits in one grid cell, so the button keeps the widest
+            label's width and never shifts as the state changes (spec 055). */}
+        <span className="sorrel-listen__labels">
+          {STATUSES.map((s) => (
+            <span key={s} data-active={s === status} aria-hidden="true">
+              {t(`action.${s}`)}
+            </span>
+          ))}
+        </span>
       </AppButton>
       <span
         role="status"

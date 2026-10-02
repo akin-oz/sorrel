@@ -3,12 +3,27 @@
 import { storyblokEditable } from "@storyblok/react/rsc";
 import { useTranslations } from "next-intl";
 
-import { AppCard, AppChip, AppHeading, AppImage, AppStack, AppText, appTokens } from "@sorrel/ui";
+import {
+  AppCard,
+  AppChip,
+  AppHeading,
+  AppImage,
+  AppLink,
+  AppStack,
+  AppText,
+  appTokens,
+} from "@sorrel/ui";
 
+import { Link } from "../../i18n/navigation";
 import { isDietaryTag } from "../../lib/dietary";
 import type { RecipeBlok } from "../../types/storyblok.gen";
 
-export function RecipeCard({ blok }: { blok: RecipeBlok }) {
+/**
+ * Spec 055: pass `href` to make the whole card one link to the recipe page (the
+ * landing showcase). The wizard picker omits it — a link there would sit beside
+ * the Add button and send people out of the funnel mid-selection.
+ */
+export function RecipeCard({ blok, href }: { blok: RecipeBlok; href?: string }) {
   const t = useTranslations("Recipes");
   return (
     <AppCard
@@ -16,6 +31,7 @@ export function RecipeCard({ blok }: { blok: RecipeBlok }) {
       radius={`${appTokens.radius.surface}px`}
       overflow="hidden"
       padding={0}
+      interactive={href !== undefined}
       editable={storyblokEditable(blok)}
     >
       <AppImage
@@ -26,7 +42,13 @@ export function RecipeCard({ blok }: { blok: RecipeBlok }) {
       />
       <AppStack p={2} gap={1}>
         <AppHeading level={3} fontSize="1.1rem" fontWeight={600}>
-          {blok.name}
+          {href ? (
+            <AppLink href={href} component={Link} stretched>
+              {blok.name}
+            </AppLink>
+          ) : (
+            blok.name
+          )}
         </AppHeading>
         <AppText variant="body2" color="text.secondary">
           {blok.description}

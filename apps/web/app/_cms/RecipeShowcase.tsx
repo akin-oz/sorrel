@@ -35,7 +35,7 @@ export function RecipeShowcase({ blok }: { blok: RecipeShowcaseBlok }) {
         </AppStack>
         <AppGrid columns={{ xs: "1fr", md: "1fr 1fr 1fr" }} gap={{ xs: 1.75, md: 2.5 }}>
           {recipes.map((recipe) => (
-            <RecipeCard key={recipe.slug} blok={recipe} />
+            <RecipeCard key={recipe.slug} blok={recipe} href={`/recipes/${recipe.slug}`} />
           ))}
         </AppGrid>
       </AppStack>

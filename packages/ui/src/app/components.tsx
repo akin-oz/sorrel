@@ -153,6 +153,10 @@ export interface AppLinkProps extends LayoutProps {
   underline?: boolean | "hover";
   "aria-label"?: string;
   "aria-current"?: "true" | "page";
+  /** Spec 055: stretch the hit area over the nearest positioned ancestor (an
+   *  `interactive` AppCard), so the whole card is one link with one tab stop. The
+   *  card draws the focus ring, so the link's own outline is suppressed. */
+  stretched?: boolean;
   /** `storyblokEditable()` spread for the Visual Editor (CMS links). */
   editable?: Record<string, unknown>;
   children: ReactNode;
@@ -163,11 +167,18 @@ export function AppLink({
   component,
   color,
   underline,
+  stretched,
   editable,
   children,
   ...rest
 }: AppLinkProps) {
   const { "aria-label": ariaLabel, "aria-current": ariaCurrent, ...layout } = rest;
+  const stretch = stretched
+    ? {
+        "&::after": { content: '""', position: "absolute", inset: 0, borderRadius: "inherit" },
+        "&:focus-visible": { outline: "none" },
+      }
+    : {};
   return (
     <Box
       component={component ?? "a"}
@@ -181,10 +192,12 @@ export function AppLink({
               color: color ?? "inherit",
               textDecoration: "none",
               "&:hover": { textDecoration: "underline", textUnderlineOffset: "3px" },
+              ...stretch,
             }
           : {
               color: color ?? "inherit",
               textDecoration: underline ? "underline" : "none",
+              ...stretch,
             },
       )}
       {...editable}
@@ -356,10 +369,16 @@ interface AppCardProps extends LayoutProps {
   id?: string;
   role?: string;
   "aria-live"?: "polite" | "off" | "assertive";
+  /** Spec 055: a whole-card link target (pair with a `stretched` AppLink inside).
+   *  Hover tints the border and lifts 2px; keyboard focus on the inner link draws
+   *  the ring around the card. Reduced motion keeps the tint, drops the lift. */
+  interactive?: boolean;
   /** `storyblokEditable()` spread for the Visual Editor (CMS cards). */
   editable?: Record<string, unknown>;
   children: ReactNode;
 }
+
+const CARD_EASE = "cubic-bezier(0.22, 1, 0.36, 1)";
 
 /** Bordered/tonal surface — recipe cards, the plan/summary panels, the funnel shell,
  *  the rail and form panes. Layout props (`gap`, `px`, `minHeight`, …) apply too. */
@@ -378,6 +397,7 @@ export function AppCard({
   component = "div",
   id,
   role,
+  interactive,
   editable,
   children,
   ...layout
@@ -422,6 +442,24 @@ export function AppCard({
   }
   if (divider) {
     base["& > :not(:first-of-type)"] = { borderTop: "1px solid", borderColor: "divider" };
+  }
+  if (interactive) {
+    base.position = "relative";
+    base.transition = `border-color 150ms ${CARD_EASE}, transform 150ms ${CARD_EASE}, box-shadow 150ms ${CARD_EASE}`;
+    base["&:hover"] = {
+      borderColor: "primary.main",
+      transform: "translateY(-2px)",
+      boxShadow: appTokens.shadow.card,
+    };
+    base["&:has(:focus-visible)"] = {
+      outline: (theme: { palette: { primary: { main: string } } }) =>
+        `2px solid ${theme.palette.primary.main}`,
+      outlineOffset: "3px",
+    };
+    base["@media (prefers-reduced-motion: reduce)"] = {
+      transition: `border-color 150ms ${CARD_EASE}`,
+      "&:hover": { transform: "none", boxShadow: "none" },
+    };
   }
   const ariaLive = (layout as { "aria-live"?: AppCardProps["aria-live"] })["aria-live"];
   return (

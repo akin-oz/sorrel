@@ -17,8 +17,15 @@ jest.mock("next-intl", () => ({
 }));
 
 jest.mock("@sorrel/ui", () => ({
-  AppButton: ({ children, ...props }: React.ButtonHTMLAttributes<HTMLButtonElement>) => (
-    <button {...props}>{children}</button>
+  AppButton: ({
+    children,
+    startIcon,
+    ...props
+  }: React.ButtonHTMLAttributes<HTMLButtonElement> & { startIcon?: React.ReactNode }) => (
+    <button {...props}>
+      {startIcon}
+      {children}
+    </button>
   ),
 }));
 
@@ -60,6 +67,7 @@ function okAudio() {
 
 const button = () => screen.getByTestId("listen-button");
 const statusText = () => screen.getByRole("status").textContent;
+const activeLabel = () => button().querySelector('[data-active="true"]')?.textContent;
 
 async function click() {
   await act(async () => {
@@ -68,10 +76,18 @@ async function click() {
 }
 
 describe("ListenButton", () => {
+  it("renders every label in the width-reserving stack, one active (spec 055)", () => {
+    render(<ListenButton text="Wild salmon." contentId="salmon" />);
+    const labels = button().querySelectorAll(".sorrel-listen__labels > span");
+    expect(labels).toHaveLength(5);
+    expect(button().querySelectorAll('[data-active="true"]')).toHaveLength(1);
+    expect(button().querySelector("svg")?.getAttribute("aria-hidden")).toBe("true");
+  });
+
   it("starts idle with the Listen label", () => {
     render(<ListenButton text="Wild salmon." contentId="salmon" />);
-    expect(button()).toHaveProperty("textContent", "Recipes.listen.action.idle");
     expect(button().getAttribute("aria-label")).toBe("Recipes.listen.action.idle");
+    expect(activeLabel()).toBe("Recipes.listen.action.idle");
     expect(statusText()).toBe("");
   });
 
@@ -103,7 +119,8 @@ describe("ListenButton", () => {
     await click();
     expect(button().dataset.status).toBe("paused");
     expect(statusText()).toBe("Recipes.listen.status.paused");
-    expect(button().textContent).toBe("Recipes.listen.action.paused");
+    expect(activeLabel()).toBe("Recipes.listen.action.paused");
+    expect(button().getAttribute("aria-label")).toBe("Recipes.listen.action.paused");
 
     await click();
     expect(button().dataset.status).toBe("playing");
@@ -129,7 +146,7 @@ describe("ListenButton", () => {
     render(<ListenButton text="Wild salmon." contentId="salmon" />);
     await click();
     expect(button().dataset.status).toBe("error");
-    expect(button().textContent).toBe("Recipes.listen.action.error");
+    expect(button().getAttribute("aria-label")).toBe("Recipes.listen.action.error");
     expect(statusText()).toBe("Recipes.listen.status.error");
     expect(events).toEqual([{ name: "tts_error", content_id: "salmon", error: "rate_limited" }]);
   });
