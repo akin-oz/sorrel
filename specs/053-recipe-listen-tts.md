@@ -1,8 +1,8 @@
 ---
 spec: 053
 title: "Listen" read-aloud button on the recipe page via ElevenLabs TTS
-status: proposed
-approved: no # ONLY a human flips this to yes — implementation is gated on it
+status: accepted
+approved: yes # ONLY a human flips this to yes — implementation is gated on it
 tier: 3 # closer — accessibility + third-party API integration, timeboxed ~45 min
 owner: apps/web · packages/analytics
 ---
