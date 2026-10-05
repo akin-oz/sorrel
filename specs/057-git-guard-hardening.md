@@ -1,8 +1,8 @@
 ---
 spec: 057
 title: Rewrite the git commit guard with real tokenising, and prove it with adversarial tests
-status: proposed
-approved: no # ONLY a human flips this to yes — implementation is gated on it
+status: accepted
+approved: yes # ONLY a human flips this to yes — implementation is gated on it
 tier: 1 # governance core — the local half of "wrong is un-mergeable"
 owner: .claude/hooks · scripts/governance · .github/workflows/ci.yml
 ---

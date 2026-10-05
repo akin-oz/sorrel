@@ -1,8 +1,8 @@
 ---
 spec: 060
 title: Verify whether project settings and the sandbox reach agent-team teammates; document it
-status: proposed
-approved: no # ONLY a human flips this to yes — implementation is gated on it
+status: accepted
+approved: yes # ONLY a human flips this to yes — implementation is gated on it
 tier: 2 # governance verification + docs
 owner: specs/README.md
 ---

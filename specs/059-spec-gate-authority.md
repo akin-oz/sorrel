@@ -1,8 +1,8 @@
 ---
 spec: 059
 title: Make the CI spec gate the authority — base-branch approval, unskippable, proven by fixtures
-status: proposed
-approved: no # ONLY a human flips this to yes — implementation is gated on it
+status: accepted
+approved: yes # ONLY a human flips this to yes — implementation is gated on it
 tier: 1 # governance core — "wrong is un-mergeable" must hold where it merges
 owner: .github/workflows/spec-gate.yml · scripts/governance
 ---

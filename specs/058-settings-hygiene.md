@@ -1,8 +1,8 @@
 ---
 spec: 058
 title: Settings hygiene — explicit MCP allowlist, no one-off permanent allows, no stale worktrees
-status: proposed
-approved: no # ONLY a human flips this to yes — implementation is gated on it
+status: accepted
+approved: yes # ONLY a human flips this to yes — implementation is gated on it
 tier: 2 # governance hygiene
 owner: .claude/settings.local.json · .gitignore
 ---

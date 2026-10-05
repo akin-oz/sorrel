@@ -1,8 +1,8 @@
 ---
 spec: 056
 title: Deny secret reads and destructive git, and turn on the Bash sandbox
-status: proposed
-approved: no # ONLY a human flips this to yes — implementation is gated on it
+status: accepted
+approved: yes # ONLY a human flips this to yes — implementation is gated on it
 tier: 1 # governance core — the boundary every other guard sits inside
 owner: .claude/settings.json
 ---
