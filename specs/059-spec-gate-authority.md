@@ -104,11 +104,16 @@ None.
 
 # Acceptance criteria
 
-- [ ] Every fixture row shows the expected exit code in `node --test` output.
-- [ ] A throwaway PR that self-approves a spec fails the gate in GitHub (link pasted).
+- [x] Every fixture row shows the expected exit code in `node --test` output (13/13, `dbb2c29`).
+- [x] A throwaway PR that self-approves a spec fails the gate in GitHub:
+      https://github.com/akin-oz/sorrel/pull/2. "Commits reference an approved spec" failed,
+      merge state `BLOCKED` (2026-10-05). The local run on the same commits gave
+      `not approved at base (f22bbaeee)`.
 - [ ] After the human applies protection, `gh api …/protection` returns the three required
-      contexts and `enforce_admins.enabled: true`.
-- [ ] `yarn lint` and `yarn type-check` green.
+      checks pinned to `app_id: 15368` and `enforce_admins.enabled: true`. _Pending: the
+      sandbox blocks `api.github.com` from Claude, so the human runs
+      `gh api repos/akin-oz/sorrel/branches/main/protection --jq '.required_status_checks.checks, .enforce_admins.enabled'`._
+- [x] `yarn lint` and `yarn type-check` green.
 
 # Residual risk
 
