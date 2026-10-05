@@ -30,4 +30,9 @@ coverage, 3 closers).
 - `.claude/rules/verification.md` — green typecheck + tests in-turn; "should work" is banned.
 - `.claude/hooks/guard-source-of-truth.sh` — pauses for human approval on contract files.
 - `.claude/hooks/guard-git.mjs` — tokenises every Bash command: requires the `Spec: NNN` trailer; refuses `--no-verify`/`-n`, `core.hooksPath` overrides, `.env*` staging, and any `git push`/`git reset` (spec 057, tested by `scripts/governance/guard-git.test.mjs`).
+- `.github/workflows/spec-gate.yml` → `scripts/governance/spec-gate.sh` — the CI authority (spec 059):
+  every PR commit needs a `Spec: NNN` trailer citing a spec that is **already approved on `main`**.
+  Spec-only commits (drafts, approval flips) are exempt, so approvals merge to `main` first,
+  then the implementation PR. Runs from `main`'s copy via `pull_request_target`; proven by
+  `scripts/governance/spec-gate.test.mjs`.
 - `.claude/hooks/verify-on-stop.sh` — fails the turn if the tree is not green.
