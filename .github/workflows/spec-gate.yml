@@ -3,7 +3,7 @@ name: Spec gate
 # Governance mirror (spec 015): the local commit contract, made provable in the
 # PR tab. Every non-merge commit in the PR must carry a `Spec: NNN` trailer, and
 # every referenced NNN must resolve to an approved spec (specs/NNN-*.md with
-# `approved: yes`). This is guard-commit.sh + the spec-gating protocol, enforced
+# `approved: yes`). This is guard-git.mjs + the spec-gating protocol, enforced
 # where a reviewer looks — the "wrong is un-mergeable" tiebreaker, demonstrable.
 
 on:

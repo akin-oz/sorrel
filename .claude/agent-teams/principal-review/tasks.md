@@ -36,7 +36,7 @@ anything checked and found sound. All tasks are **read-only**.
   that invites drift.
 
 - **A4 · Governance soundness + AI-workflow demo-readiness.** Read `.claude/hooks/`
-  (`guard-commit.sh`, `guard-source-of-truth.sh`, `guard-domain-logic.sh`, `verify-on-stop.sh`)
+  (`guard-git.mjs`, `guard-source-of-truth.sh`, `guard-domain-logic.sh`, `verify-on-stop.sh`)
   and the rules. Answer concretely: can a change with no approved spec, a missing `Spec:`
   trailer, or domain math snuck into an unwatched file actually merge? Then judge the
   **AI-workflow story on its own merits**: is the spec-gated governance coherent and

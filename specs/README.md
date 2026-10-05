@@ -15,7 +15,7 @@ implementation → green checks → merge.
    This is the only step the agent never performs.
 3. **Implement** — the agent builds strictly within the approved scope.
 4. **Commit** — every commit carries a `Spec: NNN` trailer (enforced by
-   `.claude/hooks/guard-commit.sh`).
+   `.claude/hooks/guard-git.mjs`).
 
 ## Numbering
 
@@ -29,5 +29,5 @@ coverage, 3 closers).
 - `.claude/rules/source-of-truth.md` — `schema.graphql` + `packages/domain` are canonical.
 - `.claude/rules/verification.md` — green typecheck + tests in-turn; "should work" is banned.
 - `.claude/hooks/guard-source-of-truth.sh` — pauses for human approval on contract files.
-- `.claude/hooks/guard-commit.sh` — requires the `Spec: NNN` trailer.
+- `.claude/hooks/guard-git.mjs` — tokenises every Bash command: requires the `Spec: NNN` trailer; refuses `--no-verify`/`-n`, `core.hooksPath` overrides, `.env*` staging, and any `git push`/`git reset` (spec 057, tested by `scripts/governance/guard-git.test.mjs`).
 - `.claude/hooks/verify-on-stop.sh` — fails the turn if the tree is not green.

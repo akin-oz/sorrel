@@ -16,6 +16,22 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # Spec 057: the governance layer has its own tests. Dependency-free node:test,
+  # so it needs no install and runs in seconds.
+  governance:
+    name: Governance tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      - name: Git guard + spec gate tests
+        run: node --test --test-reporter=spec 'scripts/governance/*.test.mjs'
+
   verify:
     name: Verify
     runs-on: ubuntu-latest
