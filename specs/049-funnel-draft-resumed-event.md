@@ -1,7 +1,7 @@
 ---
 spec: 049
 title: Add funnel_draft_resumed analytics event
-status: proposed
+status: accepted
 approved: yes
 tier: 2 # JD coverage: closes an instrumentation gap on a claimed recovery lever
 owner: packages/analytics · apps/web
