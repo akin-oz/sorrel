@@ -53,13 +53,25 @@ workflow found five ways around it:
 
   ```bash
   gh api -X PUT repos/akin-oz/sorrel/branches/main/protection --input - <<'EOF'
-  {"required_status_checks":{"strict":true,"contexts":["Commits reference an approved spec","Verify","Governance tests"]},
+  {"required_status_checks":{"strict":true,"checks":[
+     {"context":"Commits reference an approved spec","app_id":15368},
+     {"context":"Verify","app_id":15368},
+     {"context":"Governance tests","app_id":15368}]},
    "enforce_admins":true,"required_pull_request_reviews":null,"restrictions":null,
    "allow_force_pushes":false,"allow_deletions":false}
   EOF
   ```
 
   With required checks, `[skip ci]` leaves the check pending, and the merge stays blocked.
+  `app_id: 15368` (GitHub Actions) pins each check to its real source. Without it, anyone
+  with write access could satisfy a check by posting a commit status with the same name.
+
+  **Bootstrap (found on PR #1, 2026-10-05):** the PR that introduces the
+  `pull_request_target` gate cannot report "Commits reference an approved spec". `main`'s
+  copy of the workflow still only listens for `pull_request`, and the PR's copy no longer
+  does. For that one PR: run `bash scripts/governance/spec-gate.sh origin/main <head>`
+  locally as evidence, drop that check from protection, merge, then re-apply the command
+  above.
 
 ## C — Fixture tests proving every rejection
 
