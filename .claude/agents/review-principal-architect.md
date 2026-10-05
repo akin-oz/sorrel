@@ -79,7 +79,7 @@ A yarn-workspaces monorepo; **not** pnpm/Turborepo despite any stale prose. Layo
 ## Governance soundness (`.claude/`)
 
 - Spec-gating: only `approved: yes` specs may be implemented; every commit carries a
-  `Spec: NNN` trailer (`.claude/hooks/guard-commit.sh`). Check the enforcement is real:
+  `Spec: NNN` trailer (`.claude/hooks/guard-git.mjs`). Check the enforcement is real:
   `guard-source-of-truth.sh` (pauses on edits to `packages/domain`), `guard-domain-logic.sh`
   (pauses when domain-logic signatures appear in `services/api`/`apps/web` writes),
   `verify-on-stop.sh` (type-check + tests gate). Ask: can a wrong change actually merge?

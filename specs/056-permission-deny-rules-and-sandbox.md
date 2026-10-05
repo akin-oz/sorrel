@@ -75,9 +75,25 @@ https://code.claude.com/docs/en/permissions (fetched 2026-10-05, Claude Code 2.1
 - Starting point: `yarn.lock` resolves all 1,681 packages from `registry.yarnpkg.com`.
   Postinstall downloads (for example the Cypress binary) may add hosts. The run will show.
 
-| Host / path                                            | Needed by | Why | Approved |
-| ------------------------------------------------------ | --------- | --- | -------- |
-| _(filled during implementation from the measured run)_ |           |     |          |
+| Host / path                     | Needed by                                                  | Why                                                                                                                                                              | Approved |
+| ------------------------------- | ---------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
+| `registry.yarnpkg.com`          | `yarn install`                                             | Run 1 (empty allowlist) logged `deny network-outbound registry.yarnpkg.com:443` ×40. The verbose run 3 showed it was the only host contacted (865 tarball URLs). | yes      |
+| _(none)_                        | `yarn type-check`, `yarn lint`, `yarn workspaces run test` | No network. All three pass sandboxed: exit 0, 207 tests.                                                                                                         | n/a      |
+| `~/Library/Caches/Yarn` (write) | `yarn install`                                             | Not granted. Yarn falls back to the writable sandbox temp folder (`/tmp/claude-501/.yarn-cache-501`). The cost is a cold cache per sandboxed install.            | no       |
+
+Measured 2026-10-05 with headless `claude -p` runs under `strictAllowlist`; logs are in the
+session scratchpad.
+
+**Open finding:** a cold `yarn install` still fails inside the sandbox (`Error: aborted`, TLS
+socket closed mid-download). The proxy is not the cause: `curl` (34 MB in 1.85 s) and Node
+`fetch` with `NODE_USE_ENV_PROXY=1` both downloaded the same `next` tarball through it. Yarn 1's
+own proxy client aborts, and lowering concurrency did not help. Two fix attempts failed; the
+decision is the human's (see report).
+
+**Path syntax found by testing:** the `Read(...)` deny rules are merged into the sandbox as
+paths at the project root only, and the `!.env.example` carve-out does not carry over. So
+`filesystem.denyRead` adds `./**/.env`, `./**/.env.*` and `./**/*.pem`, and
+`filesystem.allowRead` re-opens `./.env.example`.
 
 # Contract impact
 

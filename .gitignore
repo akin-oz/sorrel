@@ -27,6 +27,9 @@ coverage/
 *.pem
 *-key.pem
 
+# Claude Code agent worktrees — throwaway copies, never tracked (spec 058)
+.claude/worktrees/
+
 # Editor / OS
 .DS_Store
 Thumbs.db

@@ -16,7 +16,18 @@
       "Bash(git diff:*)",
       "Bash(git log:*)"
     ],
-    "deny": []
+    "deny": [
+      "Read(.env)",
+      "Read(.env.*)",
+      "Read(!.env.example)",
+      "Read(*.pem)",
+      "Read(~/.ssh/**)",
+      "Read(~/.aws/**)",
+      "Bash(git push)",
+      "Bash(git push *)",
+      "Bash(git reset)",
+      "Bash(git reset *)"
+    ]
   },
   "hooks": {
     "SessionStart": [
@@ -48,7 +59,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/guard-commit.sh\""
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/guard-git.mjs\""
           }
         ]
       }
@@ -92,6 +103,18 @@
         ]
       }
     ]
+  },
+  "sandbox": {
+    "enabled": true,
+    "failIfUnavailable": true,
+    "allowUnsandboxedCommands": false,
+    "filesystem": {
+      "denyRead": ["~/.ssh", "~/.aws", "./**/.env", "./**/.env.*", "./**/*.pem"],
+      "allowRead": ["./.env.example"]
+    },
+    "network": {
+      "allowedDomains": ["registry.yarnpkg.com"]
+    }
   },
   "teammateMode": "tmux",
   "enabledPlugins": {

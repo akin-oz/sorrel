@@ -1,59 +1,47 @@
 name: Spec gate
 
-# Governance mirror (spec 015): the local commit contract, made provable in the
-# PR tab. Every non-merge commit in the PR must carry a `Spec: NNN` trailer, and
-# every referenced NNN must resolve to an approved spec (specs/NNN-*.md with
-# `approved: yes`). This is guard-commit.sh + the spec-gating protocol, enforced
-# where a reviewer looks — the "wrong is un-mergeable" tiebreaker, demonstrable.
+# Governance authority (specs 015, 059): the local commit contract, enforced
+# where it merges. Every non-merge commit in the PR must carry a `Spec: NNN`
+# trailer that resolves to a spec already `approved: yes` on the base branch.
+# The rules live in scripts/governance/spec-gate.sh and are proven by
+# scripts/governance/spec-gate.test.mjs.
+#
+# Why pull_request_target: it runs THIS file and the gate script from the base
+# branch, so a PR cannot weaken the gate it is judged by. The PR head is only
+# fetched as git objects and read — never checked out, never executed.
+# The push trigger is a detective control on main if protection is bypassed.
 
 on:
-  pull_request:
+  pull_request_target:
     branches: [main]
+    types: [opened, synchronize, reopened]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
 
 jobs:
   spec-trailer:
     name: Commits reference an approved spec
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      # PR: the base revision. Push: main's new head (already on main, so trusted).
+      - name: Check out the trusted revision
+        uses: actions/checkout@v4
         with:
-          # Need both the base and head commits to walk the PR range.
+          ref: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.base.sha || github.sha }}
           fetch-depth: 0
+          persist-credentials: false
 
-      - name: Check Spec trailers + approval
+      - name: Fetch the PR head as objects only
+        if: github.event_name == 'pull_request_target'
         env:
-          BASE: ${{ github.event.pull_request.base.sha }}
-          HEAD: ${{ github.event.pull_request.head.sha }}
-        run: |
-          set -euo pipefail
-          fail=0
-          # Non-merge commits introduced by this PR.
-          commits=$(git rev-list --no-merges "$BASE..$HEAD")
-          if [ -z "$commits" ]; then
-            echo "No commits to check."
-            exit 0
-          fi
-          for c in $commits; do
-            subject=$(git log -1 --format=%s "$c")
-            spec=$(git log -1 --format=%B "$c" | grep -oiE 'Spec:[[:space:]]*[0-9]{3}' | head -1 | grep -oE '[0-9]{3}' || true)
-            if [ -z "$spec" ]; then
-              echo "::error::Commit ${c:0:9} (\"$subject\") is missing a 'Spec: NNN' trailer."
-              fail=1
-              continue
-            fi
-            file=$(ls "specs/${spec}-"*.md 2>/dev/null | head -1 || true)
-            if [ -z "$file" ]; then
-              echo "::error::Commit ${c:0:9} references Spec: $spec, but specs/${spec}-*.md does not exist."
-              fail=1
-            elif ! grep -qiE '^approved:[[:space:]]*yes' "$file"; then
-              echo "::error::Commit ${c:0:9} references Spec: $spec, but $file is not 'approved: yes'."
-              fail=1
-            else
-              echo "ok: ${c:0:9} \"$subject\" -> $file"
-            fi
-          done
-          if [ "$fail" -ne 0 ]; then
-            echo ""
-            echo "Every commit must reference an approved spec. See .claude/CLAUDE.md (Spec-Gated Execution)."
-            exit 1
-          fi
+          PR: ${{ github.event.pull_request.number }}
+        run: git fetch --no-tags origin "+refs/pull/${PR}/head:refs/remotes/pr/head"
+
+      - name: Check Spec trailers + base approval
+        env:
+          BASE: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.base.sha || github.event.before }}
+          HEAD_SHA: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.sha || github.sha }}
+        run: bash scripts/governance/spec-gate.sh "$BASE" "$HEAD_SHA"
