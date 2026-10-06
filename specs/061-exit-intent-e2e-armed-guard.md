@@ -51,11 +51,11 @@ The flag already exists (spec 044).
 
 # Acceptance criteria
 
-- [ ] All four exit-intent tests wait for `__sorrelExitIntentArmed` before their first
-      `mouseleave`.
-- [ ] `E2E (Chrome)` green on the implementing PR, then green on a rerun of the same
-      commit (two consecutive passes).
-- [ ] `yarn type-check` and `yarn lint` green.
+- [x] All four exit-intent tests wait for `__sorrelExitIntentArmed` before their first
+      `mouseleave` (`93e4050`, PR #6).
+- [x] `E2E (Chrome)` green on the implementing PR, then green on a rerun of the same
+      commit (two consecutive passes; confirmed by the human on 2026-10-06).
+- [x] `yarn type-check` and `yarn lint` green (both exit 0 before `93e4050`).
 
 # Analytics
 
