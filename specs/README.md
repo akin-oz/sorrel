@@ -55,11 +55,12 @@ layers make mistakes fast and cheap to catch.
 context (CLAUDE.md, MCP servers, skills) and start in the lead's permission mode.
 A bypassed lead means bypassed teammates. The sandbox docs cover subagents (same
 process, same sandbox) but say nothing about split-pane (tmux) teammates.
-**Empirical check: pending a human run.** It cannot be driven from a sandboxed
-session (tmux's socket directory is write-denied, and a nested sandbox can't
-start). The 3-minute checklist is in spec 060. Until it passes, assume tmux
-teammates may be less contained than the lead. The fallback is
-`teammateMode: "in-process"`.
+**Empirical check (2026-10-06):** a tmux teammate's `curl` to a host not on the
+allowlist was refused by the sandbox proxy (`CONNECT tunnel failed, 403`). Its
+`.env` read was refused by the permission rules, and its `git -C . commit` with
+no trailer by the git guard. So the sandbox, the permission rules and the hooks
+all reach split-pane teammates. Teammates keep the permission mode they were
+spawned with. The filesystem-layer probe is still unconfirmed (spec 060).
 
 **Pending:** wire `aie audit` into the `governance` CI job once the compiler
 ships it. On 2026-10-05 no `aie` exists in the repo or on `PATH`.
