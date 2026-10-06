@@ -62,6 +62,8 @@ describe("Exit-intent modal (spec 010 / spec 044)", () => {
     });
 
     cy.location("pathname").should("include", "/wizard/cats");
+    // Spec 061: the URL is set before hydration; wait for the listener itself.
+    cy.window().should("have.property", "__sorrelExitIntentArmed");
     cy.document().trigger("mouseleave", { clientY: 0 });
 
     // Wait for the dialog to appear (confirms the trigger fired).
@@ -85,6 +87,8 @@ describe("Exit-intent modal (spec 010 / spec 044)", () => {
     });
 
     cy.location("pathname").should("include", "/wizard/cats");
+    // Spec 061: the URL is set before hydration; wait for the listener itself.
+    cy.window().should("have.property", "__sorrelExitIntentArmed");
     cy.document().trigger("mouseleave", { clientY: 0 });
     cy.get('[role="dialog"]', { timeout: 6000 }).should("be.visible");
 
@@ -104,6 +108,8 @@ describe("Exit-intent modal (spec 010 / spec 044)", () => {
     });
 
     cy.location("pathname").should("include", "/wizard/cats");
+    // Spec 061: the URL is set before hydration; wait for the listener itself.
+    cy.window().should("have.property", "__sorrelExitIntentArmed");
 
     // First trigger — modal opens.
     cy.document().trigger("mouseleave", { clientY: 0 });
