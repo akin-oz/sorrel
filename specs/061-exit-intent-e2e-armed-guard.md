@@ -1,8 +1,8 @@
 ---
 spec: 061
 title: Apply the exit-intent armed guard to every exit-intent e2e test
-status: proposed
-approved: no # ONLY a human flips this to yes — implementation is gated on it
+status: accepted
+approved: yes # ONLY a human flips this to yes — implementation is gated on it
 tier: 2 # JD coverage — a trustworthy real-browser gate
 owner: apps/web (cypress only)
 ---
