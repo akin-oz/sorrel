@@ -109,10 +109,11 @@ None.
       https://github.com/akin-oz/sorrel/pull/2. "Commits reference an approved spec" failed,
       merge state `BLOCKED` (2026-10-05). The local run on the same commits gave
       `not approved at base (f22bbaeee)`.
-- [ ] After the human applies protection, `gh api …/protection` returns the three required
-      checks pinned to `app_id: 15368` and `enforce_admins.enabled: true`. _Pending: the
-      sandbox blocks `api.github.com` from Claude, so the human runs
-      `gh api repos/akin-oz/sorrel/branches/main/protection --jq '.required_status_checks.checks, .enforce_admins.enabled'`._
+- [x] After the human applies protection, `gh api …/protection` returns the three required
+      checks pinned to `app_id: 15368` and `enforce_admins.enabled: true`. Run by the human
+      on 2026-10-06 (the sandbox blocks `api.github.com` from Claude):
+      `Verify`, `Governance tests`, `Commits reference an approved spec`, each with
+      `app_id: 15368`; `enforce_admins.enabled` = `true`.
 - [x] `yarn lint` and `yarn type-check` green.
 
 # Residual risk
