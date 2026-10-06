@@ -104,11 +104,17 @@ None.
 
 # Acceptance criteria
 
-- [ ] Every fixture row shows the expected exit code in `node --test` output.
-- [ ] A throwaway PR that self-approves a spec fails the gate in GitHub (link pasted).
-- [ ] After the human applies protection, `gh api …/protection` returns the three required
-      contexts and `enforce_admins.enabled: true`.
-- [ ] `yarn lint` and `yarn type-check` green.
+- [x] Every fixture row shows the expected exit code in `node --test` output (13/13, `dbb2c29`).
+- [x] A throwaway PR that self-approves a spec fails the gate in GitHub:
+      https://github.com/akin-oz/sorrel/pull/2. "Commits reference an approved spec" failed,
+      merge state `BLOCKED` (2026-10-05). The local run on the same commits gave
+      `not approved at base (f22bbaeee)`.
+- [x] After the human applies protection, `gh api …/protection` returns the three required
+      checks pinned to `app_id: 15368` and `enforce_admins.enabled: true`. Run by the human
+      on 2026-10-06 (the sandbox blocks `api.github.com` from Claude):
+      `Verify`, `Governance tests`, `Commits reference an approved spec`, each with
+      `app_id: 15368`; `enforce_admins.enabled` = `true`.
+- [x] `yarn lint` and `yarn type-check` green.
 
 # Residual risk
 
