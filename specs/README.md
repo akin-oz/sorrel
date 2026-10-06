@@ -60,7 +60,8 @@ allowlist was refused by the sandbox proxy (`CONNECT tunnel failed, 403`). Its
 `.env` read was refused by the permission rules, and its `git -C . commit` with
 no trailer by the git guard. So the sandbox, the permission rules and the hooks
 all reach split-pane teammates. Teammates keep the permission mode they were
-spawned with. The filesystem-layer probe is still unconfirmed (spec 060).
+spawned with. A teammate's `node` read of a nested `.env` also got `EPERM`, so the
+sandbox's filesystem layer covers teammates too (spec 060).
 
 **Pending:** wire `aie audit` into the `governance` CI job once the compiler
 ships it. On 2026-10-05 no `aie` exists in the repo or on `PATH`.
